@@ -81,7 +81,7 @@ fun Navigation(){
     }
     /** 비회원 */
     else{
-        NavHost(navController = navController, startDestination = Screen.DashBoard.route){
+        NavHost(navController = navController, startDestination = Screen.Login.route){
             composable(Screen.Login.route){
                 LoginScreen(navHostController = navController)
             }
