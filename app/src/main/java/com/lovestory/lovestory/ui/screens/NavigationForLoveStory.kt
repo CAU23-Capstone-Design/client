@@ -31,16 +31,16 @@ fun Navigation(){
 //    val isToken  = UserTokenExample(
 //        id = "sdfsdf",
 //        name = "Sdfsdf",
-//        birthday = "fsdfsd",
-//        gender = "ㅇㄴㄹㄴㅇㄹ",
-//        code = "ㅇㄴㄹㄴㅇㄹ",
+ //       birthday = "fsdfsd",
+ //       gender = "ㅇㄴㄹㄴㅇㄹ",
+ //       code = "ㅇㄴㄹㄴㅇㄹ",
 //        createAt = "ㅇㄴㄹㄴㅇㄹ"
 //    )// 회원 token 확인 test 코드
     val isToken = null
 
     /** 회원 */
     if (isToken != null){
-
+        Log.d("Navigation", "왜 회원??")
         /** 커플 연동한 회원 */
         if(isToken?.code != null){
             NavHost(navController = navController, startDestination = Screen.DashBoard.route ){
@@ -81,7 +81,8 @@ fun Navigation(){
     }
     /** 비회원 */
     else{
-        NavHost(navController = navController, startDestination = Screen.DashBoard.route){
+        Log.d("Navigation", "비회원이지")
+        NavHost(navController = navController, startDestination = Screen.Calendar.route){ // 왜 dashboard.route 로 되어 있지??
             composable(Screen.Login.route){
                 LoginScreen(navHostController = navController)
             }
