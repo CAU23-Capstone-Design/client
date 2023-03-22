@@ -5,8 +5,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.R
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.Icon
-import androidx.compose.material.Text
+import androidx.compose.material.*
+import androidx.compose.material3.Button
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.Role.Companion.Button
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -48,6 +49,13 @@ fun CalendarScreen(navHostController: NavHostController) {
     val startMonth = remember { currentMonth.minusMonths(100) } // Adjust as needed
     val endMonth = remember { currentMonth.plusMonths(100) } // Adjust as needed
     val daysOfWeek = remember { daysOfWeek() }
+
+    var selection by remember { mutableStateOf<CalendarDay?>(null) }
+
+    var isPopupVisible by remember { mutableStateOf(false) }
+
+    //val showPopup = remember { derivedStateOf { selection != null } }
+
 
     val state = rememberCalendarState(
         startMonth = startMonth,
@@ -85,39 +93,62 @@ fun CalendarScreen(navHostController: NavHostController) {
         DaysOfWeekTitle(daysOfWeek = daysOfWeek)
         Spacer(modifier = Modifier.height(16.dp))
         HorizontalCalendar(
+            modifier = Modifier.align(Alignment.CenterHorizontally),
             state = state,
-            dayContent = { Day(it) },
-            modifier = Modifier.align(Alignment.CenterHorizontally)
+            dayContent = { day ->
+                Day(
+                    day = day,
+                    isSelected = selection == day,
+                ) { clicked ->
+                    selection = clicked
+                    //Log.d("tag", "흠 $showPopup")
+                }
+            }
         )
-    }
-}
 
-@Composable
-fun DaysOfWeekTitle(daysOfWeek: List<DayOfWeek>) {
-    Row(modifier = Modifier.fillMaxWidth()) {
-        for (dayOfWeek in daysOfWeek) {
-            Text(
-                modifier = Modifier.weight(1f),
-                textAlign = TextAlign.Center,
-                fontWeight = FontWeight.Bold, //굵기 조절
-                text = dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault()), //
-            )
+        if (false) {
+            Popup(onDismiss = { isPopupVisible = false })
         }
     }
 }
 
 @Composable
-fun Day(day: CalendarDay, onClick: (CalendarDay) -> Unit = {},) {
-    var showPopup by remember { mutableStateOf(false) }
+fun Popup(onDismiss: () -> Unit) {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Card(
+            modifier = Modifier.padding(16.dp),
+            backgroundColor = Color.White
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Text("Popup content")
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(onClick = onDismiss) {
+                    Text("Close")
+                }
+            }
+        }
+    }
+}
+
+
+@Composable
+fun Day(
+    day: CalendarDay,
+    isSelected: Boolean = false,
+    onClick: (CalendarDay) -> Unit = {},
+){
+    //var showPopup by remember { mutableStateOf(false) }
     Box(
         modifier = Modifier
             .aspectRatio(0.8f) // This is important for square sizing!
             .clickable(
                 enabled = day.position == DayPosition.MonthDate,
-                onClick = {
-                    onClick(day)
-                    showPopup = true
-                }
+                onClick = { onClick(day) }
             ),
         contentAlignment = Alignment.TopCenter //텍스트 상단 중앙 배치
     ) {
@@ -135,6 +166,21 @@ fun Day(day: CalendarDay, onClick: (CalendarDay) -> Unit = {},) {
 
     }
 }
+
+@Composable
+fun DaysOfWeekTitle(daysOfWeek: List<DayOfWeek>) {
+    Row(modifier = Modifier.fillMaxWidth()) {
+        for (dayOfWeek in daysOfWeek) {
+            Text(
+                modifier = Modifier.weight(1f),
+                textAlign = TextAlign.Center,
+                fontWeight = FontWeight.Bold, //굵기 조절
+                text = dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault()), //
+            )
+        }
+    }
+}
+
 
 @Composable
 fun SimpleCalendarTitle(

@@ -11,7 +11,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.lovestory.lovestory.ui.screens.CalendarScreen
 import com.lovestory.lovestory.ui.screens.Navigation
 import com.lovestory.lovestory.ui.theme.LoveStoryTheme
 import com.lovestory.lovestory.ui.theme.LoveStoryThemeForMD3
