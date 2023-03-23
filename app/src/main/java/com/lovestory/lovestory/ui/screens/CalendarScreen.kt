@@ -1,10 +1,12 @@
 package com.lovestory.lovestory.ui.screens
 
 import android.util.Log
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.R
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material3.Button
 import androidx.compose.runtime.*
@@ -22,6 +24,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavHostController
 import com.kizitonwose.calendar.compose.CalendarLayoutInfo
 import com.kizitonwose.calendar.compose.CalendarState
@@ -40,6 +44,7 @@ import java.util.*
 import com.lovestory.lovestory.R.drawable
 import androidx.compose.ui.window.Popup
 import androidx.navigation.compose.rememberNavController
+import com.lovestory.lovestory.ui.components.TextFieldForCalendar
 import com.lovestory.lovestory.ui.theme.LoveStoryTheme
 
 @Composable
@@ -54,8 +59,9 @@ fun CalendarScreen(navHostController: NavHostController) {
 
     var isPopupVisible by remember { mutableStateOf(false) }
 
-    //val showPopup = remember { derivedStateOf { selection != null } }
-
+    val onOpenDialogRequest : ()->Unit = {isPopupVisible = true}
+    val onDismissRequest : () -> Unit = {isPopupVisible = false}
+    //Log.d("tag", "오,,, $isPopupVisible")
 
     val state = rememberCalendarState(
         startMonth = startMonth,
@@ -99,47 +105,55 @@ fun CalendarScreen(navHostController: NavHostController) {
                 Day(
                     day = day,
                     isSelected = selection == day,
+                    onOpenDialogRequest = onOpenDialogRequest,
                 ) { clicked ->
                     selection = clicked
                     //Log.d("tag", "흠 $showPopup")
                 }
             }
         )
-
-        if (false) {
-            Popup(onDismiss = { isPopupVisible = false })
-        }
     }
-}
-
-@Composable
-fun Popup(onDismiss: () -> Unit) {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Card(
-            modifier = Modifier.padding(16.dp),
-            backgroundColor = Color.White
-        ) {
+    if ( isPopupVisible ) {
+        CalendarDialog(
+            onDismissRequest = onDismissRequest,
+            properties = DialogProperties(dismissOnBackPress = true, dismissOnClickOutside = true)
+        ){
             Column(
-                modifier = Modifier.padding(16.dp)
-            ) {
-                Text("Popup content")
-                Spacer(modifier = Modifier.height(16.dp))
-                Button(onClick = onDismiss) {
-                    Text("Close")
-                }
+                modifier = Modifier
+                    .width(360.dp)
+                    .wrapContentHeight()
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(color = Color.White),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ){
+                Spacer(modifier = Modifier.height(20.dp))
+                Text(text = "팝업 창이다...")
+                Spacer(modifier = Modifier.height(20.dp))
             }
         }
     }
 }
 
+@Composable
+fun CalendarDialog(
+    onDismissRequest : ()-> Unit,
+    properties: DialogProperties = DialogProperties(),
+    content : @Composable () -> Unit
+){
+    Dialog(
+        onDismissRequest = onDismissRequest,
+        properties = properties,
+    ) {
+        content()
+    }
+}
 
 @Composable
 fun Day(
     day: CalendarDay,
     isSelected: Boolean = false,
+    onOpenDialogRequest : () -> Unit,
     onClick: (CalendarDay) -> Unit = {},
 ){
     //var showPopup by remember { mutableStateOf(false) }
@@ -148,7 +162,8 @@ fun Day(
             .aspectRatio(0.8f) // This is important for square sizing!
             .clickable(
                 enabled = day.position == DayPosition.MonthDate,
-                onClick = { onClick(day) }
+                onClick = { onClick(day)
+                            onOpenDialogRequest()}
             ),
         contentAlignment = Alignment.TopCenter //텍스트 상단 중앙 배치
     ) {
