@@ -12,12 +12,13 @@ data class Couple(
     @SerializedName("user2_id")
     val userB_id : String,
 
-    @SerializedName("firstDate*")
+    @SerializedName("firstDate")
     val meetDay : String
 )
 
 data class CoupleInfo(
-    val userA_id : String?,
+    @SerializedName("code")
     val code : String?,
-    val meetDay : String?,
+    @SerializedName("firstDate*")
+    val firstDate : String?,
 )

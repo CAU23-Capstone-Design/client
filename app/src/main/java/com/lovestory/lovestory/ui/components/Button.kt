@@ -176,16 +176,17 @@ fun ButtonForSyncCouple(buttonText : String, onOpenDialogRequest :()->Unit, cont
 fun ButtonForCreateCouple(
     buttonText: String,
     navHostController: NavHostController,
-    userId:String?,
+//    userId:String?,
     code :String?,
-    meetDay:String
+    meetDay:String,
+//    context: Context
 ){
     val context = LocalContext.current
     Button(
         onClick = {linkCouple(
             context = context,
             navHostController = navHostController,
-            userId = userId,
+//            userId = userId,
             code = code,
             meetDay = meetDay
         ) },

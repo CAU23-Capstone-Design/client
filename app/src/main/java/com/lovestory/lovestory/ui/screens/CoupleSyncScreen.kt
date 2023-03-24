@@ -9,6 +9,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -25,7 +26,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavHostController
+import com.lovestory.lovestory.module.getToken
 import com.lovestory.lovestory.module.loveStoryCheckCouple
+import com.lovestory.lovestory.resource.ManageKakaoUser
 import com.lovestory.lovestory.resource.apple_bold
 import com.lovestory.lovestory.resource.vitro
 import com.lovestory.lovestory.ui.components.*
@@ -35,7 +38,7 @@ import java.time.LocalDate
 @Composable
 fun CoupleSyncScreen(
     navHostController: NavHostController,
-    id : String?,
+//    id : String?,
     myCode : String?,
     nickname : String?
 ) {
@@ -43,7 +46,7 @@ fun CoupleSyncScreen(
     val focusManager = LocalFocusManager.current
     var code by remember { mutableStateOf("", ) }
     val onCodeChanged: (String) -> Unit = {
-        if(it.length <= 6){
+        if(it.length <= 8){
             code = it
         }
     }
@@ -59,9 +62,19 @@ fun CoupleSyncScreen(
     CalendarDialogForSignUp(calendarState = calendarForMeetState, selectedDates = selectedMeetDates)
 
     Log.d("CoupleSync-Screen", "커플 동기화 스크린 호출")
-    Log.d("CoupleSync-Screen", "$id / $code ")
+//    Log.d("CoupleSync-Screen", "$id / $code ")
 
-//    loveStoryCheckCouple(navHostController = navHostController, id = id)
+    val token = getToken(context)
+    Log.d("CoupleSync-Screen-token", "$token")
+
+    var isFunctionCalled by rememberSaveable { mutableStateOf(false) }
+    if (!isFunctionCalled) {
+        // 여기서 함수를 호출하세요.
+        isFunctionCalled = true
+        loveStoryCheckCouple(navHostController = navHostController, token = token, context= context)
+        // 함수 호출이 완료되면 상태를 true로 변경하여 다음 호출을 방지합니다.
+
+    }
     Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -91,7 +104,7 @@ fun CoupleSyncScreen(
             onNameChanged = onCodeChanged,
             label= "코드 입력",
             keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Number,
+                keyboardType = KeyboardType.Text,
                 imeAction = ImeAction.Done
             ),
             keyboardActions = KeyboardActions(
@@ -106,16 +119,18 @@ fun CoupleSyncScreen(
             otherCode = code,
             context = context
         )
+//        ManageKakaoUser(context = context)
     }
 
     if(isVisible){
         CoupleSyncDialog(
+//            context = context,
             navHostController = navHostController,
             onDismissRequest = onDismissRequest,
             selectedMeetDates = selectedMeetDates,
             calendarForMeetState = calendarForMeetState,
-            userId = id,
-            code = myCode,
+//            userId = id,
+            code =code,
         )
     }
 }

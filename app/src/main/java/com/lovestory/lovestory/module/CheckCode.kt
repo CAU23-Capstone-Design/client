@@ -1,6 +1,7 @@
 package com.lovestory.lovestory.module
 
 import android.content.Context
+import android.util.Log
 import android.widget.Toast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -17,7 +18,13 @@ fun loveStoryCheckCode(context : Context, onOpenDialogRequest :()->Unit, inputCo
             val response = checkValidCode(inputCode)
             if(response.isSuccessful){
                 onOpenDialogRequest()
-            }else{
+            }
+            else if(response.code() == 404){
+                Log.e("check code in couple sync", "${response.errorBody()}")
+                Toast.makeText(context,"올바르지 않은 코드를 입력했습니다.\n올바른 코드를 입력해주세요", Toast.LENGTH_SHORT).show()
+            }
+            else{
+                Log.e("check code in couple sync", "${response.errorBody()}")
                 Toast.makeText(context,"오류가 발생했습니다.\n잠시 후 다시 시도해주세요.", Toast.LENGTH_SHORT).show()
             }
 

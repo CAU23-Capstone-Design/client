@@ -72,9 +72,12 @@ suspend fun checkValidCode(code : String):Response<User>{
         Log.d("checkValidCode", "$user")
         Response.success(user)
     }catch (e : HttpException){
+        Log.e("checkVaildCode Failed","${e.response()?.errorBody()}")
+        Log.e("checkVaildCode Failed2","${e.code()}")
         Response.error(e.code(), e.response()?.errorBody())
 
     }catch (e : Exception){
+        Log.e("checkVaildCode Failed exception","$e")
         Response.error(500, ResponseBody.create(null, "Unknown error"))
     }
 }

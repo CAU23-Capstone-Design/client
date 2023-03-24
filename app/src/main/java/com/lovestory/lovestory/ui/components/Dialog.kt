@@ -1,5 +1,6 @@
 package com.lovestory.lovestory.ui.components
 
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -32,11 +33,12 @@ fun InputMeetDayDialog(
 
 @Composable
 fun CoupleSyncDialog(
+//    context: Context,
     navHostController: NavHostController,
     onDismissRequest : ()->Unit,
     selectedMeetDates : MutableState<LocalDate>,
     calendarForMeetState : SheetState,
-    userId : String?,
+//    userId : String?,
     code :String?
     ){
     InputMeetDayDialog(
@@ -62,9 +64,10 @@ fun CoupleSyncDialog(
             ButtonForCreateCouple(
                 "시작하기",
                 navHostController = navHostController,
-                userId = userId,
+//                userId = userId,
                 code = code,
                 meetDay = selectedMeetDates.value.toString(),
+//                context = context
             )
             Spacer(modifier = Modifier.height(20.dp))
         }

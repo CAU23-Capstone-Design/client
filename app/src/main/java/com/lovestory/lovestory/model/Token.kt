@@ -34,3 +34,53 @@ data class LoginResponse(
     @SerializedName("token")
     val token : String,
 )
+
+data class LoginPayload(
+    @SerializedName("user")
+    val user : UserForLoginPayload,
+
+    @SerializedName("couple")
+    val couple : CoupleForLoginPayload?,
+
+    @SerializedName("iat")
+    val iat :String,
+
+    @SerializedName("exp")
+    val exp : String,
+)
+
+data class ServiceTokenPayload(
+    @SerializedName("user")
+    val user : UserForServicePayload,
+
+    @SerializedName("couple")
+    val couple : CoupleForLoginPayload?,
+
+    @SerializedName("iat")
+    val iat :String,
+
+    @SerializedName("exp")
+    val exp : String,
+
+)
+
+data class UserForLoginPayload(
+    @SerializedName("_id")
+    val id : String,
+
+    @SerializedName("name")
+    val name : String,
+
+    @SerializedName("code")
+    val code : String,
+)
+
+data class CoupleForLoginPayload(
+    @SerializedName("_id")
+    val id : String,
+)
+
+data class UserForServicePayload(
+    @SerializedName("_id")
+    val id : String,
+)
