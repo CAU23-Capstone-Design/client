@@ -95,10 +95,11 @@ fun Navigation(){
                 SignUpScreen(navHostController = navController, id=id, nickname=nickname, gender=gender, birthday=birthday)
             }
 
-            composable(Screen.CoupleSync.route+"/{id}&{code}"){backStackEntry ->
+            composable(Screen.CoupleSync.route+"/{id}&{code}&{nickname}"){backStackEntry ->
                 val id = backStackEntry.arguments?.getString("id")
                 val code = backStackEntry.arguments?.getString("code")
-                CoupleSyncScreen(navHostController = navController, id=id, myCode=code)
+                val nickname = backStackEntry.arguments?.getString("nickname")
+                CoupleSyncScreen(navHostController = navController, id=id, myCode=code, nickname = nickname)
             }
             composable(Screen.DashBoard.route){
                 DashBoardScreen(navHostController = navController)

@@ -10,7 +10,7 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-suspend fun createCouple(userId : String, code : String, meetDay : String):Response<Couple>{
+suspend fun createCouple(userId : String?, code : String?, meetDay : String?):Response<Couple>{
     val couple = CoupleInfo(userA_id = userId,code = code, meetDay = meetDay)
     val retrofit = Retrofit.Builder()
         .baseUrl("http://3.34.189.103:3000")

@@ -20,6 +20,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.lovestory.lovestory.module.linkCouple
 import com.lovestory.lovestory.module.kakaoLogin
 import com.lovestory.lovestory.module.loveStoryCheckCode
 import com.lovestory.lovestory.module.loveStorySignUp
@@ -145,7 +146,48 @@ fun ButtonForSyncCouple(buttonText : String, onOpenDialogRequest :()->Unit, cont
         onClick = { loveStoryCheckCode(
             context = context,
             onOpenDialogRequest = onOpenDialogRequest,
-            inputCode = otherCode
+            inputCode = otherCode,
+            myCode = myCode
+        ) },
+        modifier = Modifier
+            .height(50.dp)
+            .width(280.dp),
+        colors = ButtonDefaults.textButtonColors(
+            backgroundColor = Color(0xFFFFB6B6),
+            contentColor = Color(0xFF131313)
+        ),
+        shape = RoundedCornerShape(25.dp),
+        elevation = ButtonDefaults.elevation(
+            disabledElevation = 0.dp,
+            defaultElevation = 0.dp,
+            pressedElevation = 0.dp)
+
+    ) {
+        Text(
+            text = "$buttonText",
+            fontFamily = apple_bold,
+            fontWeight = FontWeight.Bold,
+            fontSize = 16.sp,
+        )
+    }
+}
+
+@Composable
+fun ButtonForCreateCouple(
+    buttonText: String,
+    navHostController: NavHostController,
+    userId:String?,
+    code :String?,
+    meetDay:String
+){
+    val context = LocalContext.current
+    Button(
+        onClick = {linkCouple(
+            context = context,
+            navHostController = navHostController,
+            userId = userId,
+            code = code,
+            meetDay = meetDay
         ) },
         modifier = Modifier
             .height(50.dp)

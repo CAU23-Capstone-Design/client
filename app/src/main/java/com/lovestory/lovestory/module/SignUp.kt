@@ -19,7 +19,7 @@ fun loveStorySignUp(
     CoroutineScope(Dispatchers.Main).launch{
         val response = createUser(id = id?.toLong(), name = nickname, birthday = birthday, gender = gender)
         if(response.isSuccessful){
-            navHostController.navigate(route = Screen.CoupleSync.route+"/$id&${response.body()?.code}"){
+            navHostController.navigate(route = Screen.CoupleSync.route+"/$id&${response.body()?.code}&${response.body()?.name}"){
                 popUpTo(Screen.Login.route)
             }
         }else{
