@@ -12,20 +12,13 @@ import kotlinx.coroutines.launch
 
 fun linkCouple(context : Context, navHostController: NavHostController, code : String?, meetDay : String?){
 
-//    navHostController.navigate(route = Screen.DashBoard.route){
-//        popUpTo(Screen.Login.route)
-//    }
-
     CoroutineScope(Dispatchers.Main).launch{
         val token : String? = getToken(context)
-        Log.d("link couple", "$token")
 
         if(token != null){
             val response = createCouple(token=token, code = code, meetDay = meetDay)
             if(response.isSuccessful){
-                Log.d("success make couple", "it")
                 response.body()?.token?.let{
-                    Log.d("success make couple", "it")
                     saveToken(context = context, it)
                 }
                 navHostController.navigate(route = Screen.DashBoard.route){

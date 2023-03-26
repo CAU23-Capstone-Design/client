@@ -20,18 +20,17 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import com.lovestory.lovestory.module.linkCouple
-import com.lovestory.lovestory.module.kakaoLogin
-import com.lovestory.lovestory.module.loveStoryCheckCode
-import com.lovestory.lovestory.module.loveStorySignUp
+import com.lovestory.lovestory.R
+import com.lovestory.lovestory.module.*
 import com.lovestory.lovestory.resource.apple_bold
 import com.maxkeppeker.sheets.core.models.base.SheetState
 
 @Composable
 fun ButtonForAuth(navHostController: NavHostController){
     val context = LocalContext.current
+    val appKey = context.getString(R.string.app_kakao_key)
     Button(
-        onClick = { kakaoLogin(context, navHostController) },
+        onClick = { kakaoLogin(appKey, context, navHostController) },
         modifier = Modifier
             .height(50.dp)
             .width(240.dp),
@@ -49,7 +48,7 @@ fun ButtonForAuth(navHostController: NavHostController){
         )
         {
             Image(
-                painter = painterResource(id = com.lovestory.lovestory.R.drawable.kakao_logo),
+                painter = painterResource(id = R.drawable.kakao_logo),
                 contentDescription = "kakao login",
                 modifier = Modifier
                     .size(24.dp),
@@ -90,7 +89,7 @@ fun ButtonForToggleGender(
 
     ) {
         Text(
-            text = "$text",
+            text = text,
             fontFamily = apple_bold,
             fontWeight = FontWeight.Bold,
             fontSize = 16.sp,
@@ -132,7 +131,7 @@ fun ButtonForSignUp(
 
     ) {
         Text(
-            text = "$buttonText",
+            text = buttonText,
             fontFamily = apple_bold,
             fontWeight = FontWeight.Bold,
             fontSize = 16.sp,
@@ -164,7 +163,7 @@ fun ButtonForSyncCouple(buttonText : String, onOpenDialogRequest :()->Unit, cont
 
     ) {
         Text(
-            text = "$buttonText",
+            text = buttonText,
             fontFamily = apple_bold,
             fontWeight = FontWeight.Bold,
             fontSize = 16.sp,
@@ -205,7 +204,7 @@ fun ButtonForCreateCouple(
 
     ) {
         Text(
-            text = "$buttonText",
+            text = buttonText,
             fontFamily = apple_bold,
             fontWeight = FontWeight.Bold,
             fontSize = 16.sp,
@@ -231,7 +230,7 @@ fun CalendarButton(openCalendar : SheetState){
                 modifier = Modifier.size(24.dp),
                 content = {
                     Icon(
-                        painter = painterResource(id = com.lovestory.lovestory.R.drawable.ic_calendaer),
+                        painter = painterResource(id = R.drawable.ic_calendaer),
                         contentDescription = "Add",
                         tint = Color.Gray
                     )

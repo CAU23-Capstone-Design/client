@@ -50,7 +50,6 @@ fun Navigation(){
             GetNonCoupleNavigate(navController)
         }
     }
-    /** 비회원 또는 커플 연동 안된 회원*/
     else{
         Log.d("Navigation", "비 회원!")
         GetNonCoupleNavigate(navController)

@@ -1,12 +1,11 @@
 package com.lovestory.lovestory.api
-//
-//import com.lovestory.lovestory.model.RequestToken
-//import okhttp3.ResponseBody
-//import retrofit2.Call
-//import retrofit2.http.Body
-//import retrofit2.http.POST
-//
-//interface TokenService{
-//    @POST("/token")
-//    suspend fun createToken(@Body requestToken: RequestToken) :  Call<ResponseBody>
-//}
+
+import com.lovestory.lovestory.model.LoginRequest
+import com.lovestory.lovestory.model.LoginResponse
+import retrofit2.http.Body
+import retrofit2.http.POST
+
+interface KakaoTokenService {
+    @POST("/login")
+    suspend fun login(@Body loginRequest: LoginRequest): LoginResponse
+}

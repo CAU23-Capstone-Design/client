@@ -12,63 +12,20 @@ import com.kakao.sdk.common.model.ClientError
 import com.kakao.sdk.common.model.ClientErrorCause
 import com.kakao.sdk.user.UserApiClient
 import com.lovestory.lovestory.model.LoginPayload
-import com.lovestory.lovestory.network.sendTokenToServer
+import com.lovestory.lovestory.network.sendTokenForLogin
 import com.lovestory.lovestory.ui.screens.Screen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.*
 
-lateinit var navHostControllerForAuth : NavHostController
-lateinit var context: Context
-
-val callback : (OAuthToken?, Throwable?) -> Unit = { token, error ->
-    if(error != null){
-        Log.e("KAKAO-AUTH-ACCOUNT", "Fail get KAKAO token : $error")
-    }else if(token != null){
-        CoroutineScope(Dispatchers.Main).launch {
-            val response = sendTokenToServer(token.accessToken)
-            if(response.isSuccessful){
-                response.body()?.token?.let {
-                    saveToken(context = context, it)
-                    val chunks: List<String> = it.split(".")
-                    val decoder: Base64.Decoder = Base64.getUrlDecoder()
-
-//                    val header: String = String(decoder.decode(chunks[0]))
-                    val payload: String = String(decoder.decode(chunks[1]))
-
-                    val payloadJSON : JsonObject = JsonParser.parseString(payload).asJsonObject
-
-                    val data = Gson().fromJson(payloadJSON, LoginPayload::class.java)
-
-                    if(data.couple != null){
-                        navHostControllerForAuth.navigate(route = Screen.DashBoard.route){
-                            popUpTo(Screen.Login.route)
-                        }
-                    }else{
-                        navHostControllerForAuth.navigate(route = Screen.CoupleSync.route+"/${data.user.code}&${data.user.name}"){
-                            popUpTo(Screen.Login.route)
-                        }
-                    }
-                }
-            }else{
-                Log.e("login error","${response.errorBody()}")
-            }
-        }
-    }
-}
-
-fun kakaoLogin(currentContext: Context, navHostController: NavHostController){
-    navHostControllerForAuth = navHostController
-    context = currentContext
-    KakaoSdk.init(currentContext, "e2d337c73844599d05e5e1b56e5cbed9")
+fun kakaoLogin(appKey: String, context: Context, navHostController: NavHostController){
+    KakaoSdk.init(context, appKey)
 
     /** kakao app installed */
-//    UserApiClient.instance.loginWithKakaoAccount(context = currentContext, callback = callback)
-
-    if(UserApiClient.instance.isKakaoTalkLoginAvailable(context = currentContext)){
+    if(UserApiClient.instance.isKakaoTalkLoginAvailable(context = context)){
         //kakao talk login
-        UserApiClient.instance.loginWithKakaoTalk(context = currentContext){ token, error->
+        UserApiClient.instance.loginWithKakaoTalk(context = context){ token, error->
             if (error != null){
                 // fail kakao talk login
                 Log.e("KAKAO-AUTH-APP", "Fail login with KAKAO app : $error")
@@ -76,56 +33,72 @@ fun kakaoLogin(currentContext: Context, navHostController: NavHostController){
                     return@loginWithKakaoTalk
                 }
 
-                UserApiClient.instance.loginWithKakaoAccount(context = currentContext, callback = callback)
-
-            }else if(token != null){
-                Log.e("KAKAO-AUTH-APP", "Success login with KAKAO app : $token ")
-
-                CoroutineScope(Dispatchers.Main).launch {
-                    Log.d("Access Token", "${token.accessToken}")
-                    val response = sendTokenToServer(token.accessToken)
-                    if(response.isSuccessful){
-                        response.body()?.token?.let {
-                            saveToken(context = context, it)
-                            val chunks: List<String> = it.split(".")
-                            val decoder: Base64.Decoder = Base64.getUrlDecoder()
-
-//                            val header: String = String(decoder.decode(chunks[0]))
-                            val payload: String = String(decoder.decode(chunks[1]))
-
-                            val payloadJSON : JsonObject = JsonParser.parseString(payload).asJsonObject
-
-                            val data = Gson().fromJson(payloadJSON, LoginPayload::class.java)
-
-                            Log.d("after get token and parse token", "${data.couple}")
-                            Log.d("after get token and parse token", "${data.user.code}")
-                            if(data.couple != null){
-                                navHostControllerForAuth.navigate(route = Screen.DashBoard.route){
-                                    popUpTo(Screen.Login.route)
-                                }
-                            }else{
-                                Log.e("No couple","커플 생성해야함//////!!!!!!!!!!!")
-                                navHostControllerForAuth.navigate(route = Screen.CoupleSync.route+"/${data.user.code}&${data.user.name}"){
-                                    popUpTo(Screen.Login.route)
-                                }
-                            }
-                        }
-                    }else{
-                        Log.e("login error","${response.errorBody()}")
+                // kakao account login
+                UserApiClient.instance.loginWithKakaoAccount(context = context){ accountToken, accountError->
+                    if(accountError != null){
+                        Log.e("KAKAO-AUTH-ACCOUNT", "Fail get KAKAO token : $accountError")
+                    }else if(accountToken != null){
+                        sendKakaoTokenToServer(accountToken, context, navHostController)
                     }
                 }
+
+            }else if(token != null){
+                sendKakaoTokenToServer(token, context, navHostController)
             }
         }
     }
     /** kakao app not installed */
     else{
-        Log.d("KAKAO-AUTH", "Not installed Kakao App")
-        UserApiClient.instance.loginWithKakaoAccount(context = currentContext, callback = callback)
+        UserApiClient.instance.loginWithKakaoAccount(context = context){ token, error->
+            if(error != null){
+                Log.e("KAKAO-AUTH-ACCOUNT", "Fail get KAKAO token : $error")
+            }else if(token != null){
+                sendKakaoTokenToServer(token, context, navHostController)
+            }
+        }
     }
 }
 
-fun kakaoLogout(currentContext: Context){
-    KakaoSdk.init(currentContext, "e2d337c73844599d05e5e1b56e5cbed9")
+fun sendKakaoTokenToServer(token: OAuthToken, context: Context, navHostController: NavHostController){
+    CoroutineScope(Dispatchers.Main).launch {
+        val response = sendTokenForLogin(token.accessToken)
+        if(response.isSuccessful){
+            response.body()?.token?.let {
+                checkLoginToken(context, it, navHostController)
+            }
+        }else{
+            Log.e("KAKAO-AUTH-sendKakaoTokenToServer","${response.errorBody()}")
+        }
+    }
+}
+
+fun checkLoginToken(context : Context, token : String, navHostController: NavHostController){
+    saveToken(context = context, token)
+    val chunks: List<String> = token.split(".")
+    val decoder: Base64.Decoder = Base64.getUrlDecoder()
+
+//  val header: String = String(decoder.decode(chunks[0]))
+    val payload = String(decoder.decode(chunks[1]))
+
+    val payloadJSON : JsonObject = JsonParser.parseString(payload).asJsonObject
+
+    val data = Gson().fromJson(payloadJSON, LoginPayload::class.java)
+
+    if(data.couple != null){
+        navHostController.navigate(route = Screen.DashBoard.route){
+            popUpTo(Screen.Login.route)
+        }
+    }else{
+        navHostController.navigate(route = Screen.CoupleSync.route+"/${data.user.code}&${data.user.name}"){
+            popUpTo(Screen.Login.route)
+        }
+    }
+}
+
+
+/**For Only Dev*/
+fun kakaoLogout(appKey : String, context: Context){
+    KakaoSdk.init(context, appKey)
     UserApiClient.instance.logout { error ->
         if (error != null) {
             Log.e("KAKAO-AUTH_LOGOUT", "회원 로그아웃 실패 : $error")
@@ -136,8 +109,9 @@ fun kakaoLogout(currentContext: Context){
     }
 }
 
-fun kakaoWithdrawal(currentContext: Context){
-    KakaoSdk.init(currentContext, "e2d337c73844599d05e5e1b56e5cbed9")
+/**For Only Dev*/
+fun kakaoWithdrawal(appKey : String, context: Context){
+    KakaoSdk.init(context, appKey)
     UserApiClient.instance.unlink { error->
         if (error != null) {
             Log.e("KAKAO-AUTH_UNLINK", "회원 탈퇴 실패 : $error")
