@@ -61,11 +61,7 @@ fun CoupleSyncScreen(
     val calendarForMeetState = rememberSheetState(visible = false)
     CalendarDialogForSignUp(calendarState = calendarForMeetState, selectedDates = selectedMeetDates)
 
-    Log.d("CoupleSync-Screen", "커플 동기화 스크린 호출")
-//    Log.d("CoupleSync-Screen", "$id / $code ")
-
     val token = getToken(context)
-    Log.d("CoupleSync-Screen-token", "$token")
 
     var isFunctionCalled by rememberSaveable { mutableStateOf(false) }
     if (!isFunctionCalled) {
