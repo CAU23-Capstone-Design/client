@@ -3,8 +3,9 @@ package com.lovestory.lovestory.module
 import android.content.Context
 import android.util.Log
 import androidx.navigation.NavHostController
+import com.lovestory.lovestory.graphs.Graph
+import com.lovestory.lovestory.graphs.MainScreen
 import com.lovestory.lovestory.network.checkCouple
-import com.lovestory.lovestory.ui.screens.Screen
 import kotlinx.coroutines.*
 
 fun loveStoryCheckCouple(navHostController: NavHostController, token : String?, context : Context) : Job{
@@ -27,8 +28,9 @@ fun loveStoryCheckCouple(navHostController: NavHostController, token : String?, 
 
             }
         }
-        navHostController.navigate(route = Screen.DashBoard.route){
-            popUpTo(Screen.Login.route)
+        navHostController.navigate(route = Graph.MAIN){
+            navHostController.popBackStack()
+            navHostController.popBackStack()
         }
     }
 }

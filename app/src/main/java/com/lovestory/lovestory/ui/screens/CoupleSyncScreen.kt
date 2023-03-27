@@ -2,6 +2,11 @@ package com.lovestory.lovestory.ui.screens
 
 import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.FiniteAnimationSpec
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.scaleIn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -35,6 +40,7 @@ import com.lovestory.lovestory.ui.components.*
 import com.maxkeppeker.sheets.core.models.base.rememberSheetState
 import java.time.LocalDate
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun CoupleSyncScreen(
     navHostController: NavHostController,
@@ -119,7 +125,7 @@ fun CoupleSyncScreen(
 //        ManageKakaoUser(context = context)
     }
 
-    if(isVisible){
+    AnimatedVisibility(visible = isVisible, enter = scaleIn(animationSpec = tween(durationMillis = 300), initialScale = 0.1f)){
         CoupleSyncDialog(
             navHostController = navHostController,
             onDismissRequest = onDismissRequest,

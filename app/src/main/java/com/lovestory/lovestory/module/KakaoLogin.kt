@@ -11,9 +11,11 @@ import com.kakao.sdk.common.KakaoSdk
 import com.kakao.sdk.common.model.ClientError
 import com.kakao.sdk.common.model.ClientErrorCause
 import com.kakao.sdk.user.UserApiClient
+import com.lovestory.lovestory.graphs.AuthScreen
+import com.lovestory.lovestory.graphs.Graph
+import com.lovestory.lovestory.graphs.MainScreen
 import com.lovestory.lovestory.model.LoginPayload
 import com.lovestory.lovestory.network.sendTokenForLogin
-import com.lovestory.lovestory.ui.screens.Screen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -85,12 +87,12 @@ fun checkLoginToken(context : Context, token : String, navHostController: NavHos
     val data = Gson().fromJson(payloadJSON, LoginPayload::class.java)
 
     if(data.couple != null){
-        navHostController.navigate(route = Screen.DashBoard.route){
-            popUpTo(Screen.Login.route)
+        navHostController.navigate(route = Graph.MAIN){
+            navHostController.popBackStack()
         }
     }else{
-        navHostController.navigate(route = Screen.CoupleSync.route+"/${data.user.code}&${data.user.name}"){
-            popUpTo(Screen.Login.route)
+        navHostController.navigate(route = AuthScreen.CoupleSync.route+"/${data.user.code}&${data.user.name}"){
+            popUpTo(AuthScreen.Login.route)
         }
     }
 }

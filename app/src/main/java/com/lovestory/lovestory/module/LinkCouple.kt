@@ -1,11 +1,10 @@
 package com.lovestory.lovestory.module
 
 import android.content.Context
-import android.util.Log
 import android.widget.Toast
 import androidx.navigation.NavHostController
+import com.lovestory.lovestory.graphs.MainScreen
 import com.lovestory.lovestory.network.createCouple
-import com.lovestory.lovestory.ui.screens.Screen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -21,8 +20,8 @@ fun linkCouple(context : Context, navHostController: NavHostController, code : S
                 response.body()?.token?.let{
                     saveToken(context = context, it)
                 }
-                navHostController.navigate(route = Screen.DashBoard.route){
-                    popUpTo(Screen.Login.route)
+                navHostController.navigate(route = MainScreen.DashBoard.route){
+                    navHostController.popBackStack()
                 }
             }
             else{

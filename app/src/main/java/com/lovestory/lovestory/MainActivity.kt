@@ -10,7 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
-import com.lovestory.lovestory.ui.screens.Navigation
+import com.lovestory.lovestory.graphs.RootNavigationGraph
 import com.lovestory.lovestory.ui.theme.LoveStoryTheme
 import com.lovestory.lovestory.ui.theme.LoveStoryThemeForMD3
 
@@ -24,7 +24,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = androidx.compose.material3.MaterialTheme.colorScheme.background
                 ) {
-                    LoveStoryMainScreen()
+                    RootNavigationGraph()
                 }
             }
         }
@@ -33,12 +33,12 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun LoveStoryMainScreen() {
-    val navController = rememberNavController()
+//    val navController = rememberNavController()
     Scaffold(
         bottomBar = { }
     ) {
         Box(Modifier.padding(it)){
-            Navigation()
+
         }
     }
 }
@@ -48,7 +48,7 @@ fun LoveStoryMainScreen() {
 @Composable
 fun DefaultPreview() {
     LoveStoryTheme {
-        Navigation()
+        RootNavigationGraph()
     }
 }
 

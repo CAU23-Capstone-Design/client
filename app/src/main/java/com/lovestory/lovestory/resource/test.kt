@@ -1,6 +1,5 @@
 package com.lovestory.lovestory.resource
 
-import android.content.Context
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Button
 import androidx.compose.material.Text
@@ -13,7 +12,7 @@ import com.lovestory.lovestory.module.kakaoLogout
 import com.lovestory.lovestory.module.kakaoWithdrawal
 
 @Composable
-fun ManageKakaoUser(context : Context){
+fun ManageKakaoUser(){
     val context = LocalContext.current
     val appKey = context.getString(R.string.app_kakao_key)
     Spacer(modifier = Modifier.height(16.dp))
