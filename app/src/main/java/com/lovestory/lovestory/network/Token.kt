@@ -1,37 +1,31 @@
 package com.lovestory.lovestory.network
 
 import android.util.Log
-import com.lovestory.lovestory.model.User
-import com.lovestory.lovestory.api.UserService
+import com.lovestory.lovestory.api.KakaoTokenService
+import com.lovestory.lovestory.model.LoginRequest
+import com.lovestory.lovestory.model.LoginResponse
 import okhttp3.ResponseBody
 import retrofit2.HttpException
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-suspend fun checkValidCode(code : String):Response<User>{
+
+suspend fun sendTokenForLogin(accessToken: String):Response<LoginResponse> {
     val retrofit = Retrofit.Builder()
         .baseUrl("http://3.34.189.103:3000")
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
-    val apiService = retrofit.create(UserService::class.java)
-
+    val apiService = retrofit.create(KakaoTokenService::class.java)
     return try{
-        val user : User = apiService.getCode(code)
-        Log.d("checkValidCode", "$user")
-        Response.success(user)
+        val call  = apiService.login(LoginRequest(accessToken))
+        Response.success(call)
     }catch (e : HttpException){
-        Log.e("checkVaildCode Failed","${e.response()?.errorBody()}")
-        Log.e("checkVaildCode Failed2","${e.code()}")
+        Log.e("login api error", "$e")
         Response.error(e.code(), e.response()?.errorBody())
 
     }catch (e : Exception){
-        Log.e("checkVaildCode Failed exception","$e")
+        Log.e("login api error2", "$e")
         Response.error(500, ResponseBody.create(null, "Unknown error"))
     }
 }
-
-
-
-
-

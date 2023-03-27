@@ -72,10 +72,10 @@ dependencies {
     debugImplementation "androidx.compose.ui:ui-tooling:$compose_ui_version"
     debugImplementation "androidx.compose.ui:ui-test-manifest:$compose_ui_version"
 
+    //splash screen
     implementation "androidx.navigation:navigation-compose:2.5.3"
     implementation "androidx.compose.material3:material3:1.0.1"
     implementation 'androidx.core:core-splashscreen:1.0.0-rc01'
-
 
     //kakao
     implementation "com.kakao.sdk:v2-user:2.13.0"
@@ -99,11 +99,29 @@ dependencies {
     implementation 'com.maxkeppeler.sheets-compose-dialogs:core:1.0.1'
     implementation "com.maxkeppeler.sheets-compose-dialogs:calendar:1.0.1"
 
-
+    // data pick
     implementation "io.github.vanpra.compose-material-dialogs:datetime:0.8.1-rc"
 
+    // life cycle
     implementation "androidx.lifecycle:lifecycle-viewmodel-compose:2.5.1"
+    
+    // jwt
+//    implementation 'com.auth0.android:jwtdecode:2.0.0'
+//
+//    implementation 'io.jsonwebtoken:jjwt-api:0.11.2'
+//    implementation 'io.jsonwebtoken:jjwt-impl:0.11.2'
+//    implementation 'io.jsonwebtoken:jjwt-jackson:0.11.2'
 
+    // shared preference
+    implementation 'androidx.preference:preference-ktx:1.1.1'
+
+    // system ui controller
+    implementation 'com.google.accompanist:accompanist-systemuicontroller:0.19.0'
+
+    // material icon
+    implementation 'com.google.android.material:compose-theme-adapter:1.0.0-alpha01'
+    implementation 'com.google.accompanist:accompanist-navigation-material:0.17.0'
+    
     // The compose calendar library
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.0.2'
     implementation 'com.kizitonwose.calendar:compose:2.2.0'

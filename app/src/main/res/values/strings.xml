@@ -1,7 +1,4 @@
 <resources>
     <string name="app_name">LoveStory</string>
-    <string name="text_home">홈</string>
-    <string name="text_gallery">갤러리</string>
-    <string name="text_calendar">캘린더</string>
-    <string name="text_option">설정</string>
+    <string name="app_kakao_key">e2d337c73844599d05e5e1b56e5cbed9</string>
 </resources>

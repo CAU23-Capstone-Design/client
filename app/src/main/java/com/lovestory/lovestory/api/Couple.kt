@@ -1,19 +1,17 @@
 package com.lovestory.lovestory.api
 
-import com.lovestory.lovestory.model.Couple
 import com.lovestory.lovestory.model.CoupleInfo
-import retrofit2.http.Body
-import retrofit2.http.GET
-import retrofit2.http.POST
-import retrofit2.http.Path
-import retrofit2.http.Query
+import com.lovestory.lovestory.model.LoginResponse
+import retrofit2.http.*
 
 
 interface CoupleService{
+    @Headers("Content-Type: application/json")
     @POST("/couples")
-    suspend fun createCouple(@Body couple : CoupleInfo) : Couple
+    suspend fun createCouple(@Header("Authorization") jwtToken: String, @Body couple : CoupleInfo) : LoginResponse
 
-    @GET("/couples/findByUserId")
-    suspend fun verifiedCouple(@Query("userid") id : String?) : Couple
+    @Headers("Content-Type: application/json")
+    @GET("/couples")
+    suspend fun verifiedCouple(@Header("Authorization") jwtToken : String) : LoginResponse
 
 }

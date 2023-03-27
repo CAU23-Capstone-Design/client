@@ -56,14 +56,11 @@ fun LoveStoryTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composa
         LightColorPalette
     }
     MaterialTheme(
-
         colors = colors,
         typography = Typography,
         shapes = Shapes,
         content = content
     )
-
-
 }
 
 @Composable
@@ -71,14 +68,14 @@ fun LoveStoryThemeForMD3(
     useDarkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
-    val colorSchemecolors =
+    val colorScheme =
         if (!useDarkTheme) {
             LightColors
         } else {
             DarkColors
         }
     androidx.compose.material3.MaterialTheme(
-        colorScheme = colorSchemecolors,
+        colorScheme = colorScheme,
         content = content
     )
 }

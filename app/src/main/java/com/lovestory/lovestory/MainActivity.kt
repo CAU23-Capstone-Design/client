@@ -7,11 +7,13 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.lovestory.lovestory.ui.screens.Navigation
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.lovestory.lovestory.graphs.RootNavigationGraph
 import com.lovestory.lovestory.ui.theme.LoveStoryTheme
 import com.lovestory.lovestory.ui.theme.LoveStoryThemeForMD3
 
@@ -19,13 +21,24 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         requestWindowFeature(Window.FEATURE_NO_TITLE)
+
         setContent {
+            val systemUiController = rememberSystemUiController()
+            val useDarkIcons = MaterialTheme.colors.isLight
+
+            SideEffect {
+                systemUiController.setSystemBarsColor(
+                    color = Color.White,
+                    darkIcons = useDarkIcons
+                )
+            }
+
             LoveStoryThemeForMD3() {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = androidx.compose.material3.MaterialTheme.colorScheme.background
                 ) {
-                    LoveStoryMainScreen()
+                    RootNavigationGraph()
                 }
             }
         }
@@ -34,18 +47,21 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun LoveStoryMainScreen() {
-    val navController = rememberNavController()
+//    val navController = rememberNavController()
     Scaffold(
         bottomBar = { }
     ) {
         Box(Modifier.padding(it)){
-            Navigation()
+
         }
     }
 }
 
 
-
-
-
-
+@Preview(showSystemUi = true)
+@Composable
+fun DefaultPreview() {
+    LoveStoryTheme {
+        RootNavigationGraph()
+    }
+}

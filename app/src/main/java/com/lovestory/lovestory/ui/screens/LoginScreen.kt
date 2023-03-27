@@ -8,13 +8,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.lovestory.lovestory.resource.vitro
 import com.lovestory.lovestory.ui.components.ButtonForAuth
+import com.lovestory.lovestory.ui.theme.LoveStoryTheme
 
 @Composable
 fun LoginScreen(navHostController: NavHostController) {
@@ -45,8 +48,8 @@ fun LoginScreen(navHostController: NavHostController) {
 
 //@Preview(showSystemUi = true)
 //@Composable
-//fun DefaultPreview() {
+//fun LoginScreenPreview() {
 //    LoveStoryTheme {
-//        FirstPage()
+//        LoginScreen(navHostController = NavHostController(LocalContext.current))
 //    }
 //}
