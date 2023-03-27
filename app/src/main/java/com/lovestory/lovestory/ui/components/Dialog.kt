@@ -17,3 +17,17 @@ fun CoupleSyncDialog(
         content()
     }
 }
+
+@Composable
+fun CalendarDialog(
+    onDismissRequest : ()-> Unit,
+    properties: DialogProperties = DialogProperties(),
+    content : @Composable () -> Unit
+){
+    Dialog(
+        onDismissRequest = onDismissRequest,
+        properties = properties,
+    ) {
+        content()
+    }
+}

@@ -16,6 +16,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.Role.Companion.Button
@@ -31,10 +32,6 @@ import com.kizitonwose.calendar.compose.CalendarLayoutInfo
 import com.kizitonwose.calendar.compose.CalendarState
 import com.kizitonwose.calendar.compose.HorizontalCalendar
 import com.kizitonwose.calendar.compose.rememberCalendarState
-import com.kizitonwose.calendar.core.CalendarDay
-import com.kizitonwose.calendar.core.CalendarMonth
-import com.kizitonwose.calendar.core.DayPosition
-import com.kizitonwose.calendar.core.daysOfWeek
 import kotlinx.coroutines.flow.filterNotNull
 import java.time.DayOfWeek
 import java.time.Month
@@ -44,8 +41,12 @@ import java.util.*
 import com.lovestory.lovestory.R.drawable
 import androidx.compose.ui.window.Popup
 import androidx.navigation.compose.rememberNavController
-import com.lovestory.lovestory.ui.components.TextFieldForCalendar
+import com.kizitonwose.calendar.core.*
 import com.lovestory.lovestory.ui.theme.LoveStoryTheme
+import kotlinx.coroutines.launch
+import java.time.LocalDate
+import com.lovestory.lovestory.R.color
+import com.lovestory.lovestory.ui.components.*
 
 @Composable
 fun CalendarScreen(navHostController: NavHostController) {
@@ -55,13 +56,12 @@ fun CalendarScreen(navHostController: NavHostController) {
     val endMonth = remember { currentMonth.plusMonths(100) } // Adjust as needed
     val daysOfWeek = remember { daysOfWeek() }
 
-    var selection by remember { mutableStateOf<CalendarDay?>(null) }
+    var selection by remember { mutableStateOf<CalendarDay?>(null)}
 
     var isPopupVisible by remember { mutableStateOf(false) }
 
     val onOpenDialogRequest : ()->Unit = {isPopupVisible = true}
     val onDismissRequest : () -> Unit = {isPopupVisible = false}
-    //Log.d("tag", "오,,, $isPopupVisible")
 
     val state = rememberCalendarState(
         startMonth = startMonth,
@@ -73,15 +73,21 @@ fun CalendarScreen(navHostController: NavHostController) {
     val coroutineScope = rememberCoroutineScope()
     val visibleMonth = rememberFirstCompletelyVisibleMonth(state)
 
+    val coupleMemoryList = generateCoupleMemory()
+    //coupleMemoryList.forEach{coupleMemory -> Log.d("tag","${coupleMemory.date}") }
+
     Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White),
+        //horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        /* // 캘린더 타이틀 부분, preview 할 때, 곧바로 확인이 안 되서 잠시 주석 처리
+        Spacer(modifier = Modifier.height(10.dp))
+
+        // /* 캘린더 타이틀 부분, preview 할 때, 곧바로 확인이 안 되서 잠시 주석 처리
         SimpleCalendarTitle(
             modifier = Modifier
-                .padding(horizontal = 8.dp, vertical = 12.dp),
+                .padding(horizontal = 16.dp, vertical = 12.dp),
             currentMonth = visibleMonth.yearMonth,
             goToPrevious = {
                 coroutineScope.launch {
@@ -94,211 +100,73 @@ fun CalendarScreen(navHostController: NavHostController) {
                 }
             },
         )
-        */
+
+         // */
+
         Spacer(modifier = Modifier.height(10.dp))
         DaysOfWeekTitle(daysOfWeek = daysOfWeek)
         Spacer(modifier = Modifier.height(16.dp))
         HorizontalCalendar(
-            modifier = Modifier.align(Alignment.CenterHorizontally),
+            modifier = Modifier.wrapContentWidth(),//.background(color = Color.White, RoundedCornerShape(30.dp)),
             state = state,
             dayContent = { day ->
                 Day(
                     day = day,
                     isSelected = selection == day,
                     onOpenDialogRequest = onOpenDialogRequest,
+                    coupleMemoryList = coupleMemoryList,
                 ) { clicked ->
                     selection = clicked
-                    //Log.d("tag", "흠 $showPopup")
                 }
             }
         )
     }
-    if ( isPopupVisible ) {
+    if (true){//isPopupVisible ) {
         CalendarDialog(
             onDismissRequest = onDismissRequest,
             properties = DialogProperties(dismissOnBackPress = true, dismissOnClickOutside = true)
         ){
-            Column(
-                modifier = Modifier
-                    .width(360.dp)
-                    .wrapContentHeight()
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(color = Color.White),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ){
-                Spacer(modifier = Modifier.height(20.dp))
-                Text(text = "팝업 창이다...")
-                Spacer(modifier = Modifier.height(20.dp))
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    modifier = Modifier
+                        .width(360.dp)
+                        .wrapContentHeight()
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(color = Color.White),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Spacer(modifier = Modifier.height(20.dp))
+                    Text(text = "팝업 창이다...")
+                    Spacer(modifier = Modifier.height(20.dp))
+                    Box(modifier = Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp).height(150.dp).background(color = Color.Gray, RoundedCornerShape(12.dp)))
+                    Spacer(modifier = Modifier.height(20.dp))
+                    Box(modifier = Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp).height(300.dp).background(color = Color.Gray, RoundedCornerShape(12.dp)))
+                    Spacer(modifier = Modifier.height(20.dp))
+                }
             }
         }
     }
 }
 
-@Composable
-fun CalendarDialog(
-    onDismissRequest : ()-> Unit,
-    properties: DialogProperties = DialogProperties(),
-    content : @Composable () -> Unit
-){
-    Dialog(
-        onDismissRequest = onDismissRequest,
-        properties = properties,
-    ) {
-        content()
-    }
-}
-
-@Composable
-fun Day(
-    day: CalendarDay,
-    isSelected: Boolean = false,
-    onOpenDialogRequest : () -> Unit,
-    onClick: (CalendarDay) -> Unit = {},
-){
-    //var showPopup by remember { mutableStateOf(false) }
-    Box(
-        modifier = Modifier
-            .aspectRatio(0.8f) // This is important for square sizing!
-            .clickable(
-                enabled = day.position == DayPosition.MonthDate,
-                onClick = { onClick(day)
-                            onOpenDialogRequest()}
-            ),
-        contentAlignment = Alignment.TopCenter //텍스트 상단 중앙 배치
-    ) {
-        val textColor = when (day.position){
-            DayPosition.MonthDate -> Color.Black //Color.Unspecified 해당 월에 속하는 날들의 숫자 색
-            DayPosition.InDate, DayPosition.OutDate -> Color.Gray // 해당 월에 속하지 않은 날들의 숫자 색
-        }
-        Text(
-            text = day.date.dayOfMonth.toString(),
-            textAlign = TextAlign.Center, //텍스트 가운데 정렬
-            color = textColor, //해당 월에 있는 날들은 검은 색으로 표시, 아닌데 나오는 날들은 회색으로 표시
-            fontWeight = FontWeight.Bold, //굵기 조절
-            modifier = Modifier.padding(top = 5.dp)) // 위에서 5dp 만큼 간격
 
 
-    }
-}
+data class couple_memory(val date: LocalDate, val comment: String)
 
-@Composable
-fun DaysOfWeekTitle(daysOfWeek: List<DayOfWeek>) {
-    Row(modifier = Modifier.fillMaxWidth()) {
-        for (dayOfWeek in daysOfWeek) {
-            Text(
-                modifier = Modifier.weight(1f),
-                textAlign = TextAlign.Center,
-                fontWeight = FontWeight.Bold, //굵기 조절
-                text = dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault()), //
-            )
-        }
-    }
-}
-
-
-@Composable
-fun SimpleCalendarTitle(
-    modifier: Modifier,
-    currentMonth: YearMonth,
-    goToPrevious: () -> Unit,
-    goToNext: () -> Unit,
-) {
-    Row(
-        modifier = modifier.height(60.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        CalendarNavigationIcon(
-            icon = painterResource(id = drawable.ic_chevron_left),
-            contentDescription = "Previous",
-            onClick = goToPrevious,
-        )
-        Text(
-            modifier = Modifier
-                .weight(1f)
-                .testTag("MonthTitle"),
-            text = currentMonth.displayText(),
-            fontSize = 32.sp,
-            textAlign = TextAlign.Center,
-            fontWeight = FontWeight.ExtraBold,
-            color = Color.Black, // 툴바에 있는 월, 연도 글자의 색
-        )
-        CalendarNavigationIcon(
-            icon = painterResource(id = drawable.ic_chevron_right),
-            contentDescription = "Next",
-            onClick = goToNext,
-        )
-    }
-}
-
-@Composable
-private fun CalendarNavigationIcon(
-    icon: Painter,
-    contentDescription: String,
-    onClick: () -> Unit,
-) = Box(
-    modifier = Modifier
-        .fillMaxHeight()
-        .aspectRatio(1f)
-        .clip(shape = CircleShape)
-        .clickable(role = Role.Button, onClick = onClick),
-) {
-    Icon(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(4.dp)
-            .align(Alignment.Center),
-        painter = icon,
-        tint = Color.Black,
-        contentDescription = contentDescription,
-    )
-}
-
-@Composable
-fun rememberFirstCompletelyVisibleMonth(state: CalendarState): CalendarMonth {
-    val visibleMonth = remember(state) { mutableStateOf(state.firstVisibleMonth) }
-    // Only take non-null values as null will be produced when the
-    // list is mid-scroll as no index will be completely visible.
-    LaunchedEffect(state) {
-        snapshotFlow { state.layoutInfo.completelyVisibleMonths.firstOrNull() }
-            .filterNotNull()
-            .collect { month -> visibleMonth.value = month }
-    }
-    return visibleMonth.value
-}
-
-private val CalendarLayoutInfo.completelyVisibleMonths: List<CalendarMonth>
-    get() {
-        val visibleItemsInfo = this.visibleMonthsInfo.toMutableList()
-        return if (visibleItemsInfo.isEmpty()) {
-            emptyList()
-        } else {
-            val lastItem = visibleItemsInfo.last()
-            val viewportSize = this.viewportEndOffset + this.viewportStartOffset
-            if (lastItem.offset + lastItem.size > viewportSize) {
-                visibleItemsInfo.removeLast()
-            }
-            val firstItem = visibleItemsInfo.firstOrNull()
-            if (firstItem != null && firstItem.offset < this.viewportStartOffset) {
-                visibleItemsInfo.removeFirst()
-            }
-            visibleItemsInfo.map { it.month }
-        }
-    }
-
-fun YearMonth.displayText(short: Boolean = false): String {
-    return "${this.month.displayText(short = short)} ${this.year}"
-}
-
-fun Month.displayText(short: Boolean = true): String {
-    val style = if (short) TextStyle.SHORT else TextStyle.FULL
-    return getDisplayName(style, Locale.getDefault())
+fun generateCoupleMemory(): List<couple_memory> = buildList {
+    val currentDate = LocalDate.now()
+    add(couple_memory(LocalDate.parse("2023-03-24"), "good"))
+    add(couple_memory(currentDate.minusDays(10), "bad"))
 }
 
 @Preview(showSystemUi = true)
 @Composable
 fun DefaultPreview() {
     val navController = rememberNavController()
+    val onDismissRequest : () -> Unit = {}
     LoveStoryTheme {
         CalendarScreen(navHostController = navController)
     }
