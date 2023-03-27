@@ -14,6 +14,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.lovestory.lovestory.graphs.RootNavigationGraph
+import com.lovestory.lovestory.ui.screens.CalendarScreen
 import com.lovestory.lovestory.ui.theme.LoveStoryTheme
 import com.lovestory.lovestory.ui.theme.LoveStoryThemeForMD3
 
@@ -23,9 +24,10 @@ class MainActivity : ComponentActivity() {
         requestWindowFeature(Window.FEATURE_NO_TITLE)
 
         setContent {
+            val navController = rememberNavController()
             val systemUiController = rememberSystemUiController()
             val useDarkIcons = MaterialTheme.colors.isLight
-
+            /*a
             SideEffect {
                 systemUiController.setSystemBarsColor(
                     color = Color.White,
@@ -41,6 +43,9 @@ class MainActivity : ComponentActivity() {
                     RootNavigationGraph()
                 }
             }
+
+             */
+            CalendarScreen(navHostController = navController)
         }
     }
 }

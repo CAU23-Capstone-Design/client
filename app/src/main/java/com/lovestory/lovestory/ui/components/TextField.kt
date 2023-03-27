@@ -83,3 +83,17 @@ fun TextFieldForCalendar(selectedDates :  MutableState<LocalDate>, calendarState
         trailingIcon = { CalendarButton(calendarState) }
     )
 }
+
+@Composable
+fun EditableTextField(initialValue: String, onValueChanged: (String) -> Unit) {
+    var value by remember { mutableStateOf(initialValue) }
+
+    TextField(
+        value = value,
+        onValueChange = {
+            value = it
+            onValueChanged(it)
+        },
+        label = { Text("Enter text") }
+    )
+}
