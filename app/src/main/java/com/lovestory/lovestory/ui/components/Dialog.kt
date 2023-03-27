@@ -33,12 +33,10 @@ fun InputMeetDayDialog(
 
 @Composable
 fun CoupleSyncDialog(
-//    context: Context,
     navHostController: NavHostController,
     onDismissRequest : ()->Unit,
     selectedMeetDates : MutableState<LocalDate>,
     calendarForMeetState : SheetState,
-//    userId : String?,
     code :String?
     ){
     InputMeetDayDialog(
@@ -64,10 +62,8 @@ fun CoupleSyncDialog(
             ButtonForCreateCouple(
                 "시작하기",
                 navHostController = navHostController,
-//                userId = userId,
                 code = code,
                 meetDay = selectedMeetDates.value.toString(),
-//                context = context
             )
             Spacer(modifier = Modifier.height(20.dp))
         }

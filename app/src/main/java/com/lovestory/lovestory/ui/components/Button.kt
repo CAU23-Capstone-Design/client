@@ -99,47 +99,6 @@ fun ButtonForToggleGender(
 }
 
 @Composable
-fun ButtonForSignUp(
-    navHostController: NavHostController,
-    buttonText : String,
-    id:String?,
-    nickname:String,
-    gender:String,
-    birthday:String,
-    context : Context,
-){
-    Button(
-        onClick = {
-            loveStorySignUp(
-            navHostController = navHostController,
-            id = id, nickname = nickname,
-            gender = gender,
-            birthday = birthday,
-            context = context ) },
-        modifier = Modifier
-            .height(50.dp)
-            .width(280.dp),
-        colors = ButtonDefaults.textButtonColors(
-            backgroundColor = Color(0xFFFFB6B6),
-            contentColor = Color(0xFF131313)
-        ),
-        shape = RoundedCornerShape(25.dp),
-        elevation = ButtonDefaults.elevation(
-            disabledElevation = 0.dp,
-            defaultElevation = 0.dp,
-            pressedElevation = 0.dp)
-
-    ) {
-        Text(
-            text = buttonText,
-            fontFamily = apple_bold,
-            fontWeight = FontWeight.Bold,
-            fontSize = 16.sp,
-        )
-    }
-}
-
-@Composable
 fun ButtonForSyncCouple(buttonText : String, onOpenDialogRequest :()->Unit, context: Context, myCode : String?, otherCode : String){
     Button(
         onClick = { loveStoryCheckCode(
@@ -175,17 +134,14 @@ fun ButtonForSyncCouple(buttonText : String, onOpenDialogRequest :()->Unit, cont
 fun ButtonForCreateCouple(
     buttonText: String,
     navHostController: NavHostController,
-//    userId:String?,
     code :String?,
     meetDay:String,
-//    context: Context
 ){
     val context = LocalContext.current
     Button(
         onClick = {linkCouple(
             context = context,
             navHostController = navHostController,
-//            userId = userId,
             code = code,
             meetDay = meetDay
         ) },

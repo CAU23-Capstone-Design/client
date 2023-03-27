@@ -2,13 +2,6 @@ package com.lovestory.lovestory.model
 
 
 import com.google.gson.annotations.SerializedName
-import okhttp3.ResponseBody
-import retrofit2.Call
-import retrofit2.Response
-import retrofit2.http.Body
-import retrofit2.http.Field
-import retrofit2.http.FormUrlEncoded
-import retrofit2.http.POST
 
 data class LoginRequest(
     val accessToken: String
@@ -39,21 +32,6 @@ data class LoginPayload(
     val exp : String,
 )
 
-data class ServiceTokenPayload(
-    @SerializedName("user")
-    val user : UserForServicePayload,
-
-    @SerializedName("couple")
-    val couple : CoupleForLoginPayload?,
-
-    @SerializedName("iat")
-    val iat :String,
-
-    @SerializedName("exp")
-    val exp : String,
-
-)
-
 data class UserForLoginPayload(
     @SerializedName("_id")
     val id : String,
@@ -66,11 +44,6 @@ data class UserForLoginPayload(
 )
 
 data class CoupleForLoginPayload(
-    @SerializedName("_id")
-    val id : String,
-)
-
-data class UserForServicePayload(
     @SerializedName("_id")
     val id : String,
 )

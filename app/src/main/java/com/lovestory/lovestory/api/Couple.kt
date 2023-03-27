@@ -1,6 +1,5 @@
 package com.lovestory.lovestory.api
 
-import com.lovestory.lovestory.model.Couple
 import com.lovestory.lovestory.model.CoupleInfo
 import com.lovestory.lovestory.model.LoginResponse
 import retrofit2.http.*

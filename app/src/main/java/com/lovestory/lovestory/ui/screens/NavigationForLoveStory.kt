@@ -62,14 +62,6 @@ fun GetNonCoupleNavigate(navController : NavHostController){
         composable(Screen.Login.route){
             LoginScreen(navHostController = navController)
         }
-        composable(Screen.SignUp.route+"/{id}&{nickname}&{gender}&{birthday}"){backStackEntry ->
-            val id = backStackEntry.arguments?.getString("id")
-            val nickname = backStackEntry.arguments?.getString("nickname")
-            val gender = backStackEntry.arguments?.getString("gender")
-            val birthday = backStackEntry.arguments?.getString("birthday")
-            SignUpScreen(navHostController = navController, id=id, nickname=nickname, gender=gender, birthday=birthday)
-        }
-
         composable(Screen.CoupleSync.route+"/{code}&{nickname}"){backStackEntry ->
             val code = backStackEntry.arguments?.getString("code")
             val nickname = backStackEntry.arguments?.getString("nickname")
@@ -92,7 +84,6 @@ fun GetNonCoupleNavigate(navController : NavHostController){
 
 sealed class Screen(val route : String){
     object Login : Screen(route = "login_screen")
-    object SignUp : Screen(route = "signup_screen")
     object CoupleSync : Screen(route = "couplesync_screen")
     object DashBoard : Screen(route = "dashboard_screen")
     object Gallery : Screen(route = "gallery_screen")

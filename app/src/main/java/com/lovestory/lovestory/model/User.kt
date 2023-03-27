@@ -18,29 +18,3 @@ data class User(
     @SerializedName("code")
     val code : String,
 )
-
-data class UserCreated(
-    val _id: String,
-    val name : String,
-    val birthday : String,
-    val gender : String,
-    val createdAt : String
-)
-
-data class UserInfo(
-    val _id: Long?,
-    val name : String,
-    val birthday : String,
-    val gender : String,
-)
-
-data class TokenUser(
-    @SerializedName("_id")
-    val id : Long,
-
-    @SerializedName("name")
-    val name : String,
-
-    @SerializedName("code")
-    val code : String,
-)

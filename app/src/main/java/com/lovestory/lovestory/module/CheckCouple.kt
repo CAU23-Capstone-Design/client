@@ -5,14 +5,10 @@ import android.util.Log
 import androidx.navigation.NavHostController
 import com.lovestory.lovestory.network.checkCouple
 import com.lovestory.lovestory.ui.screens.Screen
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 
-fun loveStoryCheckCouple(navHostController: NavHostController, token : String?, context : Context){
-//    Log.d("checkCouple-id","$id")
-    CoroutineScope(Dispatchers.Main).launch{
+fun loveStoryCheckCouple(navHostController: NavHostController, token : String?, context : Context) : Job{
+    return CoroutineScope(Dispatchers.Main).launch{
         var success = false
         while(!success){
             delay(5000)
@@ -35,5 +31,4 @@ fun loveStoryCheckCouple(navHostController: NavHostController, token : String?, 
             popUpTo(Screen.Login.route)
         }
     }
-
 }

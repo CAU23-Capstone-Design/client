@@ -38,7 +38,6 @@ import java.time.LocalDate
 @Composable
 fun CoupleSyncScreen(
     navHostController: NavHostController,
-//    id : String?,
     myCode : String?,
     nickname : String?
 ) {
@@ -63,14 +62,16 @@ fun CoupleSyncScreen(
 
     val token = getToken(context)
 
-    var isFunctionCalled by rememberSaveable { mutableStateOf(false) }
-    if (!isFunctionCalled) {
-        // 여기서 함수를 호출하세요.
-        isFunctionCalled = true
-        loveStoryCheckCouple(navHostController = navHostController, token = token, context= context)
-        // 함수 호출이 완료되면 상태를 true로 변경하여 다음 호출을 방지합니다.
+    DisposableEffect(key1 = token) {
+        Log.d("Couple-Sync-Screen", "코루틴 시작")
+        val checkCoupleJob = loveStoryCheckCouple(navHostController = navHostController, token = token, context = context)
 
+        onDispose {
+            Log.d("Couple-Sync-Screen", "코루틴 종료 및 스크린 제거")
+            checkCoupleJob.cancel()
+        }
     }
+
     Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -120,12 +121,10 @@ fun CoupleSyncScreen(
 
     if(isVisible){
         CoupleSyncDialog(
-//            context = context,
             navHostController = navHostController,
             onDismissRequest = onDismissRequest,
             selectedMeetDates = selectedMeetDates,
             calendarForMeetState = calendarForMeetState,
-//            userId = id,
             code =code,
         )
     }

@@ -1,7 +1,6 @@
 package com.lovestory.lovestory.network
 
 import android.util.Log
-import com.lovestory.lovestory.model.Couple
 import com.lovestory.lovestory.model.CoupleInfo
 import com.lovestory.lovestory.api.CoupleService
 import com.lovestory.lovestory.model.LoginResponse
