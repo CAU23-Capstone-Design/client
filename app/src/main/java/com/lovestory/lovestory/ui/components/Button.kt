@@ -183,10 +183,10 @@ fun CalendarButton(openCalendar : SheetState){
             ) {
             IconButton(
                 onClick = {openCalendar.show()},
-                modifier = Modifier.size(24.dp),
+                modifier = Modifier.size(20.dp),
                 content = {
                     Icon(
-                        painter = painterResource(id = R.drawable.ic_calendaer),
+                        painter = painterResource(id = R.drawable.ic_calendar),
                         contentDescription = "Add",
                         tint = Color.Gray
                     )

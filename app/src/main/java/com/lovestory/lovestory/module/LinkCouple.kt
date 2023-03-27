@@ -3,7 +3,7 @@ package com.lovestory.lovestory.module
 import android.content.Context
 import android.widget.Toast
 import androidx.navigation.NavHostController
-import com.lovestory.lovestory.graphs.MainScreen
+import com.lovestory.lovestory.graphs.Graph
 import com.lovestory.lovestory.network.createCouple
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -20,7 +20,7 @@ fun linkCouple(context : Context, navHostController: NavHostController, code : S
                 response.body()?.token?.let{
                     saveToken(context = context, it)
                 }
-                navHostController.navigate(route = MainScreen.DashBoard.route){
+                navHostController.navigate(route = Graph.MAIN){
                     navHostController.popBackStack()
                 }
             }

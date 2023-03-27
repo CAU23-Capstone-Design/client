@@ -11,7 +11,7 @@ import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.lovestory.lovestory.model.LoginPayload
 import com.lovestory.lovestory.module.getToken
-import com.lovestory.lovestory.ui.screens.DashBoardScreen
+import com.lovestory.lovestory.ui.screens.MainScreen
 import java.util.*
 
 @Composable
@@ -36,7 +36,7 @@ fun RootNavigationGraph(){
                 startDestination = Graph.MAIN
             ) {
                 composable(route = Graph.MAIN) {
-                    DashBoardScreen(navHostController = navHostController)
+                    MainScreen()
                 }
             }
         }
@@ -48,7 +48,7 @@ fun RootNavigationGraph(){
             ) {
                 loginNavGraph(navHostController = navHostController)
                 composable(route = Graph.MAIN) {
-                    DashBoardScreen(navHostController = navHostController)
+                    MainScreen(navHostController = navHostController)
                 }
             }
         }
@@ -61,7 +61,7 @@ fun RootNavigationGraph(){
         ) {
             loginNavGraph(navHostController = navHostController)
             composable(route = Graph.MAIN) {
-                DashBoardScreen(navHostController = navHostController)
+                MainScreen()
             }
         }
     }

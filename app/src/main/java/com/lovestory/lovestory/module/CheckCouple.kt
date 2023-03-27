@@ -4,7 +4,6 @@ import android.content.Context
 import android.util.Log
 import androidx.navigation.NavHostController
 import com.lovestory.lovestory.graphs.Graph
-import com.lovestory.lovestory.graphs.MainScreen
 import com.lovestory.lovestory.network.checkCouple
 import kotlinx.coroutines.*
 
@@ -12,7 +11,7 @@ fun loveStoryCheckCouple(navHostController: NavHostController, token : String?, 
     return CoroutineScope(Dispatchers.Main).launch{
         var success = false
         while(!success){
-            delay(5000)
+            delay(2000)
             try{
                 val response =  checkCouple(token)
                 if (response.isSuccessful) {

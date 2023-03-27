@@ -13,7 +13,6 @@ import com.kakao.sdk.common.model.ClientErrorCause
 import com.kakao.sdk.user.UserApiClient
 import com.lovestory.lovestory.graphs.AuthScreen
 import com.lovestory.lovestory.graphs.Graph
-import com.lovestory.lovestory.graphs.MainScreen
 import com.lovestory.lovestory.model.LoginPayload
 import com.lovestory.lovestory.network.sendTokenForLogin
 import kotlinx.coroutines.CoroutineScope

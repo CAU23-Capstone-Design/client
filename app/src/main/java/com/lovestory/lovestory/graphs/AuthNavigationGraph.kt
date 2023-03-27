@@ -19,10 +19,6 @@ fun NavGraphBuilder.loginNavGraph(navHostController: NavHostController){
             val code = backStackEntry.arguments?.getString("code")
             val nickname = backStackEntry.arguments?.getString("nickname")
             CoupleSyncScreen(
-//                onClick = {
-//                    navHostController.popBackStack()
-//                    navHostController.navigate(Graph.MAIN)
-//                },
                 navHostController = navHostController,
                 myCode=code,
                 nickname = nickname
@@ -40,10 +36,6 @@ fun NavGraphBuilder.syncCiupleNavGraph(navHostController: NavHostController){
             val code = backStackEntry.arguments?.getString("code")
             val nickname = backStackEntry.arguments?.getString("nickname")
             CoupleSyncScreen(
-//                onClick = {
-//                    navHostController.popBackStack()
-//                    navHostController.navigate(Graph.MAIN)
-//                },
                 navHostController = navHostController,
                 myCode=code,
                 nickname = nickname

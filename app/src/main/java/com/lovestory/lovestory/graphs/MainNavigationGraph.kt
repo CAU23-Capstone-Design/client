@@ -4,33 +4,31 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.lovestory.lovestory.ui.screens.CalendarScreen
-import com.lovestory.lovestory.ui.screens.DashBoardScreen
-import com.lovestory.lovestory.ui.screens.GalleryScreen
-import com.lovestory.lovestory.ui.screens.ProfileScreen
+import com.lovestory.lovestory.R
+import com.lovestory.lovestory.ui.screens.*
 
 @Composable
 fun MainNavGraph(navHostController: NavHostController){
-    NavHost(navController = navHostController, startDestination =MainScreen.DashBoard.route, route = Graph.MAIN){
-        composable(Screen.DashBoard.route){
+    NavHost(navController = navHostController, startDestination =MainScreens.DashBoard.route, route = Graph.MAIN){
+        composable(MainScreens.DashBoard.route){
             DashBoardScreen(navHostController = navHostController)
         }
-        composable(Screen.Gallery.route){
+        composable(MainScreens.Gallery.route){
             GalleryScreen(navHostController = navHostController)
         }
-        composable(Screen.Calendar.route){
+        composable(MainScreens.Calendar.route){
             CalendarScreen(navHostController = navHostController)
         }
-        composable(Screen.Profile.route){
+        composable(MainScreens.Profile.route){
             ProfileScreen(navHostController = navHostController)
         }
     }
 }
 
 
-sealed class MainScreen(val route : String){
-    object DashBoard : MainScreen(route = "dashboard_screen")
-    object Gallery : MainScreen(route = "gallery_screen")
-    object Calendar : MainScreen(route = "calendar_screen")
-    object Profile : MainScreen(route = "profile_screen")
+sealed class MainScreens(val route : String, val title : String, val icon : Int){
+    object DashBoard : MainScreens(route = "DASHBOARD", title = "DASHBOARD", icon = R.drawable.ic_home)
+    object Gallery : MainScreens(route = "GALLERY", title = "GALLERY", icon = R.drawable.ic_gallery)
+    object Calendar : MainScreens(route = "CALENDAR", title = "CALENDAR", icon = R.drawable.ic_calendar)
+    object Profile : MainScreens(route = "PROFILE", title= "PROFILE", icon = R.drawable.ic_setting)
 }
