@@ -1,5 +1,6 @@
 package com.lovestory.lovestory.ui.components
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -37,9 +38,10 @@ fun BottomNaviagtionBar(navHostController: NavHostController){
     if (bottomBarDestination) {
         Row (
             modifier = Modifier
-                .padding(start = 0.dp, end = 0.dp, top = 8.dp, bottom = 0.dp)
+                .padding(start = 10.dp, end = 10.dp, top = 8.dp, bottom = 0.dp)
                 .background(Color.White)
-                .fillMaxWidth().height(72.dp)
+                .fillMaxWidth()
+                .height(72.dp)
                 .drawBehind {
                     val strokeWidth = 1.dp.toPx()
                     drawLine(
@@ -50,7 +52,7 @@ fun BottomNaviagtionBar(navHostController: NavHostController){
                     )
                 }
             ,
-            horizontalArrangement = Arrangement.SpaceEvenly,
+            horizontalArrangement = Arrangement.SpaceAround,
             verticalAlignment = Alignment.CenterVertically
         ){
             screens.forEach { screen ->
@@ -80,7 +82,7 @@ fun RowScope.AddItem(
 
     Box(
         modifier = Modifier
-            .height(50.dp).width(50.dp)
+            .height(40.dp)
             .clip(CircleShape)
             .background(background)
             .clickable {
@@ -93,16 +95,25 @@ fun RowScope.AddItem(
     ){
         Row(
             modifier = Modifier
-                .padding(start = 5.dp, end = 5.dp, top = 5.dp, bottom = 5.dp),
-            horizontalArrangement = Arrangement.Center,
+                .padding(start = 15.dp, end = 15.dp, top = 5.dp, bottom = 5.dp),
+            horizontalArrangement = Arrangement.SpaceAround,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
                 painter = painterResource(id = screen.icon),
                 contentDescription = "icon",
                 tint = contentColor,
-                modifier = Modifier.height(20.dp).width(20.dp)
+                modifier = Modifier
+                    .height(20.dp)
+                    .width(20.dp)
             )
+            AnimatedVisibility(visible = selected) {
+                Text(
+                    modifier = Modifier.padding(start = 10.dp),
+                    text = screen.title,
+                    color = Color.White
+                )
+            }
         }
     }
 }

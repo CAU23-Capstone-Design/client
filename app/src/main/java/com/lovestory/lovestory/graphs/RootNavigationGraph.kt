@@ -29,6 +29,8 @@ fun RootNavigationGraph(){
         val payloadJSON : JsonObject = JsonParser.parseString(payload).asJsonObject
         val data = Gson().fromJson(payloadJSON, LoginPayload::class.java)
 
+        Log.d("LoveStory Token", "$data")
+
         if(data.couple != null){
             NavHost(
                 navController = navHostController,

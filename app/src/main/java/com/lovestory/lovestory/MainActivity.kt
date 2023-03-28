@@ -11,7 +11,6 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.lovestory.lovestory.graphs.RootNavigationGraph
 import com.lovestory.lovestory.ui.theme.LoveStoryTheme

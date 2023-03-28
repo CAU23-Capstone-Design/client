@@ -39,11 +39,26 @@ data class UserForLoginPayload(
     @SerializedName("name")
     val name : String,
 
+    @SerializedName("birthday")
+    val birthday : String,
+
+    @SerializedName("gender")
+    val gender : String,
+
     @SerializedName("code")
     val code : String,
 )
 
 data class CoupleForLoginPayload(
-    @SerializedName("_id")
+    @SerializedName("couple_id")
     val id : String,
+
+    @SerializedName("user1_id")
+    val user1_id : String,
+
+    @SerializedName("user2_id")
+    val user2_id : String,
+
+    @SerializedName("firstDate")
+    val firstDate : String,
 )

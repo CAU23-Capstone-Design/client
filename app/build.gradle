@@ -119,4 +119,6 @@ dependencies {
     implementation 'com.google.android.material:compose-theme-adapter:1.0.0-alpha01'
     implementation 'com.google.accompanist:accompanist-navigation-material:0.17.0'
 
+    // location
+    implementation 'com.google.android.gms:play-services-location:18.0.0'
 }

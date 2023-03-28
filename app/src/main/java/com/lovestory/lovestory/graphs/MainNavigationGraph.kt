@@ -27,8 +27,8 @@ fun MainNavGraph(navHostController: NavHostController){
 
 
 sealed class MainScreens(val route : String, val title : String, val icon : Int){
-    object DashBoard : MainScreens(route = "DASHBOARD", title = "DASHBOARD", icon = R.drawable.ic_home)
-    object Gallery : MainScreens(route = "GALLERY", title = "GALLERY", icon = R.drawable.ic_gallery)
-    object Calendar : MainScreens(route = "CALENDAR", title = "CALENDAR", icon = R.drawable.ic_calendar)
-    object Profile : MainScreens(route = "PROFILE", title= "PROFILE", icon = R.drawable.ic_setting)
+    object DashBoard : MainScreens(route = "DASHBOARD", title = "홈", icon = R.drawable.ic_home)
+    object Gallery : MainScreens(route = "GALLERY", title = "갤러리", icon = R.drawable.ic_gallery)
+    object Calendar : MainScreens(route = "CALENDAR", title = "캘린더", icon = R.drawable.ic_calendar)
+    object Profile : MainScreens(route = "PROFILE", title= "프로필", icon = R.drawable.ic_setting)
 }
