@@ -61,20 +61,32 @@ fun Day(
             .background(color = if (day.date == LocalDate.now()) colorResource(com.lovestory.lovestory.R.color.ls_pink) else Color.Transparent),
         contentAlignment = Alignment.TopCenter //텍스트 상단 중앙 배치
     ) {
-        val textColor = when (day.position){
-            DayPosition.MonthDate -> coupleMemoryList.firstOrNull { it.date == day.date }?.let {
-                colorResource(R.color.ls_pink) } ?: Color.Black // 일정이 있던 날이면 분홍색으로 바꾸는 로직 넣기
-            DayPosition.InDate, DayPosition.OutDate -> Color.White // 해당 월에 속하지 않은 날들의 숫자 색
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            val textColor = when (day.position) {
+                DayPosition.MonthDate -> coupleMemoryList.firstOrNull { it.date == day.date }?.let {
+                    colorResource(R.color.black)//R.color.ls_pink)
+                } ?: Color.Black // 공휴일 색 바꾸는 로직 필요
+                DayPosition.InDate, DayPosition.OutDate -> Color.White // 해당 월에 속하지 않은 날들의 숫자 색
+            }
+            Text(
+                modifier = Modifier
+                    .padding(top = 5.dp), // 위에서 5dp 만큼 간격
+                text = day.date.dayOfMonth.toString(), //텍스트 가운데 정렬
+                color = textColor, //해당 월에 있는 날들은 검은 색으로 표시, 아닌데 나오는 날들은 회색으로 표시
+                fontWeight = FontWeight.Bold,//굵기 조절
+                fontSize = 14.sp,
+            )
+            Spacer(modifier = Modifier.height(2.dp))
+
+            coupleMemoryList.firstOrNull { it.date == day.date }?.let{
+                Box(modifier = Modifier
+                    .size(8.dp)
+                    .background(colorResource(R.color.ls_pink), CircleShape),
+                    contentAlignment = Alignment.Center){
+                }
+            }
+
         }
-        Text(
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .padding(top = 5.dp), // 위에서 5dp 만큼 간격
-            text = day.date.dayOfMonth.toString(), //텍스트 가운데 정렬
-            color = textColor, //해당 월에 있는 날들은 검은 색으로 표시, 아닌데 나오는 날들은 회색으로 표시
-            fontWeight = FontWeight.Bold,//굵기 조절
-            fontSize = 14.sp,
-        )
     }
 }
 

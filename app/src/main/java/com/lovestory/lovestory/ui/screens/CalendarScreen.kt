@@ -18,12 +18,12 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.google.android.gms.maps.model.CameraPosition
-import com.google.android.gms.maps.model.LatLng
-import com.google.maps.android.compose.GoogleMap
-import com.google.maps.android.compose.Marker
-import com.google.maps.android.compose.MarkerState
-import com.google.maps.android.compose.rememberCameraPositionState
+//import com.google.android.gms.maps.model.CameraPosition
+//import com.google.android.gms.maps.model.LatLng
+//import com.google.maps.android.compose.GoogleMap
+//import com.google.maps.android.compose.Marker
+//import com.google.maps.android.compose.MarkerState
+//import com.google.maps.android.compose.rememberCameraPositionState
 import com.kizitonwose.calendar.compose.HorizontalCalendar
 import com.kizitonwose.calendar.compose.rememberCalendarState
 import com.kizitonwose.calendar.core.*
@@ -142,7 +142,7 @@ fun CalendarScreen(navHostController: NavHostController) {
                     Text(text = "This is a pop-up window...")
                 }
                     Spacer(modifier = Modifier.height(20.dp))
-                    val singapore = LatLng(1.35, 103.87)
+                    /*val singapore = LatLng(1.35, 103.87)
                     val cameraPositionState = rememberCameraPositionState {
                         position = CameraPosition.fromLatLngZoom(singapore, 10f)
                     }
@@ -160,6 +160,8 @@ fun CalendarScreen(navHostController: NavHostController) {
                             snippet = "Marker in Singapore"
                         )
                     }
+
+                     */
                 Spacer(modifier = Modifier.height(20.dp))
                 Box(
                     modifier = Modifier
@@ -216,8 +218,6 @@ LaunchedEffect(Unit) {
         Looper.getMainLooper()
     )
 }
-
-
  */
 
 
@@ -228,29 +228,30 @@ fun generateCoupleMemory(): List<couple_memory> = buildList {
     val currentDate = LocalDate.now()
     add(couple_memory(LocalDate.parse("2023-03-24"), "good"))
     add(couple_memory(currentDate.minusDays(10), "bad"))
+    add(couple_memory(currentDate.minusYears(1),"What??"))
 }
 
 @Preview(showSystemUi = true)
 @Composable
 fun DefaultPreview() {
-    //val navController = rememberNavController()
-    //val onDismissRequest : () -> Unit = {}
-    //LoveStoryTheme {
-    //    CalendarScreen(navHostController = navController)
+    val navController = rememberNavController()
+    val onDismissRequest : () -> Unit = {}
+    LoveStoryTheme {
+        CalendarScreen(navHostController = navController)
+    }
+    //val singapore = LatLng(1.35, 103.87)
+    //val cameraPositionState = rememberCameraPositionState {
+    //    position = CameraPosition.fromLatLngZoom(singapore, 10f)
     //}
-    val singapore = LatLng(1.35, 103.87)
-    val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(singapore, 10f)
-    }
-    GoogleMap(
-        modifier = Modifier
-                .fillMaxSize(),
-        cameraPositionState = cameraPositionState
-    ){
-        Marker(
-            state = MarkerState(position = singapore),
-            title = "Singapore",
-            snippet = "Marker in Singapore"
-        )
-    }
+    //GoogleMap(
+    //    modifier = Modifier
+    //            .fillMaxSize(),
+    //    cameraPositionState = cameraPositionState
+    //){
+    //    Marker(
+    //        state = MarkerState(position = singapore),
+    //        title = "Singapore",
+    //        snippet = "Marker in Singapore"
+    //    )
+    //}
 }

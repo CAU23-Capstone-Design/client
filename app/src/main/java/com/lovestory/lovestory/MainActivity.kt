@@ -27,7 +27,7 @@ class MainActivity : ComponentActivity() {
             val navController = rememberNavController()
             val systemUiController = rememberSystemUiController()
             val useDarkIcons = MaterialTheme.colors.isLight
-            /*a
+            /*
             SideEffect {
                 systemUiController.setSystemBarsColor(
                     color = Color.White,
