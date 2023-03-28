@@ -35,10 +35,10 @@ fun InputMeetDayDialog(
 @Composable
 fun CalendarDialog(
     selectedMemory: CoupleMemory?, // pass selected couple memory object
-    coupleMemoryList: List<CoupleMemory>,
-    onMemoryUpdated: (CoupleMemory) -> Unit,
-    onCommentChanged: (String) -> Unit,
-    editedComment: String,
+    //coupleMemoryList: List<CoupleMemory>,
+    //onMemoryUpdated: (CoupleMemory) -> Unit,
+    //onCommentChanged: (String) -> Unit,
+    //editedComment: String,
     onDismissRequest : ()-> Unit,
     properties: DialogProperties = DialogProperties(),
     content : @Composable () -> Unit
@@ -48,9 +48,9 @@ fun CalendarDialog(
         properties = properties,
     ) {
         content()
-        if (selectedMemory != null) {
-            onMemoryUpdated(selectedMemory.copy(comment = editedComment))
-        }
+        //if (selectedMemory != null) {
+        //    onMemoryUpdated(selectedMemory.copy(comment = editedComment))
+    //  }
     }
 }
 

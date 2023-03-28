@@ -31,6 +31,8 @@ class MainActivity : ComponentActivity() {
             var keyHash = Utility.getKeyHash(this)
             Log.d("hash","$keyHash")
 
+            /*
+
             val systemUiController = rememberSystemUiController()
             val useDarkIcons = MaterialTheme.colors.isLight
 
@@ -50,8 +52,10 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
+             */
 
-            //CalendarScreen(navHostController = navController)
+
+            CalendarScreen(navHostController = navController)
         }
     }
 }

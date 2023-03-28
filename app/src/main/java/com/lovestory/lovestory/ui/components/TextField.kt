@@ -94,6 +94,6 @@ fun EditableTextField(initialValue: String, onValueChanged: (String) -> Unit) {
             value = it
             onValueChanged(it)
         },
-        label = { Text("Enter text") }
+        label = { Text("Enter comment") }
     )
 }

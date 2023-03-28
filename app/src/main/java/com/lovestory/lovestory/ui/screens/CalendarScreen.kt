@@ -2,8 +2,12 @@ package com.lovestory.lovestory.ui.screens
 
 import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.runtime.*
@@ -11,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -58,9 +63,14 @@ fun CalendarScreen(navHostController: NavHostController) {
     val coroutineScope = rememberCoroutineScope()
     val visibleMonth = rememberFirstCompletelyVisibleMonth(state)
 
-    var coupleMemoryList = generateCoupleMemory()
+    var coupleMemoryList by remember { mutableStateOf(generateCoupleMemory()) }
+    var selectedMemory = coupleMemoryList.find{it.date == selection.date}
+    fun hasSelectedMemory(): Boolean {
+        return selectedMemory != null
+    }
+
     //coupleMemoryList.forEach{coupleMemory -> Log.d("업뎃","${coupleMemory.comment}") }
-    val selectedMemory = coupleMemoryList.find{it.date == selection.date}
+    //Log.d("셀렉트 메모리","$selectedMemory")
 
     Column(
         modifier = Modifier
@@ -108,69 +118,72 @@ fun CalendarScreen(navHostController: NavHostController) {
         )
     }
 
-    Log.d("tag","$selection") //CalendarDay(date=2023-03-08, position=MonthDate)
-    Log.d("tag","$selectedMemory")
+    //Log.d("tag","$selection") //CalendarDay(date=2023-03-08, position=MonthDate)
+    //Log.d("tag","$selectedMemory")
+    Log.d("popup","$isPopupVisible")
+    if (isPopupVisible && hasSelectedMemory()){
 
-    if (isPopupVisible) {
-        var editedComment = ""
-        if (selectedMemory != null){
-            editedComment = selectedMemory.comment
-        }
+        var editedcomment by remember{ mutableStateOf( selectedMemory!!.comment )} // Use !! operator to force unwrap selectedMemory as it's not null
+
+        //coupleMemoryList.forEach{coupleMemory -> Log.d("업뎃","${coupleMemory.comment}") }
+
         CalendarDialog(
             selectedMemory = selectedMemory,
-            coupleMemoryList = coupleMemoryList,
-            editedComment = editedComment,
-            onCommentChanged = { editedComment = it },
-            onMemoryUpdated = { updatedMemory ->
-               coupleMemoryList = coupleMemoryList.map {
-                    if (it.date == updatedMemory.date) updatedMemory else it
-                }
-            },
-            onDismissRequest = onDismissRequest,
+            onDismissRequest = {
+                //coupleMemoryList = generateCoupleMemory()
+                coupleMemoryList.find{ it.date == selectedMemory!!.date }?.comment = editedcomment
+                isPopupVisible = false// Update coupleMemoryList when dialog is dismissed
+            }, //onDismissRequest,
             properties = DialogProperties(dismissOnBackPress = true, dismissOnClickOutside = true)
         ) {
-            
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
+            /*
+            Surface(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .pointerInput(Unit) {
+                        detectTapGestures(
+                            onTap = { onDismissRequest() }
+                        )
+                    },
+                    //.clickable(onClick = onDismissRequest, indication = null), // This makes the dialog dismiss on outside click
+                color = Color.Transparent, // This makes the background of the Surface transparent
             ) {
-                Column(
-                    modifier = Modifier
-                        .width(360.dp)
-                        .wrapContentHeight()
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(color = Color.White),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Spacer(modifier = Modifier.height(20.dp))
-                    if (editedComment != ""){
-                        //var editedComment by remember{ mutableStateOf(selectedMemory.comment) }
-                        EditableTextField(initialValue = editedComment){
-                            editedComment = it
-                        }
-                        Text(text = editedComment)
-                        Log.d("업뎃", "$editedComment")
-                        //coupleMemoryList.forEach{coupleMemory -> Log.d("업뎃","${selectedMemory.comment}") }
-                    }
-                    else {
-                        Text(text = "This is a pop-up window...")
-                    }
 
-                    Spacer(modifier = Modifier.height(20.dp))
-                    Spacer(modifier = Modifier.height(20.dp))
-                    Box(
+             */
+                Box(
+                    modifier = Modifier.wrapContentSize(),//.clickable(onClick = {onDismissRequest}),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(start = 20.dp, end = 20.dp)
-                            .height(300.dp)
-                            .background(color = Color.Gray, RoundedCornerShape(12.dp))
-                    )
-                    Spacer(modifier = Modifier.height(20.dp))
+                            .width(360.dp)
+                            .wrapContentHeight()
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(color = Color.White),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Spacer(modifier = Modifier.height(20.dp))
+                        EditableTextField(
+                            initialValue = editedcomment,
+                            onValueChanged = {editedcomment = it}
+                        )
+                        Text(text = "Current value: $editedcomment")
+                        Spacer(modifier = Modifier.height(20.dp))
+                        Spacer(modifier = Modifier.height(20.dp))
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(start = 20.dp, end = 20.dp)
+                                .height(300.dp)
+                                .background(color = Color.Gray, RoundedCornerShape(12.dp))
+                        )
+                        Spacer(modifier = Modifier.height(20.dp))
+                    }
+                }
             }
-        }
+        //}
     }
-}
 }
 
 /*
@@ -218,7 +231,7 @@ LaunchedEffect(Unit) {
 
 
 
-data class CoupleMemory(val date: LocalDate, val comment: String)
+data class CoupleMemory(val date: LocalDate, var comment: String)
 
 fun generateCoupleMemory(): List<CoupleMemory> = buildList {
     val currentDate = LocalDate.now()
