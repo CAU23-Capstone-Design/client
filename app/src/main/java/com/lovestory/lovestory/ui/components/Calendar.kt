@@ -28,7 +28,7 @@ import com.kizitonwose.calendar.core.CalendarDay
 import com.kizitonwose.calendar.core.CalendarMonth
 import com.kizitonwose.calendar.core.DayPosition
 import com.lovestory.lovestory.R
-import com.lovestory.lovestory.ui.screens.CoupleMemory
+import com.lovestory.lovestory.model.CoupleMemory
 import kotlinx.coroutines.flow.filterNotNull
 import java.time.DayOfWeek
 import java.time.LocalDate

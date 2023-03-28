@@ -32,6 +32,8 @@ import androidx.navigation.compose.rememberNavController
 import com.kizitonwose.calendar.compose.HorizontalCalendar
 import com.kizitonwose.calendar.compose.rememberCalendarState
 import com.kizitonwose.calendar.core.*
+import com.lovestory.lovestory.model.CoupleMemory
+import com.lovestory.lovestory.model.generateCoupleMemory
 import com.lovestory.lovestory.resource.vitro
 import com.lovestory.lovestory.ui.components.*
 import com.lovestory.lovestory.ui.theme.LoveStoryTheme
@@ -65,11 +67,8 @@ fun CalendarScreen(navHostController: NavHostController) {
 
     var coupleMemoryList by remember { mutableStateOf(generateCoupleMemory()) }
     var selectedMemory = coupleMemoryList.find{it.date == selection.date}
-    fun hasSelectedMemory(): Boolean {
-        return selectedMemory != null
-    }
 
-    //coupleMemoryList.forEach{coupleMemory -> Log.d("업뎃","${coupleMemory.comment}") }
+    coupleMemoryList.forEach{coupleMemory -> Log.d("업뎃","$coupleMemory") }
     //Log.d("셀렉트 메모리","$selectedMemory")
 
     Column(
@@ -121,17 +120,23 @@ fun CalendarScreen(navHostController: NavHostController) {
     //Log.d("tag","$selection") //CalendarDay(date=2023-03-08, position=MonthDate)
     //Log.d("tag","$selectedMemory")
     Log.d("popup","$isPopupVisible")
-    if (isPopupVisible && hasSelectedMemory()){
-
-        var editedcomment by remember{ mutableStateOf( selectedMemory!!.comment )} // Use !! operator to force unwrap selectedMemory as it's not null
-
-        //coupleMemoryList.forEach{coupleMemory -> Log.d("업뎃","${coupleMemory.comment}") }
+    if (isPopupVisible){
+        var editedcomment by remember { mutableStateOf("") }
+        val existingMemory = coupleMemoryList.firstOrNull { it.date == selection.date }
+        if (existingMemory != null) {
+            editedcomment = existingMemory.comment
+        }
 
         CalendarDialog(
-            selectedMemory = selectedMemory,
+            selection = selection,
             onDismissRequest = {
-                //coupleMemoryList = generateCoupleMemory()
-                coupleMemoryList.find{ it.date == selectedMemory!!.date }?.comment = editedcomment
+                if(existingMemory != null) {coupleMemoryList.find{ it.date == selection.date }?.comment = editedcomment}
+                else {
+                    if ( editedcomment != ""){
+                        val newMemory = CoupleMemory(date = selection.date, comment = editedcomment)
+                        coupleMemoryList = coupleMemoryList.toMutableList().apply{add(newMemory)}
+                    }
+                }
                 isPopupVisible = false// Update coupleMemoryList when dialog is dismissed
             }, //onDismissRequest,
             properties = DialogProperties(dismissOnBackPress = true, dismissOnClickOutside = true)
@@ -230,15 +235,6 @@ LaunchedEffect(Unit) {
  */
 
 
-
-data class CoupleMemory(val date: LocalDate, var comment: String)
-
-fun generateCoupleMemory(): List<CoupleMemory> = buildList {
-    val currentDate = LocalDate.now()
-    add(CoupleMemory(LocalDate.parse("2023-03-24"), "good"))
-    add(CoupleMemory(currentDate.minusDays(10), "bad"))
-    add(CoupleMemory(currentDate.minusYears(1),"What??"))
-}
 
 @Preview(showSystemUi = true)
 @Composable
