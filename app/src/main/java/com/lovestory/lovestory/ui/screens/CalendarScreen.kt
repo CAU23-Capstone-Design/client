@@ -66,7 +66,7 @@ fun CalendarScreen(navHostController: NavHostController) {
     val visibleMonth = rememberFirstCompletelyVisibleMonth(state)
 
     var coupleMemoryList by remember { mutableStateOf(generateCoupleMemory()) }
-    var selectedMemory = coupleMemoryList.find{it.date == selection.date}
+    //var selectedMemory = coupleMemoryList.find{it.date == selection.date}
 
     coupleMemoryList.forEach{coupleMemory -> Log.d("업뎃","$coupleMemory") }
     //Log.d("셀렉트 메모리","$selectedMemory")
@@ -119,7 +119,8 @@ fun CalendarScreen(navHostController: NavHostController) {
 
     //Log.d("tag","$selection") //CalendarDay(date=2023-03-08, position=MonthDate)
     //Log.d("tag","$selectedMemory")
-    Log.d("popup","$isPopupVisible")
+    //Log.d("popup","$isPopupVisible")
+
     if (isPopupVisible){
         var editedcomment by remember { mutableStateOf("") }
         val existingMemory = coupleMemoryList.firstOrNull { it.date == selection.date }
