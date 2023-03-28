@@ -39,11 +39,13 @@ fun kakaoLogin(appKey: String, context: Context, navHostController: NavHostContr
                     if(accountError != null){
                         Log.e("KAKAO-AUTH-ACCOUNT", "Fail get KAKAO token : $accountError")
                     }else if(accountToken != null){
+                        Log.d("KAKAO-AUTH-APP", "success login with KAKAO account : $token")
                         sendKakaoTokenToServer(accountToken, context, navHostController)
                     }
                 }
 
             }else if(token != null){
+                Log.d("KAKAO-AUTH-APP", "Success login with KAKAO app : $token")
                 sendKakaoTokenToServer(token, context, navHostController)
             }
         }
@@ -54,6 +56,7 @@ fun kakaoLogin(appKey: String, context: Context, navHostController: NavHostContr
             if(error != null){
                 Log.e("KAKAO-AUTH-ACCOUNT", "Fail get KAKAO token : $error")
             }else if(token != null){
+                Log.d("KAKAO-AUTH-APP", "success login with KAKAO account : $token")
                 sendKakaoTokenToServer(token, context, navHostController)
             }
         }
@@ -64,6 +67,7 @@ fun sendKakaoTokenToServer(token: OAuthToken, context: Context, navHostControlle
     CoroutineScope(Dispatchers.Main).launch {
         val response = sendTokenForLogin(token.accessToken)
         if(response.isSuccessful){
+            Log.d("KAKAO-AUTH-sendKakaoTokenToServer", "sendToken Successful : ${response.body()}")
             response.body()?.token?.let {
                 checkLoginToken(context, it, navHostController)
             }
@@ -86,10 +90,12 @@ fun checkLoginToken(context : Context, token : String, navHostController: NavHos
     val data = Gson().fromJson(payloadJSON, LoginPayload::class.java)
 
     if(data.couple != null){
+        Log.d("Route to Main", "route to main : $data")
         navHostController.navigate(route = Graph.MAIN){
             navHostController.popBackStack()
         }
     }else{
+        Log.d("Route to CoupleSync", "route to coupleSync : $data")
         navHostController.navigate(route = AuthScreen.CoupleSync.route+"/${data.user.code}&${data.user.name}"){
             popUpTo(AuthScreen.Login.route)
         }
