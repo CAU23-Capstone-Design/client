@@ -58,8 +58,8 @@ fun CalendarScreen(navHostController: NavHostController) {
     val coroutineScope = rememberCoroutineScope()
     val visibleMonth = rememberFirstCompletelyVisibleMonth(state)
 
-    val coupleMemoryList = generateCoupleMemory()
-    //coupleMemoryList.forEach{coupleMemory -> Log.d("tag","${coupleMemory.date}") }
+    var coupleMemoryList = generateCoupleMemory()
+    //coupleMemoryList.forEach{coupleMemory -> Log.d("업뎃","${coupleMemory.comment}") }
     val selectedMemory = coupleMemoryList.find{it.date == selection.date}
 
     Column(
@@ -112,10 +112,24 @@ fun CalendarScreen(navHostController: NavHostController) {
     Log.d("tag","$selectedMemory")
 
     if (isPopupVisible) {
+        var editedComment = ""
+        if (selectedMemory != null){
+            editedComment = selectedMemory.comment
+        }
         CalendarDialog(
+            selectedMemory = selectedMemory,
+            coupleMemoryList = coupleMemoryList,
+            editedComment = editedComment,
+            onCommentChanged = { editedComment = it },
+            onMemoryUpdated = { updatedMemory ->
+               coupleMemoryList = coupleMemoryList.map {
+                    if (it.date == updatedMemory.date) updatedMemory else it
+                }
+            },
             onDismissRequest = onDismissRequest,
             properties = DialogProperties(dismissOnBackPress = true, dismissOnClickOutside = true)
         ) {
+            
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
@@ -130,47 +144,29 @@ fun CalendarScreen(navHostController: NavHostController) {
                     verticalArrangement = Arrangement.Center
                 ) {
                     Spacer(modifier = Modifier.height(20.dp))
+                    if (editedComment != ""){
+                        //var editedComment by remember{ mutableStateOf(selectedMemory.comment) }
+                        EditableTextField(initialValue = editedComment){
+                            editedComment = it
+                        }
+                        Text(text = editedComment)
+                        Log.d("업뎃", "$editedComment")
+                        //coupleMemoryList.forEach{coupleMemory -> Log.d("업뎃","${selectedMemory.comment}") }
+                    }
+                    else {
+                        Text(text = "This is a pop-up window...")
+                    }
 
-                if (selectedMemory != null){
-                    var editedComment by remember { mutableStateOf(selectedMemory.comment) }
-                    EditableTextField(initialValue = editedComment){
-                        editedComment = it
-                    }
-                    Text(text = editedComment)
-                }
-                else {
-                    Text(text = "This is a pop-up window...")
-                }
                     Spacer(modifier = Modifier.height(20.dp))
-                    /*val singapore = LatLng(1.35, 103.87)
-                    val cameraPositionState = rememberCameraPositionState {
-                        position = CameraPosition.fromLatLngZoom(singapore, 10f)
-                    }
-                    GoogleMap(
+                    Spacer(modifier = Modifier.height(20.dp))
+                    Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(start = 20.dp, end = 20.dp)
-                            .height(150.dp)
-                            .clip(RoundedCornerShape(12.dp)),
-                        cameraPositionState = cameraPositionState
-                    ){
-                        Marker(
-                            state = MarkerState(position = singapore),
-                            title = "Singapore",
-                            snippet = "Marker in Singapore"
-                        )
-                    }
-
-                     */
-                Spacer(modifier = Modifier.height(20.dp))
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 20.dp, end = 20.dp)
-                        .height(300.dp)
-                        .background(color = Color.Gray, RoundedCornerShape(12.dp))
-                )
-                Spacer(modifier = Modifier.height(20.dp))
+                            .height(300.dp)
+                            .background(color = Color.Gray, RoundedCornerShape(12.dp))
+                    )
+                    Spacer(modifier = Modifier.height(20.dp))
             }
         }
     }
@@ -222,13 +218,13 @@ LaunchedEffect(Unit) {
 
 
 
-data class couple_memory(val date: LocalDate, val comment: String)
+data class CoupleMemory(val date: LocalDate, val comment: String)
 
-fun generateCoupleMemory(): List<couple_memory> = buildList {
+fun generateCoupleMemory(): List<CoupleMemory> = buildList {
     val currentDate = LocalDate.now()
-    add(couple_memory(LocalDate.parse("2023-03-24"), "good"))
-    add(couple_memory(currentDate.minusDays(10), "bad"))
-    add(couple_memory(currentDate.minusYears(1),"What??"))
+    add(CoupleMemory(LocalDate.parse("2023-03-24"), "good"))
+    add(CoupleMemory(currentDate.minusDays(10), "bad"))
+    add(CoupleMemory(currentDate.minusYears(1),"What??"))
 }
 
 @Preview(showSystemUi = true)

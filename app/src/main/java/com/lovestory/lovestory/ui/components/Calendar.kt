@@ -28,7 +28,7 @@ import com.kizitonwose.calendar.core.CalendarDay
 import com.kizitonwose.calendar.core.CalendarMonth
 import com.kizitonwose.calendar.core.DayPosition
 import com.lovestory.lovestory.R
-import com.lovestory.lovestory.ui.screens.couple_memory
+import com.lovestory.lovestory.ui.screens.CoupleMemory
 import kotlinx.coroutines.flow.filterNotNull
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -41,7 +41,7 @@ import java.util.*
 fun Day(
     day: CalendarDay,
     isSelected: Boolean = false,
-    coupleMemoryList: List<couple_memory>,
+    coupleMemoryList: List<CoupleMemory>,
     onOpenDialogRequest : () -> Unit,
     onClick: (CalendarDay) -> Unit = {},
 ){
@@ -64,9 +64,13 @@ fun Day(
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             val textColor = when (day.position) {
                 DayPosition.MonthDate -> coupleMemoryList.firstOrNull { it.date == day.date }?.let {
-                    colorResource(R.color.black)//R.color.ls_pink)
+                    colorResource(R.color.black)//R.color.ls_pink) // 공휴일 색 넣는 로직 넣을 예정
                 } ?: Color.Black // 공휴일 색 바꾸는 로직 필요
                 DayPosition.InDate, DayPosition.OutDate -> Color.White // 해당 월에 속하지 않은 날들의 숫자 색
+            }
+            val circleColor = when (day.position){
+                DayPosition.MonthDate -> colorResource(R.color.ls_pink)
+                DayPosition.InDate, DayPosition.OutDate -> Color.Transparent
             }
             Text(
                 modifier = Modifier
@@ -81,7 +85,7 @@ fun Day(
             coupleMemoryList.firstOrNull { it.date == day.date }?.let{
                 Box(modifier = Modifier
                     .size(8.dp)
-                    .background(colorResource(R.color.ls_pink), CircleShape),
+                    .background(color = circleColor, CircleShape), //colorResource(R.color.ls_pink)
                     contentAlignment = Alignment.Center){
                 }
             }

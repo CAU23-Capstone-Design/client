@@ -27,7 +27,7 @@ class MainActivity : ComponentActivity() {
             val navController = rememberNavController()
             val systemUiController = rememberSystemUiController()
             val useDarkIcons = MaterialTheme.colors.isLight
-            /*
+
             SideEffect {
                 systemUiController.setSystemBarsColor(
                     color = Color.White,
@@ -44,8 +44,8 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-             */
-            CalendarScreen(navHostController = navController)
+
+            //CalendarScreen(navHostController = navController)
         }
     }
 }

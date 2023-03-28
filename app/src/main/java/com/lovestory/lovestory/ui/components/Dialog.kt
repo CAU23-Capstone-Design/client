@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavHostController
+import com.lovestory.lovestory.ui.screens.CoupleMemory
 import com.maxkeppeker.sheets.core.models.base.SheetState
 import java.time.LocalDate
 
@@ -33,6 +34,11 @@ fun InputMeetDayDialog(
 
 @Composable
 fun CalendarDialog(
+    selectedMemory: CoupleMemory?, // pass selected couple memory object
+    coupleMemoryList: List<CoupleMemory>,
+    onMemoryUpdated: (CoupleMemory) -> Unit,
+    onCommentChanged: (String) -> Unit,
+    editedComment: String,
     onDismissRequest : ()-> Unit,
     properties: DialogProperties = DialogProperties(),
     content : @Composable () -> Unit
@@ -42,6 +48,9 @@ fun CalendarDialog(
         properties = properties,
     ) {
         content()
+        if (selectedMemory != null) {
+            onMemoryUpdated(selectedMemory.copy(comment = editedComment))
+        }
     }
 }
 
