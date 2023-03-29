@@ -13,6 +13,7 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
+// 목욜에 할 것들
 suspend fun getComment(token : String, code : String?, meetDay : String?):Response<LoginResponse>{
     val jwt : String = "Bearer $token"
     val couple = CoupleInfo(code = code, firstDate = meetDay)

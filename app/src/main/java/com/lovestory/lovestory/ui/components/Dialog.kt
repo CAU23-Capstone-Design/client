@@ -42,13 +42,19 @@ fun CalendarDialog(
     //editedComment: String,
     onDismissRequest : ()-> Unit,
     properties: DialogProperties = DialogProperties(),
-    content : @Composable () -> Unit
+    content : @Composable () -> Unit,
 ){
     Dialog(
         onDismissRequest = onDismissRequest,
         properties = properties,
     ) {
-        content()
+        Box(
+            modifier = Modifier
+                .background(Color.Transparent)
+        ) {
+            content()
+        }
+        //content()
         //if (selectedMemory != null) {
         //    onMemoryUpdated(selectedMemory.copy(comment = editedComment))
     //  }

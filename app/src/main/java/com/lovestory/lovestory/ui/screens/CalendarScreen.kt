@@ -6,10 +6,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.material.TextField
+import androidx.compose.foundation.text.ClickableText
+import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,6 +40,8 @@ import com.lovestory.lovestory.ui.theme.LoveStoryTheme
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.YearMonth
+import java.time.format.TextStyle
+import java.util.*
 
 @Composable
 fun CalendarScreen(navHostController: NavHostController) {
@@ -122,6 +124,8 @@ fun CalendarScreen(navHostController: NavHostController) {
     //Log.d("popup","$isPopupVisible")
 
     if (isPopupVisible){
+        //getComment
+
         var editedcomment by remember { mutableStateOf("") }
         val existingMemory = coupleMemoryList.firstOrNull { it.date == selection.date }
         if (existingMemory != null) {
@@ -131,11 +135,14 @@ fun CalendarScreen(navHostController: NavHostController) {
         CalendarDialog(
             selection = selection,
             onDismissRequest = {
-                if(existingMemory != null) {coupleMemoryList.find{ it.date == selection.date }?.comment = editedcomment}
-                else {
+                if(existingMemory != null) {
+                    coupleMemoryList.find{ it.date == selection.date }?.comment = editedcomment
+                    //sendComment
+                } else {
                     if ( editedcomment != ""){
                         val newMemory = CoupleMemory(date = selection.date, comment = editedcomment)
                         coupleMemoryList = coupleMemoryList.toMutableList().apply{add(newMemory)}
+
                     }
                 }
                 isPopupVisible = false// Update coupleMemoryList when dialog is dismissed
@@ -156,26 +163,78 @@ fun CalendarScreen(navHostController: NavHostController) {
             ) {
 
              */
-                Box(
-                    modifier = Modifier.wrapContentSize(),//.clickable(onClick = {onDismissRequest}),
-                    contentAlignment = Alignment.Center
-                ) {
+                //Box(
+                //    modifier = Modifier.wrapContentSize(),//.clickable(onClick = {onDismissRequest}),
+                //    contentAlignment = Alignment.Center
+                //) {
                     Column(
                         modifier = Modifier
                             .width(360.dp)
                             .wrapContentHeight()
                             .clip(RoundedCornerShape(12.dp))
                             .background(color = Color.White),
+                        verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
                     ) {
-                        Spacer(modifier = Modifier.height(20.dp))
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .wrapContentHeight()
+                                .background(color = Color.Transparent)
+                                .padding(start = 25.dp, end = 25.dp, top = 15.dp, bottom = 10.dp),//vertical = 15.dp, horizontal = 25.dp),
+                            verticalAlignment = Alignment.Bottom
+                            //horizontalArrangement = Arrangement.SpaceBetween,
+                            //verticalAlignment = Alignment.CenterVertically
+                        ){
+                            Text(
+                                text = selection.date.dayOfMonth.toString(),
+                                fontSize = 26.sp,
+                                color = Color.Black,
+                                fontWeight = FontWeight.ExtraBold,
+                            )
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Text(
+                                modifier = Modifier.padding(bottom = 3.dp).weight(1f),
+                                text = selection.date.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault())+"요일",
+                                fontSize = 16.sp,
+                                color = Color.Black,
+                            )
+                            //Spacer(Modifier.weight(1f))
+                            Button(
+                                colors = ButtonDefaults.buttonColors(backgroundColor = Color.Transparent),
+                                onClick = {
+                                    if(existingMemory != null) {
+                                        coupleMemoryList.find{ it.date == selection.date }?.comment = editedcomment
+                                        //sendComment
+                                    } else {
+                                        if ( editedcomment != ""){
+                                            val newMemory = CoupleMemory(date = selection.date, comment = editedcomment)
+                                            coupleMemoryList = coupleMemoryList.toMutableList().apply{add(newMemory)}
+
+                                        }
+                                    }
+                                    isPopupVisible = false
+                                },
+                                elevation = null,
+                                contentPadding = PaddingValues(0.dp),
+                                modifier = Modifier.width(30.dp).height(30.dp).padding(bottom = 5.dp),//wrapContentSize(),
+                                shape = CircleShape,
+                            ){
+                                Text(
+                                    text = "X",
+                                    fontSize = 22.sp,
+                                    color = Color.Black,
+                                    fontWeight = FontWeight.ExtraBold
+                                )
+                            }
+                        }
+                        Divider(color = Color.Black, thickness = 1.dp, modifier = Modifier.padding(start = 15.dp, end = 15.dp))
+                        Spacer(modifier = Modifier.height(15.dp))
                         EditableTextField(
                             initialValue = editedcomment,
                             onValueChanged = {editedcomment = it}
                         )
-                        Text(text = "Current value: $editedcomment")
-                        Spacer(modifier = Modifier.height(20.dp))
+                        //Text(text = "Current value: $editedcomment")
                         Spacer(modifier = Modifier.height(20.dp))
                         Box(
                             modifier = Modifier
@@ -187,7 +246,7 @@ fun CalendarScreen(navHostController: NavHostController) {
                         Spacer(modifier = Modifier.height(20.dp))
                     }
                 }
-            }
+            //}
         //}
     }
 }
