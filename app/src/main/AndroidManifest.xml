@@ -44,13 +44,11 @@
                     android:scheme="kakaoe2d337c73844599d05e5e1b56e5cbed9" />
             </intent-filter>
         </activity>
-
-<!--        <service-->
-<!--            android:name=".services.LocationUpdatesService"-->
-<!--            android:foregroundServiceType="location"
-android:enabled="true"-->
-<!--            android:exported="false"-->
-<!--             />-->
+        <service
+            android:name=".services.LocationService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="location" />
     </application>
 
 </manifest>

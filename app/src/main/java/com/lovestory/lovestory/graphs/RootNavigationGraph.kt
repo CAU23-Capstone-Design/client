@@ -1,8 +1,12 @@
 package com.lovestory.lovestory.graphs
 
+import android.content.Intent
+import android.os.Build
 import android.util.Log
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -11,6 +15,7 @@ import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.lovestory.lovestory.model.LoginPayload
 import com.lovestory.lovestory.module.getToken
+import com.lovestory.lovestory.services.LocationService
 import com.lovestory.lovestory.ui.screens.MainScreen
 import java.util.*
 
