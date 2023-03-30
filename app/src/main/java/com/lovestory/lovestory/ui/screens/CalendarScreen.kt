@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -34,10 +35,13 @@ import com.kizitonwose.calendar.compose.rememberCalendarState
 import com.kizitonwose.calendar.core.*
 import com.lovestory.lovestory.model.CoupleMemory
 import com.lovestory.lovestory.model.generateCoupleMemory
+import com.lovestory.lovestory.module.getToken
+import com.lovestory.lovestory.network.getComment
 import com.lovestory.lovestory.resource.vitro
 import com.lovestory.lovestory.ui.components.*
 import com.lovestory.lovestory.ui.theme.LoveStoryTheme
 import kotlinx.coroutines.launch
+import retrofit2.Response
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.TextStyle
@@ -68,9 +72,24 @@ fun CalendarScreen(navHostController: NavHostController) {
     val visibleMonth = rememberFirstCompletelyVisibleMonth(state)
 
     var coupleMemoryList by remember { mutableStateOf(generateCoupleMemory()) }
-    //var selectedMemory = coupleMemoryList.find{it.date == selection.date}
+    //var selectedMemory = coupleMemoryList.find{it.date
+    //
+    // == selection.date}
 
-    coupleMemoryList.forEach{coupleMemory -> Log.d("업뎃","$coupleMemory") }
+    val context = LocalContext.current
+    val token = getToken(context)
+    Log.d("토큰","$token")
+    LaunchedEffect(isPopupVisible){
+        if(isPopupVisible){
+            if(token != null) {
+                val any: Response<Any> = getComment(token)
+                Log.d("코멘트", "${any.body()}")
+            }
+        }
+    }
+    //var comment = getComment(token)
+
+    //coupleMemoryList.forEach{coupleMemory -> Log.d("업뎃","$coupleMemory") }
     //Log.d("셀렉트 메모리","$selectedMemory")
 
     Column(
