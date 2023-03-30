@@ -24,6 +24,7 @@ import android.content.Context
 import android.os.Build
 import com.google.android.gms.location.*
 import com.lovestory.lovestory.R
+import com.lovestory.lovestory.module.checkNearby
 import com.lovestory.lovestory.module.getToken
 import com.lovestory.lovestory.module.saveLocation
 import com.lovestory.lovestory.network.sendLocationToServer
@@ -74,6 +75,7 @@ class LocationService : Service() {
                         val token = getToken(context)
                         saveLocation(token, location.latitude, location.longitude)
                         Log.d("LOCATION-SERVICE", "current location : latitude ${location.latitude}, longitude : ${location.longitude}")
+                        checkNearby(token)
                     }
                 }
             }

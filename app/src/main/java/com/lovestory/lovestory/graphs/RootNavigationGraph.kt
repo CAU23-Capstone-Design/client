@@ -28,6 +28,7 @@ fun RootNavigationGraph(){
     val token = getToken(context)
 
     if(token != null){
+        Log.d("RootNavigationGraph", "$token")
         val chunks: List<String> = token.split(".")
         val decoder: Base64.Decoder = Base64.getUrlDecoder()
         val payload = String(decoder.decode(chunks[1]))
