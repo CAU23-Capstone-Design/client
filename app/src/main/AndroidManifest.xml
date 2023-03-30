@@ -49,6 +49,11 @@
             android:enabled="true"
             android:exported="false"
             android:foregroundServiceType="location" />
+<!--        <service-->
+<!--            android:name=".services.PhotoService"-->
+<!--            android:enabled="true"-->
+<!--            android:exported="false"-->
+<!--            android:foregroundServiceType="mediaProjection" />-->
     </application>
 
 </manifest>

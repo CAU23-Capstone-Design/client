@@ -10,6 +10,20 @@ data class LocationInfo(
     val longitude : Double,
 )
 
+data class LocationResponse(
+    @SerializedName("user_id")
+    val user_id : String,
+
+    @SerializedName("latitude")
+    val latitude : Double,
+
+    @SerializedName("longitude")
+    val longitude : Double,
+
+    @SerializedName("timestamp")
+    val timestamp : String
+)
+
 data class NearbyResponse(
     @SerializedName("isNearby")
     val isNearby : Boolean,

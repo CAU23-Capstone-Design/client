@@ -7,6 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 fun checkNearby(token : String?){
+    Log.d("Check by", "$token")
     CoroutineScope(Dispatchers.Main).launch {
         val response = getNearbyCoupleFromServer(token)
         if(response.isSuccessful){

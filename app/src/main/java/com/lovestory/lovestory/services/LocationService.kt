@@ -41,8 +41,8 @@ class LocationService : Service() {
         createNotificationChannel()
 
         val notification: Notification = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("앱이 실행 중입니다")
-            .setContentText("앱이 백그라운드에서 실행 중입니다.")
+            .setContentTitle("LoveStory 위치 서비스")
+            .setContentText("위치 서비스가 실행중입니다.")
             .setSmallIcon(R.drawable.lovestory_logo)
             .build()
 
@@ -74,8 +74,9 @@ class LocationService : Service() {
                         location.longitude
                         val token = getToken(context)
                         saveLocation(token, location.latitude, location.longitude)
-                        Log.d("LOCATION-SERVICE", "current location : latitude ${location.latitude}, longitude : ${location.longitude}")
                         checkNearby(token)
+                        Log.d("LOCATION-SERVICE", "current location : latitude ${location.latitude}, longitude : ${location.longitude}")
+//                        checkNearby(token)
                     }
                 }
             }

@@ -3,6 +3,7 @@ package com.lovestory.lovestory.network
 import android.util.Log
 import com.lovestory.lovestory.api.LocationApiService
 import com.lovestory.lovestory.model.LocationInfo
+import com.lovestory.lovestory.model.LocationResponse
 import com.lovestory.lovestory.model.LoginResponse
 import com.lovestory.lovestory.model.NearbyResponse
 import okhttp3.ResponseBody
@@ -12,7 +13,7 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-fun sendLocationToServer(token : String?, latitude: Double, longitude: Double):Response<Call<Void>> {
+suspend fun sendLocationToServer(token : String?, latitude: Double, longitude: Double): Response<LocationResponse> {
     val jwt : String = "Bearer $token"
     val retrofit = Retrofit.Builder()
         .baseUrl("http://3.34.189.103:3000")
@@ -20,24 +21,26 @@ fun sendLocationToServer(token : String?, latitude: Double, longitude: Double):R
         .build()
 
     val apiService = retrofit.create(LocationApiService::class.java)
+    Log.d("sendLocationToServer", "$token, $longitude, $latitude")
 
     val locationData = LocationInfo(latitude =  latitude, longitude = longitude)
 //    val call = apiService.sendLocation(jwt, locationData)
 
-    try{
+    return try{
         val call = apiService.sendLocation(jwt, locationData)
-        return Response.success(call)
+        Response.success(call)
     }catch (e : HttpException){
         Log.e("loaction api error", "$e")
-        return Response.error(e.code(), e.response()?.errorBody())
+        Response.error(e.code(), e.response()?.errorBody())
     }catch (e : Exception){
         Log.e("location api error2", "$e")
-        return Response.error(500, ResponseBody.create(null, "Unknown error"))
+        Response.error(500, ResponseBody.create(null, "Unknown error"))
     }
 }
 
-fun getNearbyCoupleFromServer(token: String?):Response<NearbyResponse>{
-    val jwt : String = "Bearer $token"
+suspend fun getNearbyCoupleFromServer(token: String?):Response<NearbyResponse> {
+    Log.d("Check by apiapi", "$token")
+    val jwt: String = "Bearer $token"
     val retrofit = Retrofit.Builder()
         .baseUrl("http://3.34.189.103:3000")
         .addConverterFactory(GsonConverterFactory.create())
@@ -45,28 +48,14 @@ fun getNearbyCoupleFromServer(token: String?):Response<NearbyResponse>{
 
     val apiService = retrofit.create(LocationApiService::class.java)
 
-    try{
-        val call = apiService.checkNearbyCouple(token)
-        return Response.success(call)
-    }catch (e : HttpException){
+    return try {
+        val call = apiService.checkNearbyCouple(jwt)
+        Response.success(call)
+    } catch (e: HttpException) {
         Log.e("check nearby api error", "$e")
-        return Response.error(e.code(), e.response()?.errorBody())
-    }catch (e : Exception){
+        Response.error(e.code(), e.response()?.errorBody())
+    } catch (e: Exception) {
         Log.e("check nearby api error2", "$e")
-        return Response.error(500, ResponseBody.create(null, "Unknown error"))
+        Response.error(500, ResponseBody.create(null, "Unknown error"))
     }
 }
-
-//    call.enqueue(object : retrofit2.Callback<Void> {
-//        override fun onResponse(call: Call<Void>, response: Response<Void>) {
-//            if (response.isSuccessful) {
-//                Log.d("LocationService", "Location data sent successfully.")
-//            } else {
-//                Log.e("LocationService", "Failed to send location data. Status code: ${response.code()}")
-//            }
-//        }
-//
-//        override fun onFailure(call: Call<Void>, t: Throwable) {
-//            Log.e("LocationService", "Error sending location data: ${t.message}")
-//        }
-//    })
