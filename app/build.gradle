@@ -104,13 +104,6 @@ dependencies {
     // life cycle
     implementation "androidx.lifecycle:lifecycle-viewmodel-compose:2.5.1"
 
-    // jwt
-//    implementation 'com.auth0.android:jwtdecode:2.0.0'
-//
-//    implementation 'io.jsonwebtoken:jjwt-api:0.11.2'
-//    implementation 'io.jsonwebtoken:jjwt-impl:0.11.2'
-//    implementation 'io.jsonwebtoken:jjwt-jackson:0.11.2'
-
     // shared preference
     implementation 'androidx.preference:preference-ktx:1.1.1'
 
@@ -128,4 +121,7 @@ dependencies {
     implementation "androidx.room:room-runtime:$room_version"
     annotationProcessor "androidx.room:room-compiler:$room_version"
     ksp 'androidx.room:room-compiler:2.5.0'
+
+    // Coil
+    implementation "io.coil-kt:coil-compose:2.2.0"
 }

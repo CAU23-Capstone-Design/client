@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.lovestory.lovestory.resource.vitro
+import com.lovestory.lovestory.ui.components.DisplayImageFromUri
 
 @Composable
 fun GalleryScreen(navHostController: NavHostController) {
@@ -30,6 +31,9 @@ fun GalleryScreen(navHostController: NavHostController) {
             fontSize = 30.sp,
             fontFamily = vitro,
             fontWeight = FontWeight.Normal)
+        DisplayImageFromUri(imageUri = "content://media/external/images/media/1000000152")
+        DisplayImageFromUri(imageUri = "content://media/external/images/media/1000000151")
+        DisplayImageFromUri(imageUri = "content://media/external/images/media/1000000150")
 
 
     }

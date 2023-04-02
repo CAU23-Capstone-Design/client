@@ -5,12 +5,10 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
+import android.content.*
 import android.content.pm.PackageManager
 import android.database.ContentObserver
+import android.media.ExifInterface
 import android.net.Uri
 import android.os.*
 import android.provider.MediaStore
@@ -28,6 +26,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.lovestory.lovestory.R
 import com.lovestory.lovestory.broadcasts.LocationToPhoto.ACTION_START_PHOTO_PICKER_SERVICE
 import com.lovestory.lovestory.broadcasts.LocationToPhoto.ACTION_STOP_PHOTO_PICKER_SERVICE
+import java.io.IOException
 
 class PhotoService : Service(){
     private lateinit var contentObserver: ContentObserver
@@ -110,6 +109,8 @@ class PhotoService : Service(){
                     return
                 }else{
                     Log.d("CONTENT-Observer", "$uri")
+                    val filepath = getImageFilePath(contentResolver, uri)
+                    Log.d("COTENT-Observer-Uri-path", "$filepath")
                     processedUris.add(uriString)
                 }
             }
@@ -123,10 +124,19 @@ class PhotoService : Service(){
     }
 }
 
+fun getPhotoInfo(context: Context, uri: Uri){
+    val projection = arrayOf(
+        MediaStore.Images.Media.DISPLAY_NAME,
+        MediaStore.Images.Media.DOCUMENT_ID ,
+//        MediaStore.Images.Media. ,
+    )
+}
+
 @Composable
 fun getExternalStoragePermission(){
     val context = LocalContext.current
-    val permission = Manifest.permission.READ_EXTERNAL_STORAGE
+//    val permission = Manifest.permission.READ_EXTERNAL_STORAGE
+    val permission = Manifest.permission.READ_MEDIA_IMAGES
     val permissionResult =  ContextCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED
 
     val externalStoragePermissionRequest = rememberLauncherForActivityResult(
@@ -145,4 +155,38 @@ fun getExternalStoragePermission(){
             externalStoragePermissionRequest.launch(permission)
         }
     }
+}
+
+fun getImageFilePath(contentResolver: ContentResolver, imageUri: Uri): String? {
+    val projection = arrayOf(MediaStore.Images.Media.DATA)
+    val cursor = contentResolver.query(imageUri, projection, null, null, null)
+    var filePath: String? = null
+
+    cursor?.use {
+        if (it.moveToFirst()) {
+            val columnIndex = it.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
+            filePath = it.getString(columnIndex)
+        }
+    }
+
+    return filePath
+}
+
+fun getPhotoLocation(filePath: String): Pair<Double?, Double?> {
+    var latitude: Double? = null
+    var longitude: Double? = null
+
+    try {
+        val exifInterface = ExifInterface(filePath)
+
+        val latLong = FloatArray(2)
+        if (exifInterface.getLatLong(latLong)) {
+            latitude = latLong[0].toDouble()
+            longitude = latLong[1].toDouble()
+        }
+    } catch (e: IOException) {
+        Log.e("Photo Location", "Error reading Exif data", e)
+    }
+
+    return Pair(latitude, longitude)
 }
