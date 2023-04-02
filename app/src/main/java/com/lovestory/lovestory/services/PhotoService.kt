@@ -12,10 +12,7 @@ import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.database.ContentObserver
 import android.net.Uri
-import android.os.Build
-import android.os.Handler
-import android.os.IBinder
-import android.os.Looper
+import android.os.*
 import android.provider.MediaStore
 import android.util.Log
 import android.widget.Toast
@@ -34,6 +31,9 @@ import com.lovestory.lovestory.broadcasts.LocationToPhoto.ACTION_STOP_PHOTO_PICK
 
 class PhotoService : Service(){
     private lateinit var contentObserver: ContentObserver
+    private lateinit var backgroundHandler: Handler
+    private lateinit var handlerThread: HandlerThread
+
     override fun onBind(intent: Intent?): IBinder? {
         return null
     }
@@ -54,12 +54,13 @@ class PhotoService : Service(){
 
                 startForeground(NOTIFICATION_ID, notification)
                 Log.d("Photo-service", "포토 서비스 시작")
-                // Start photo picking process
+                registerContentObserver()
             }
             ACTION_STOP_PHOTO_PICKER_SERVICE -> {
                 Log.d("Photo-service", "포토 서비스 중지")
+                contentResolver.unregisterContentObserver(contentObserver)
                 stopForeground(true)
-                // Stop photo picking process
+                stopSelf()
             }
         }
         return START_NOT_STICKY
@@ -67,8 +68,15 @@ class PhotoService : Service(){
 
     override fun onCreate() {
         super.onCreate()
-        Log.d("Photo-service", "포토 서비스 생상")
+        Log.d("Photo-service", "포토 서비스 생성")
         createNotificationChannel()
+    }
+
+    override fun onDestroy() {
+        Log.d("Photo-service", "포토 서비스 삭제")
+        contentResolver.unregisterContentObserver(contentObserver)
+        handlerThread.quitSafely()
+        super.onDestroy()
     }
 
     private fun createNotificationChannel() {
@@ -85,56 +93,25 @@ class PhotoService : Service(){
         private const val NOTIFICATION_ID = 2
     }
 
+    private fun registerContentObserver() {
+        handlerThread = HandlerThread("PhotoServiceBackground")
+        handlerThread.start()
+        backgroundHandler = Handler(handlerThread.looper)
 
+        contentObserver = object : ContentObserver(backgroundHandler) {
+            override fun onChange(selfChange: Boolean, uri: Uri?) {
 
-//    private val broadcastReceiver = object : BroadcastReceiver() {
-//        override fun onReceive(context: Context, intent: Intent) {
-//            when (intent.action) {
-//                "photo_picker_service_start" -> {
-//                    Log.d("Photo service", "사진 픽커 서비스가 시작")
-//
-//                }
-//                "photo_picker_service_stop" -> {
-//                    Log.d("Photo service", "사진 픽커 서비스가 종료")
-//                }
-//            }
-//        }
-//    }
+                super.onChange(selfChange, uri)
+                Log.d("CONTENT-Observer","$uri")
+            }
+        }
 
-//    private fun registerContentObserver() {
-//        contentObserver = object : ContentObserver(Handler(Looper.getMainLooper())) {
-//            override fun onChange(selfChange: Boolean, uri: Uri?) {
-//                super.onChange(selfChange, uri)
-////                onNewPhotoAdded()
-//            }
-//        }
-//
-//        contentResolver.registerContentObserver(
-//            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-//            true,
-//            contentObserver
-//        )
-//    }
-
-//    override fun onCreate() {
-//        super.onCreate()
-//        // BroadcastReceiver 등록
-//        LocalBroadcastManager.getInstance(this).registerReceiver(
-//            broadcastReceiver,
-//            IntentFilter().apply {
-//                addAction("photo_picker_service_start")
-//                addAction("photo_picker_service_stop")
-//            }
-//        )
-//
-//        registerContentObserver()
-//    }
-//
-//    override fun onDestroy() {
-//        // BroadcastReceiver 등록 해제
-//        LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver)
-//        super.onDestroy()
-//    }
+        contentResolver.registerContentObserver(
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+            true,
+            contentObserver
+        )
+    }
 }
 
 @Composable

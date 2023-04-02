@@ -5,8 +5,6 @@ import android.app.Service
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
-import android.os.IBinder
-import android.os.Looper
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -21,7 +19,7 @@ import androidx.core.app.NotificationCompat
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
-import android.os.Build
+import android.os.*
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.android.gms.location.*
 import com.lovestory.lovestory.R
@@ -38,6 +36,11 @@ import kotlinx.coroutines.launch
 
 class LocationService : Service() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private lateinit var backgroundHandler: Handler
+    private lateinit var handlerThread: HandlerThread
+
+    private var isPhotoServiceRunning = false
+
     override fun onBind(intent: Intent): IBinder? {
         return null
     }
@@ -81,7 +84,7 @@ class LocationService : Service() {
                         location.longitude
                         val token = getToken(context)
                         saveLocation(token, location.latitude, location.longitude)
-                        CoroutineScope(Dispatchers.Main).launch{
+                        CoroutineScope(Dispatchers.IO).launch{
                             val response = getNearbyCoupleFromServer(token)
                             if(response.isSuccessful){
                                 Log.d("check nearby Location", "${response.body()}")
@@ -111,10 +114,14 @@ class LocationService : Service() {
                     }
                 }
             }
+            handlerThread = HandlerThread("LocationServiceBackground")
+            handlerThread.start()
+            backgroundHandler = Handler(handlerThread.looper)
+
             fusedLocationClient.requestLocationUpdates(
                 locationRequest,
                 locationCallbackForMyApp,
-                Looper.getMainLooper()
+                backgroundHandler.looper
             )
         }else{
 //            getLocationPermission()
@@ -122,15 +129,29 @@ class LocationService : Service() {
         return START_STICKY
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        handlerThread.quitSafely()
+    }
+
     private fun sendBroadcastToSecondService(action: String) {
 //        val intent = Intent(action)
 //        LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
         val intent = Intent(this, PhotoService::class.java)
         intent.action = action
-        if (action == ACTION_START_PHOTO_PICKER_SERVICE) {
-            startForegroundService(intent)
-        } else {
-            stopService(intent)
+        when (intent.action) {
+            ACTION_START_PHOTO_PICKER_SERVICE -> {
+                if (!isPhotoServiceRunning) {
+                    isPhotoServiceRunning = true
+                    startForegroundService(intent)
+                }
+            }
+            ACTION_STOP_PHOTO_PICKER_SERVICE -> {
+                if (isPhotoServiceRunning) {
+                    isPhotoServiceRunning = false
+                    stopService(intent)
+                }
+            }
         }
     }
 
