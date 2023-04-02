@@ -7,6 +7,7 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
 
     <application
         android:allowBackup="true"
@@ -49,11 +50,10 @@
             android:enabled="true"
             android:exported="false"
             android:foregroundServiceType="location" />
-<!--        <service-->
-<!--            android:name=".services.PhotoService"-->
-<!--            android:enabled="true"-->
-<!--            android:exported="false"-->
-<!--            android:foregroundServiceType="mediaProjection" />-->
+        <service
+            android:name=".services.PhotoService"
+            android:enabled="true"
+            android:exported="false"/>
     </application>
 
 </manifest>

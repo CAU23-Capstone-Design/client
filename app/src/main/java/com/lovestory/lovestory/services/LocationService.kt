@@ -22,12 +22,19 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.android.gms.location.*
 import com.lovestory.lovestory.R
+import com.lovestory.lovestory.broadcasts.LocationToPhoto.ACTION_START_PHOTO_PICKER_SERVICE
+import com.lovestory.lovestory.broadcasts.LocationToPhoto.ACTION_STOP_PHOTO_PICKER_SERVICE
 import com.lovestory.lovestory.module.checkNearby
 import com.lovestory.lovestory.module.getToken
 import com.lovestory.lovestory.module.saveLocation
+import com.lovestory.lovestory.network.getNearbyCoupleFromServer
 import com.lovestory.lovestory.network.sendLocationToServer
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class LocationService : Service() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
@@ -74,9 +81,33 @@ class LocationService : Service() {
                         location.longitude
                         val token = getToken(context)
                         saveLocation(token, location.latitude, location.longitude)
-                        checkNearby(token)
+                        CoroutineScope(Dispatchers.Main).launch{
+                            val response = getNearbyCoupleFromServer(token)
+                            if(response.isSuccessful){
+                                Log.d("check nearby Location", "${response.body()}")
+                                if(response.body()!!.isNearby){
+                                    Log.d("LOCATION-SERVICE", "포토 서비스 시작 호출")
+
+                                    sendBroadcastToSecondService(ACTION_START_PHOTO_PICKER_SERVICE)
+                                }
+                                else{
+                                    Log.d("LOCATION-SERVICE", "포토 서비스 종료 호출 ")
+                                    sendBroadcastToSecondService(ACTION_STOP_PHOTO_PICKER_SERVICE)
+                                }
+
+                            }else{
+                                Log.e("check nearby location error" , "${response.errorBody()}")
+                                Log.d("LOCATION-SERVICE", "포토 서비스 종료 호출 ")
+                                sendBroadcastToSecondService(ACTION_STOP_PHOTO_PICKER_SERVICE)
+                            }
+                        }
+//                        val result  = checkNearby(token)
                         Log.d("LOCATION-SERVICE", "current location : latitude ${location.latitude}, longitude : ${location.longitude}")
-//                        checkNearby(token)
+//                        if(result){
+//
+//                        }else{
+//
+//                        }
                     }
                 }
             }
@@ -85,8 +116,22 @@ class LocationService : Service() {
                 locationCallbackForMyApp,
                 Looper.getMainLooper()
             )
+        }else{
+//            getLocationPermission()
         }
         return START_STICKY
+    }
+
+    private fun sendBroadcastToSecondService(action: String) {
+//        val intent = Intent(action)
+//        LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
+        val intent = Intent(this, PhotoService::class.java)
+        intent.action = action
+        if (action == ACTION_START_PHOTO_PICKER_SERVICE) {
+            startForegroundService(intent)
+        } else {
+            stopService(intent)
+        }
     }
 
     private fun createNotificationChannel() {
@@ -133,110 +178,6 @@ fun getLocationPermission(){
         }
     }
 }
-
-
-@Composable
-fun GetDeviceLocation(onLocationReceived: (Location) -> Unit) {
-    val context = LocalContext.current
-    val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
-
-    val permission = arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
-    val permissionResult = ContextCompat.checkSelfPermission(context, permission[0]) != PackageManager.PERMISSION_GRANTED
-            && ContextCompat.checkSelfPermission(context, permission[1]) != PackageManager.PERMISSION_GRANTED
-
-    val locationPermissionRequest = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestMultiplePermissions()
-    ){permissions ->
-        when{
-            permissions.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false) -> {
-
-            }
-            permissions.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false) -> {
-                Toast.makeText(context, "정확한 위치 확인을 위해서 정확한 위치 권한으로 설정해주세요", Toast.LENGTH_SHORT).show()
-            }
-            else -> {
-                Toast.makeText(context, "상대방과 위치 확인을 위해서 위치 권한을 켜주세요", Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
-    if (permissionResult) {
-        SideEffect {
-            locationPermissionRequest.launch(permission)
-        }
-
-    } else {
-        fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
-            location?.let {
-                onLocationReceived(it)
-            }
-        }
-        val locationRequest = com.google.android.gms.location.LocationRequest
-            .Builder(Priority.PRIORITY_HIGH_ACCURACY, 10 * 1000)
-            .build()
-
-        val locationCallbackForMyApp = object : LocationCallback(){
-            override fun onLocationResult(locationResult: LocationResult) {
-                // 새로 요청된 위치 정보
-                for (location in locationResult.locations){
-                    location.latitude
-                    location.longitude
-                    Log.d("LOCATION-SERVICE", "current location : latitude ${location.latitude}, longitude : ${location.longitude}")
-                }
-            }
-        }
-        fusedLocationClient.requestLocationUpdates(
-            locationRequest,
-            locationCallbackForMyApp,
-            Looper.getMainLooper()
-        )
-    }
-}
-
-
-
-//        val locationRequest = LocationRequest.Builder(5000).build()
-
-//        fusedLocationClient.requestLocationUpdates(locationRequest, locationCallbackForMyApp)
-
-//    val requestPermissionLauncher = rememberLauncherForActivityResult(
-//        contract = ActivityResultContracts.RequestPermission()
-//    ) { isGranted ->
-//        if (isGranted) {
-//            fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
-//                location?.let {
-//                    onLocationReceived(it)
-//                }
-//            }
-//        }else{
-//            Toast.makeText(context, "상대방과 위치 확인을 위해서 위치 권한을 켜주세요", Toast.LENGTH_SHORT).show()
-//        }
-//    }
-
-
-
-//            val locationRequest = LocationRequest.create().apply {
-//                priority = Priority.PRIORITY_HIGH_ACCURACY
-//                interval = 60_000 // 1 minute
-//                fastestInterval = 30_000 // 30 seconds
-//            }
-//
-//            val locationCallbackForMyApp = object : LocationCallback() {
-//                override fun onLocationResult(locationResult: LocationResult) {
-//                    // 새로 요청된 위치 정보
-//                    for (location in locationResult.locations) {
-//                        Log.d("LOCATION-SERVICE", "current location : latitude ${location.latitude}, longitude : ${location.longitude}")
-//                    }
-//                }
-//            }
-//
-//            fusedLocationClient.requestLocationUpdates(
-//                locationRequest,
-//                locationCallbackForMyApp,
-//                Looper.getMainLooper()
-//            )
-
-
-
 
 
 
