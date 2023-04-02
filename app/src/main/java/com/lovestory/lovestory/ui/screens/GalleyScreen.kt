@@ -30,5 +30,7 @@ fun GalleryScreen(navHostController: NavHostController) {
             fontSize = 30.sp,
             fontFamily = vitro,
             fontWeight = FontWeight.Normal)
+
+
     }
 }

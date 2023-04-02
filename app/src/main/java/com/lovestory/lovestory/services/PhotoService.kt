@@ -98,11 +98,20 @@ class PhotoService : Service(){
         handlerThread.start()
         backgroundHandler = Handler(handlerThread.looper)
 
+        val processedUris = mutableSetOf<String>()
+
         contentObserver = object : ContentObserver(backgroundHandler) {
             override fun onChange(selfChange: Boolean, uri: Uri?) {
 
                 super.onChange(selfChange, uri)
-                Log.d("CONTENT-Observer","$uri")
+                val uriString = uri?.toString() ?: return
+
+                if (processedUris.contains(uriString)) {
+                    return
+                }else{
+                    Log.d("CONTENT-Observer", "$uri")
+                    processedUris.add(uriString)
+                }
             }
         }
 

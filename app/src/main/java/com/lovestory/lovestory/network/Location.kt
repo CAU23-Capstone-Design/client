@@ -21,7 +21,6 @@ suspend fun sendLocationToServer(token : String?, latitude: Double, longitude: D
         .build()
 
     val apiService = retrofit.create(LocationApiService::class.java)
-    Log.d("sendLocationToServer", "$token, $longitude, $latitude")
 
     val locationData = LocationInfo(latitude =  latitude, longitude = longitude)
 //    val call = apiService.sendLocation(jwt, locationData)
@@ -39,7 +38,6 @@ suspend fun sendLocationToServer(token : String?, latitude: Double, longitude: D
 }
 
 suspend fun getNearbyCoupleFromServer(token: String?):Response<NearbyResponse> {
-    Log.d("Check by apiapi", "$token")
     val jwt: String = "Bearer $token"
     val retrofit = Retrofit.Builder()
         .baseUrl("http://3.34.189.103:3000")
