@@ -153,4 +153,9 @@ dependencies {
     // To use Kotlin Symbol Processing (KSP)
     //ksp "androidx.room:room-compiler:$room_version"
     //ksp("androidx.room:room-compiler:$room_version")
+
+    //shared preference convert gson
+    implementation 'com.google.code.gson:gson:2.8.7'
+
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:<version>"
 }

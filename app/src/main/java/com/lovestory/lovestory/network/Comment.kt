@@ -14,7 +14,7 @@ import java.time.LocalDate
 
 
 // 목욜에 할 것들
-suspend fun getComment(token : String):Response<Any>{
+suspend fun getComment(token : String):Response<List<GetMemory>>{
     val jwt : String = "Bearer $token"
     //Log.d("코루틴 토큰","$token")
     //val couple = CoupleInfo(code = code, firstDate = meetDay)
@@ -28,7 +28,57 @@ suspend fun getComment(token : String):Response<Any>{
 
     return try{
         val any : Any = apiService.getComment(jwtToken = jwt)
-        Response.success(any)
+        Response.success((any as List<GetMemory>))
+    }catch (e : HttpException){
+        Log.e("create couple api error", "$e")
+        Response.error(e.code(), e.response()?.errorBody())
+    }catch (e : Exception){
+        Log.e("create couple api error2", "$e")
+        Response.error(500, ResponseBody.create(null, "Unknown error"))
+    }
+}
+
+suspend fun postComment(token : String, coupleMemory: CoupleMemory):Response<Any>{
+    val jwt : String = "Bearer $token"
+    val sendStringMemory = convertToStringMemory(coupleMemory)
+
+    //Log.d("코루틴 토큰","$token")
+    //val couple = CoupleInfo(code = code, firstDate = meetDay)
+    // val couplememory = CoupleMemory(date = LocalDate.parse(date), comment = comment)
+    val retrofit = Retrofit.Builder()
+        .baseUrl("http://3.34.189.103:3000")
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
+
+    val apiService = retrofit.create(CalendarService::class.java)
+
+    return try{
+        val any : Any = apiService.postComment(jwtToken = jwt, sendStringMemory)
+        Response.success((any))
+    }catch (e : HttpException){
+        Log.e("create couple api error", "$e")
+        Response.error(e.code(), e.response()?.errorBody())
+    }catch (e : Exception){
+        Log.e("create couple api error2", "$e")
+        Response.error(500, ResponseBody.create(null, "Unknown error"))
+    }
+}
+
+suspend fun deleteComment(token : String, date: String):Response<Any>{
+    val jwt : String = "Bearer $token"
+    //Log.d("코루틴 토큰","$token")
+    //val couple = CoupleInfo(code = code, firstDate = meetDay)
+    // val couplememory = CoupleMemory(date = LocalDate.parse(date), comment = comment)
+    val retrofit = Retrofit.Builder()
+        .baseUrl("http://3.34.189.103:3000")
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
+
+    val apiService = retrofit.create(CalendarService::class.java)
+
+    return try{
+        val any : Any = apiService.deleteComment(jwtToken = jwt, date)
+        Response.success((any))
     }catch (e : HttpException){
         Log.e("create couple api error", "$e")
         Response.error(e.code(), e.response()?.errorBody())

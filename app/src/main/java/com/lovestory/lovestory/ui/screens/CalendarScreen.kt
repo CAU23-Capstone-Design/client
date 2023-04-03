@@ -17,6 +17,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -33,19 +34,26 @@ import androidx.navigation.compose.rememberNavController
 import com.kizitonwose.calendar.compose.HorizontalCalendar
 import com.kizitonwose.calendar.compose.rememberCalendarState
 import com.kizitonwose.calendar.core.*
-import com.lovestory.lovestory.model.CoupleMemory
-import com.lovestory.lovestory.model.generateCoupleMemory
+import com.lovestory.lovestory.model.*
+import com.lovestory.lovestory.module.getSavedComment
 import com.lovestory.lovestory.module.getToken
+import com.lovestory.lovestory.module.saveComment
 import com.lovestory.lovestory.network.getComment
+import com.lovestory.lovestory.network.postComment
 import com.lovestory.lovestory.resource.vitro
 import com.lovestory.lovestory.ui.components.*
 import com.lovestory.lovestory.ui.theme.LoveStoryTheme
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import retrofit2.Response
 import java.time.LocalDate
 import java.time.YearMonth
+import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.*
+import androidx.lifecycle.lifecycleScope
+
 
 @Composable
 fun CalendarScreen(navHostController: NavHostController) {
@@ -71,22 +79,72 @@ fun CalendarScreen(navHostController: NavHostController) {
     val coroutineScope = rememberCoroutineScope()
     val visibleMonth = rememberFirstCompletelyVisibleMonth(state)
 
-    var coupleMemoryList by remember { mutableStateOf(generateCoupleMemory()) }
-    //var selectedMemory = coupleMemoryList.find{it.date
-    //
-    // == selection.date}
+    //var coupleMemoryList by remember { mutableStateOf(generateCoupleMemory()) }
+
+    var coupleMemoryList by remember { mutableStateOf(emptyList<CoupleMemory>()) }
+    val stringMemoryList = mutableListOf<StringMemory>()
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val lifecycleScope = lifecycleOwner.lifecycleScope
 
     val context = LocalContext.current
     val token = getToken(context)
+
+    var editedcomment by remember { mutableStateOf("") }
+
+    LaunchedEffect(key1 = true) {
+        val data = withContext(Dispatchers.IO) {
+            getSavedComment(context)
+        }
+        coupleMemoryList = data
+        coupleMemoryList.forEach{CoupleMemory -> Log.d("쉐어드2","$CoupleMemory") }
+        saveComment(context, coupleMemoryList) // 이 부분 주석 처리하면 shared preference 초기화 가능
+
+        /*
+        val getMemoryList: Response<List<GetMemory>> = getComment(token!!)
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+        for (getMemory in getMemoryList.body()!!) {
+            val date = LocalDate.parse(getMemory.date, formatter)
+            val comment = getMemory.comment
+            val stringMemory = StringMemory(date.toString(), comment)
+            stringMemoryList.add(stringMemory)
+        }
+        coupleMemoryList = convertToCoupleMemoryList(stringMemoryList)
+
+         */
+    }
     Log.d("토큰","$token")
+
     LaunchedEffect(isPopupVisible){
         if(isPopupVisible){
             if(token != null) {
-                val any: Response<Any> = getComment(token)
-                Log.d("코멘트", "${any.body()}")
+                val getMemoryList: Response<List<GetMemory>> = getComment(token)
+
+                val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+                for (getMemory in getMemoryList.body()!!) {
+                    val date = LocalDate.parse(getMemory.date, formatter)
+                    val comment = getMemory.comment
+                    val stringMemory = StringMemory(date.toString(), comment)
+                    stringMemoryList.add(stringMemory)
+                }
+                coupleMemoryList = convertToCoupleMemoryList(stringMemoryList)
+                //Log.d("코멘트", "${GetMemoryList.body()}")
+                coupleMemoryList.forEach{CoupleMemory -> Log.d("업뎃","$CoupleMemory") }
             }
         }
+        else{
+            saveComment(context, coupleMemoryList)
+            val seldate = selection.date
+            Log.d("셀렉션","${seldate}, $coupleMemoryList")
+            //val post : Response<Any> = postComment(token!!, CoupleMemory(selection.date, editedcomment))
+            //Log.d("포스트","${post.body()}")
+            editedcomment = ""
+        }
     }
+
+
+
+
     //var comment = getComment(token)
 
     //coupleMemoryList.forEach{coupleMemory -> Log.d("업뎃","$coupleMemory") }
@@ -145,7 +203,7 @@ fun CalendarScreen(navHostController: NavHostController) {
     if (isPopupVisible){
         //getComment
 
-        var editedcomment by remember { mutableStateOf("") }
+        //var editedcomment by remember { mutableStateOf("") }
         val existingMemory = coupleMemoryList.firstOrNull { it.date == selection.date }
         if (existingMemory != null) {
             editedcomment = existingMemory.comment
@@ -153,15 +211,15 @@ fun CalendarScreen(navHostController: NavHostController) {
 
         CalendarDialog(
             selection = selection,
+            editedcomment = editedcomment,
             onDismissRequest = {
                 if(existingMemory != null) {
                     coupleMemoryList.find{ it.date == selection.date }?.comment = editedcomment
-                    //sendComment
+
                 } else {
                     if ( editedcomment != ""){
                         val newMemory = CoupleMemory(date = selection.date, comment = editedcomment)
                         coupleMemoryList = coupleMemoryList.toMutableList().apply{add(newMemory)}
-
                     }
                 }
                 isPopupVisible = false// Update coupleMemoryList when dialog is dismissed
@@ -213,7 +271,9 @@ fun CalendarScreen(navHostController: NavHostController) {
                             )
                             Spacer(modifier = Modifier.width(10.dp))
                             Text(
-                                modifier = Modifier.padding(bottom = 3.dp).weight(1f),
+                                modifier = Modifier
+                                    .padding(bottom = 3.dp)
+                                    .weight(1f),
                                 text = selection.date.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault())+"요일",
                                 fontSize = 16.sp,
                                 color = Color.Black,
@@ -236,7 +296,10 @@ fun CalendarScreen(navHostController: NavHostController) {
                                 },
                                 elevation = null,
                                 contentPadding = PaddingValues(0.dp),
-                                modifier = Modifier.width(30.dp).height(30.dp).padding(bottom = 5.dp),//wrapContentSize(),
+                                modifier = Modifier
+                                    .width(30.dp)
+                                    .height(30.dp)
+                                    .padding(bottom = 5.dp),//wrapContentSize(),
                                 shape = CircleShape,
                             ){
                                 Text(
@@ -268,50 +331,8 @@ fun CalendarScreen(navHostController: NavHostController) {
             //}
         //}
     }
-}
 
-/*
-//사용자 위치 접근 권한 요청
-val permissionState = rememberPermissionState(
-    permission = Manifest.permission.ACCESS_FINE_LOCATION,
-    rationale = PermissionRationale(
-        title = "Location Permission",
-        message = "This app needs access to your location to provide the weather forecast."
-    )
-)
-if (permissionState.hasPermission) {
-    // Request location updates
-} else {
-    // Request permission
-    LaunchedEffect(permissionState) {
-        permissionState.launchPermissionRequest()
-    }
 }
-
-//위치 업데이트의 빈도와 정확도를 지정하기 위해 LocationRequest 개체를 생성하고 위치와 함께 호출될 LocationCallback 개체와 함께 FusedLocationProviderClient의 requestLocationUpdates 함수에 전달
-//위치 업데이트가 수신되면 Location 개체에서 위도와 경도를 추출하고 이를 사용하여 UI를 업데이트합니다. 위치 업데이트는 백그라운드 스레드에서 수신되므로 UI를 업데이트하려면 LaunchedEffect를 사용해야 합니다.
-LaunchedEffect(Unit) {
-    val locationRequest = LocationRequest.create().apply {
-        interval = 1000
-        fastestInterval = 500
-        priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-    }
-    fusedLocationClient.requestLocationUpdates(
-        locationRequest,
-        object : LocationCallback() {
-            override fun onLocationResult(locationResult: LocationResult?) {
-                locationResult?.lastLocation?.let { location ->
-                    // Use the location object to get the latitude and longitude
-                    val latitude = location.latitude
-                    val longitude = location.longitude
-                    // Update the UI with the location information
-                }
-            }
-        },
-        Looper.getMainLooper()
-    )
-}
- */
 
 
 
@@ -323,19 +344,4 @@ fun DefaultPreview() {
     LoveStoryTheme {
         CalendarScreen(navHostController = navController)
     }
-    //val singapore = LatLng(1.35, 103.87)
-    //val cameraPositionState = rememberCameraPositionState {
-    //    position = CameraPosition.fromLatLngZoom(singapore, 10f)
-    //}
-    //GoogleMap(
-    //    modifier = Modifier
-    //            .fillMaxSize(),
-    //    cameraPositionState = cameraPositionState
-    //){
-    //    Marker(
-    //        state = MarkerState(position = singapore),
-    //        title = "Singapore",
-    //        snippet = "Marker in Singapore"
-    //    )
-    //}
 }
