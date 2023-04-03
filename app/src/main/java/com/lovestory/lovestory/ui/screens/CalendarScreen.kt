@@ -15,9 +15,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -53,6 +55,8 @@ import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.*
 import androidx.lifecycle.lifecycleScope
+import com.lovestory.lovestory.R
+import com.lovestory.lovestory.network.deleteComment
 
 
 @Composable
@@ -200,7 +204,7 @@ fun CalendarScreen(navHostController: NavHostController) {
     //Log.d("tag","$selectedMemory")
     //Log.d("popup","$isPopupVisible")
 
-    if (isPopupVisible){
+    if (true){//isPopupVisible){
         //getComment
 
         //var editedcomment by remember { mutableStateOf("") }
@@ -282,6 +286,27 @@ fun CalendarScreen(navHostController: NavHostController) {
                             Button(
                                 colors = ButtonDefaults.buttonColors(backgroundColor = Color.Transparent),
                                 onClick = {
+                                    coroutineScope.launch {
+                                        deleteComment(token!!, selection.date.toString())
+                                    }
+                                },
+                                elevation = null,
+                                contentPadding = PaddingValues(0.dp),
+                                modifier = Modifier
+                                    .width(30.dp)
+                                    .height(30.dp),
+                                    //.padding(bottom = 5.dp),//wrapContentSize(),
+                                shape = CircleShape,
+                            ){
+                                Icon(
+                                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_delete),
+                                    contentDescription = "Delete"
+                                )
+                            }
+
+                            Button(
+                                colors = ButtonDefaults.buttonColors(backgroundColor = Color.Transparent),
+                                onClick = {
                                     if(existingMemory != null) {
                                         coupleMemoryList.find{ it.date == selection.date }?.comment = editedcomment
                                         //sendComment
@@ -309,6 +334,7 @@ fun CalendarScreen(navHostController: NavHostController) {
                                     fontWeight = FontWeight.ExtraBold
                                 )
                             }
+
                         }
                         Divider(color = Color.Black, thickness = 1.dp, modifier = Modifier.padding(start = 15.dp, end = 15.dp))
                         Spacer(modifier = Modifier.height(15.dp))
