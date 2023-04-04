@@ -20,6 +20,8 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.os.*
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.android.gms.location.*
 import com.lovestory.lovestory.R
@@ -122,6 +124,7 @@ class LocationService : Service() {
     override fun onDestroy() {
         super.onDestroy()
         handlerThread.quitSafely()
+//        handlerThread.quit()
     }
 
     private fun sendBroadcastToSecondService(action: String) {
@@ -161,29 +164,29 @@ class LocationService : Service() {
 @Composable
 fun getLocationPermission(){
     val context = LocalContext.current
-    val permission = arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
-    val permissionResult = ContextCompat.checkSelfPermission(context, permission[0]) != PackageManager.PERMISSION_GRANTED
-            && ContextCompat.checkSelfPermission(context, permission[1]) != PackageManager.PERMISSION_GRANTED
+    val permissions = arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
+    val permissionResult = ContextCompat.checkSelfPermission(context, permissions[0]) != PackageManager.PERMISSION_GRANTED
+            && ContextCompat.checkSelfPermission(context, permissions[1]) != PackageManager.PERMISSION_GRANTED
 
     val locationPermissionRequest = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions()
     ){permissions ->
         when{
             permissions.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false) -> {
-
+                Toast.makeText(context, "정확한 위치 권한 승인", Toast.LENGTH_SHORT).show()
             }
             permissions.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false) -> {
-                Toast.makeText(context, "정확한 위치 확인을 위해서 정확한 위치 권한으로 설정해주세요", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "대략적인 위치 권한 승인", Toast.LENGTH_SHORT).show()
             }
             else -> {
-                Toast.makeText(context, "상대방과 위치 확인을 위해서 위치 권한을 켜주세요", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "위치 권한 얻기 실패...", Toast.LENGTH_SHORT).show()
             }
         }
-    }
 
+    }
     if (permissionResult) {
         SideEffect {
-            locationPermissionRequest.launch(permission)
+            locationPermissionRequest.launch(permissions)
         }
     }
 }

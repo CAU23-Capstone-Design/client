@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
+import android.os.Environment.isExternalStorageManager
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -31,10 +32,19 @@ import com.lovestory.lovestory.ui.components.BottomNaviagtionBar
 @Composable
 fun MainScreen(navHostController: NavHostController = rememberNavController()) {
     val context = LocalContext.current
-    getExternalStoragePermission()
+
     getLocationPermission()
+
+
+//    getExternalStoragePermission()
 //    getReadMediaImagePermission()
 
+    requestStoragePermission()
+
+//    getReadMediaImagePermission()
+
+    val isGranted = isExternalStorageManager()
+    Log.d(",jfgvsdjghsjdkfsdjkfhjksifkhwesfhisidkghisdkg", "sdfjsdjkfhsdfjsdjfgjsdf :: $isGranted")
 
     LaunchedEffect(key1 = null){
         val locationIntent = Intent(context, LocationService::class.java)
@@ -49,43 +59,10 @@ fun MainScreen(navHostController: NavHostController = rememberNavController()) {
         }
     }
 
-//    LaunchedEffect(Unit){
-//        val permission = Manifest.permission.READ_EXTERNAL_STORAGE
-//        val permissionResult =  ContextCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED
-//
-//        if(permissionResult){
-//            Log.d("MAIN-SCREEN", "권한이 없으므로 권한 승인이 필요합니다.")
-////            getPermission(context)
-//            getExternalStoragePermission(context)
-//        }
-//    }
-
-
-
     Scaffold(
         bottomBar = {BottomNaviagtionBar(navHostController = navHostController)},
         backgroundColor = Color.White
     ) {
         MainNavGraph(navHostController = navHostController)
     }
-}
-
-
-fun getPermission(context: Context){
-    ActivityCompat.requestPermissions(
-        context as Activity,
-        arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE),
-        100
-    )
-//        val externalStoragePermissionRequest =
-//            rememberLauncherForActivityResult(
-//            contract = ActivityResultContracts.RequestPermission()
-//        ){ granted->
-//            Log.d("getExternalStorage-Permission", "$granted")
-//            if(granted){
-//
-//            }else{
-//                Toast.makeText(context, "LoveStory에서 사진에 접근할 수 있도록 권한을 허용해주세요", Toast.LENGTH_SHORT).show()
-//            }
-//        }
 }

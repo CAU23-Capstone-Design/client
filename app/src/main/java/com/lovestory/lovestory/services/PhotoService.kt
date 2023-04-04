@@ -8,6 +8,7 @@ import android.database.ContentObserver
 import android.media.ExifInterface
 import android.net.Uri
 import android.os.*
+import android.os.Environment.isExternalStorageManager
 import android.provider.DocumentsContract
 import android.provider.MediaStore
 import android.util.Log
@@ -18,7 +19,6 @@ import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.platform.LocalContext
-import androidx.core.app.ActivityCompat
 import androidx.core.app.ActivityCompat.shouldShowRequestPermissionRationale
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
@@ -49,8 +49,7 @@ class PhotoService : Service(){
 
         when (intent?.action) {
             ACTION_START_PHOTO_PICKER_SERVICE -> {
-//                createNotificationChannel()
-
+                createNotificationChannel()
                 startForeground(NOTIFICATION_ID, notification)
                 Log.d("Photo-service", "포토 서비스 시작")
                 registerContentObserver()
@@ -109,20 +108,47 @@ class PhotoService : Service(){
                     return
                 }else{
                     Log.d("CONTENT-Observer", "$uri")
-//                    getRotationFromImageUri(
-//                        uri = uri,
-//                        context = contextLocal
-//                    )
-                    takePersistableUriPermission(contextLocal, uri)
-//                    val filepath = getImageFilePath(contentResolver, uri)
-//                    Log.d("COTENT-Observer-Uri-path", "$filepath")
-//                    getPhotoInfo(uri)
-//                    getPhotoLocation(uri, contextLocal)
+
+                    var fsdgsdgsdg = isExternalStorageManager()
+                    Log.d("sdfsdfsdfsdfsdf","sdfsdfsdfsdfsdf ---- $fsdgsdgsdg")
+
 
                     processedUris.add(uriString)
-//
-//                    val contentResolver = contentResolver
-//                    val inputStream = applicationContext.contentResolver.openInputStream(uri)
+
+                    try{
+                        var isPending = 1
+                        while(isPending == 1){
+                            val projection = arrayOf(
+                                MediaStore.Images.Media.IS_PENDING,
+                            )
+
+                            val cursor = contentResolver.query(uri, projection, null, null, null)
+                            cursor?.use{cursor->
+                                val pending= cursor.getColumnIndexOrThrow(MediaStore.Images.Media.IS_PENDING)
+                                cursor.moveToNext()
+                                isPending = cursor.getInt(pending)
+                            }
+                            Log.d("while", "야로나오란ㅇ롸ㅓㄴㅇ런오ㅓㄹ")
+                        }
+                        Log.d("while 빠져나옴", "야로나ㄴㅇㄹㄴㅇㅎㄴㅇㅎㄴㅇㅎㄴㅇㅎ오란ㅇ롸ㅓㄴㅇ런오ㅓㄹ")
+                        val inputStream = applicationContext.contentResolver.openInputStream(uri)
+
+                        val exifInterface = inputStream?.let { androidx.exifinterface.media.ExifInterface(it) }
+                        val orientation = exifInterface?.getAttribute(androidx.exifinterface.media.ExifInterface.TAG_ORIENTATION)
+                        val dateTaken = exifInterface?.getAttribute(androidx.exifinterface.media.ExifInterface.TAG_DATETIME)
+                        val latitude = exifInterface?.getAttribute(android.media.ExifInterface.TAG_GPS_LATITUDE)
+                        val longitude = exifInterface?.getAttribute(android.media.ExifInterface.TAG_GPS_LONGITUDE)
+
+                        Log.e("dsfgsdj.kfbgjzdbfgjkbfdg", "$orientation &&&& $dateTaken")
+                        Log.d("getPhotoeExif", "$latitude - $longitude")
+                    }
+                    catch (e: InterruptedException) {
+                        e.printStackTrace()
+                    }
+                    catch(e : Exception){
+                        Log.e("jsdfkjhsdj,ghjksdg", "$e")
+                    }
+
 //                    val exifInterface = inputStream?.let { ExifInterface(it) }
 //
 //                    val orientation = exifInterface?.getAttribute(ExifInterface.TAG_ORIENTATION)
@@ -207,6 +233,34 @@ class PhotoService : Service(){
             }
         }
     }
+
+
+}
+
+@Composable
+fun requestStoragePermission() {
+    Log.d("getExternalStorage-Permission", "권한체크")
+    val context = LocalContext.current
+    val permission = Manifest.permission.MANAGE_EXTERNAL_STORAGE
+    val permissionResult =  ContextCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED
+
+    val externalStoragePermissionRequest = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ){ granted->
+        Log.d("getExternalStorage-Permission", "$granted")
+        if(granted){
+
+        }else{
+            Toast.makeText(context, "LoveStory에서 사진에 접근할 수 있도록 권한을 허용해주세요", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    if(permissionResult){
+        SideEffect {
+//            shouldShowRequestPermissionRationale(context as Activity,Manifest.permission.MANAGE_EXTERNAL_STORAGE)
+            externalStoragePermissionRequest.launch(permission)
+        }
+    }
 }
 
 fun getRotationFromImageUri(context: Context, uri: Uri) {
@@ -246,23 +300,16 @@ fun getReadMediaImagePermission(){
 //        }
 //    }
 
-    val permission = arrayOf(Manifest.permission.READ_MEDIA_IMAGES, Manifest.permission.READ_MEDIA_VIDEO, Manifest.permission.READ_MEDIA_AUDIO, Manifest.permission.READ_EXTERNAL_STORAGE)
+    val permission = arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.MANAGE_EXTERNAL_STORAGE)
     val permissionResult = ContextCompat.checkSelfPermission(context, permission[0]) != PackageManager.PERMISSION_GRANTED
             && ContextCompat.checkSelfPermission(context, permission[1]) != PackageManager.PERMISSION_GRANTED
-            && ContextCompat.checkSelfPermission(context, permission[2]) != PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(context, permission[3]) != PackageManager.PERMISSION_GRANTED
 
     val locationPermissionRequest = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions()
     ){permissions ->
         when{
-            permissions.getOrDefault(Manifest.permission.READ_MEDIA_IMAGES, false) -> {
-                Toast.makeText(context, "정확한 위sdfsdfsdfsdfds으로 설정해주세요", Toast.LENGTH_SHORT).show()
-            }
-            permissions.getOrDefault(Manifest.permission.READ_MEDIA_VIDEO, false) -> {
-                Toast.makeText(context, "정확한 위fvcxbnbfbdfn위치 권한으로 설정해주세요", Toast.LENGTH_SHORT).show()
-            }
-            permissions.getOrDefault(Manifest.permission.READ_MEDIA_AUDIO, false) -> {
-                Toast.makeText(context, "정확한 위치ewrwetg34f 권한으로 설정해주세요", Toast.LENGTH_SHORT).show()
+            permissions.getOrDefault(Manifest.permission.MANAGE_EXTERNAL_STORAGE, false) -> {
+                Toast.makeText(context, "정확한 위치 확인을 sdfsdfhjkadhjvcbdfjvgukesrudfkvbudfjkxfbuj세요", Toast.LENGTH_SHORT).show()
             }
             permissions.getOrDefault(Manifest.permission.READ_EXTERNAL_STORAGE, false) -> {
                 Toast.makeText(context, "정확한 위치 확인을 위해서 정확한 위치 권한으로 설정해주세요", Toast.LENGTH_SHORT).show()
@@ -275,6 +322,8 @@ fun getReadMediaImagePermission(){
 
     if (permissionResult) {
         SideEffect {
+            shouldShowRequestPermissionRationale(context as Activity,Manifest.permission.MANAGE_EXTERNAL_STORAGE)
+            shouldShowRequestPermissionRationale(context as Activity,Manifest.permission.READ_EXTERNAL_STORAGE)
             locationPermissionRequest.launch(permission)
         }
     }
@@ -304,12 +353,6 @@ fun getExternalStoragePermission(){
             externalStoragePermissionRequest.launch(permission)
         }
     }
-//    Log.d("getExternalStorage-Permission", "wpqkfsdfsdfsdf")
-//    ActivityCompat.requestPermissions(
-//        context as Activity,
-//        arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE),
-//        100
-//    )
 }
 
 fun getPhotoLocation(filePath: Uri, context : Context): Pair<String?, String?> {
