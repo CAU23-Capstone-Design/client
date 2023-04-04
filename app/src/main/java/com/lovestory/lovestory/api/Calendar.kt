@@ -1,9 +1,6 @@
 package com.lovestory.lovestory.api
 
-import com.lovestory.lovestory.model.GetMemory
-import com.lovestory.lovestory.model.LoginResponse
-import com.lovestory.lovestory.model.SendStringMemory
-import com.lovestory.lovestory.model.StringMemory
+import com.lovestory.lovestory.model.*
 import retrofit2.http.*
 
 interface CalendarService{
@@ -17,5 +14,9 @@ interface CalendarService{
 
     @Headers("Content-Type: application/json")
     @DELETE("/memos/date/{date}") // 서버 endpoint
-    suspend fun deleteComment(@Header("Authorization") jwtToken: String, date: String) : Any
+    suspend fun deleteComment(@Header("Authorization") jwtToken: String, @Path("date") date: String) : Any
+
+    @Headers("Content-Type: application/json")
+    @PUT("/memos/{date}") // 서버 endpoint
+    suspend fun putComment(@Header("Authorization") jwtToken: String, @Path("date") date: String, @Body requestBody: PutCommentRequest) : Any
 }

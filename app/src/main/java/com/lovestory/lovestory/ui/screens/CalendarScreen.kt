@@ -1,5 +1,6 @@
 package com.lovestory.lovestory.ui.screens
 
+import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -57,8 +58,12 @@ import java.util.*
 import androidx.lifecycle.lifecycleScope
 import com.lovestory.lovestory.R
 import com.lovestory.lovestory.network.deleteComment
+import com.lovestory.lovestory.network.putComment
+import kotlinx.coroutines.CoroutineScope
+import okhttp3.Dispatcher
 
 
+@SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 fun CalendarScreen(navHostController: NavHostController) {
     val currentMonth = remember { YearMonth.now() }
@@ -94,17 +99,19 @@ fun CalendarScreen(navHostController: NavHostController) {
     val context = LocalContext.current
     val token = getToken(context)
 
-    var editedcomment by remember { mutableStateOf("") }
+    //var editedcomment by remember { mutableStateOf("") }
 
+    //해야 되는 게 코루틴 정리. 룸 db
     LaunchedEffect(key1 = true) {
+        //내부 db
         val data = withContext(Dispatchers.IO) {
             getSavedComment(context)
         }
         coupleMemoryList = data
-        coupleMemoryList.forEach{CoupleMemory -> Log.d("쉐어드2","$CoupleMemory") }
+        coupleMemoryList.forEach{CoupleMemory -> Log.d("쉐어드1","$CoupleMemory") }
         saveComment(context, coupleMemoryList) // 이 부분 주석 처리하면 shared preference 초기화 가능
 
-        /*
+        //서버 통신
         val getMemoryList: Response<List<GetMemory>> = getComment(token!!)
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
         for (getMemory in getMemoryList.body()!!) {
@@ -114,11 +121,11 @@ fun CalendarScreen(navHostController: NavHostController) {
             stringMemoryList.add(stringMemory)
         }
         coupleMemoryList = convertToCoupleMemoryList(stringMemoryList)
-
-         */
+        coupleMemoryList.forEach{CoupleMemory -> Log.d("쉐어드2","$CoupleMemory") }
     }
     Log.d("토큰","$token")
 
+    /*
     LaunchedEffect(isPopupVisible){
         if(isPopupVisible){
             if(token != null) {
@@ -145,6 +152,8 @@ fun CalendarScreen(navHostController: NavHostController) {
             editedcomment = ""
         }
     }
+
+     */
 
 
 
@@ -204,10 +213,22 @@ fun CalendarScreen(navHostController: NavHostController) {
     //Log.d("tag","$selectedMemory")
     //Log.d("popup","$isPopupVisible")
 
-    if (true){//isPopupVisible){
-        //getComment
+    if (isPopupVisible) {
+        //getComment 서버 통신
+        coroutineScope.launch {
+            val getMemoryList: Response<List<GetMemory>> = getComment(token!!)
+            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+            for (getMemory in getMemoryList.body()!!) {
+                val date = LocalDate.parse(getMemory.date, formatter)
+                val comment = getMemory.comment
+                val stringMemory = StringMemory(date.toString(), comment)
+                stringMemoryList.add(stringMemory)
+            }
+            coupleMemoryList = convertToCoupleMemoryList(stringMemoryList)
+            coupleMemoryList.forEach { CoupleMemory -> Log.d("쉐어드3", "$CoupleMemory") }
+        }
 
-        //var editedcomment by remember { mutableStateOf("") }
+        var editedcomment by remember { mutableStateOf("") }
         val existingMemory = coupleMemoryList.firstOrNull { it.date == selection.date }
         if (existingMemory != null) {
             editedcomment = existingMemory.comment
@@ -215,15 +236,25 @@ fun CalendarScreen(navHostController: NavHostController) {
 
         CalendarDialog(
             selection = selection,
-            editedcomment = editedcomment,
+            //editedcomment = editedcomment,
             onDismissRequest = {
                 if(existingMemory != null) {
                     coupleMemoryList.find{ it.date == selection.date }?.comment = editedcomment
-
+                    coroutineScope.launch{
+                        val date = selection.date
+                        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+                        val dateString = date.format(formatter)
+                        val put : Response<Any> = putComment(token!!, dateString, editedcomment)
+                        Log.d("풑1","$put, $dateString, $editedcomment")
+                    }
                 } else {
                     if ( editedcomment != ""){
                         val newMemory = CoupleMemory(date = selection.date, comment = editedcomment)
                         coupleMemoryList = coupleMemoryList.toMutableList().apply{add(newMemory)}
+                        coroutineScope.launch{
+                            val post : Response<Any> = postComment(token!!, CoupleMemory(selection.date, editedcomment))
+                            Log.d("포스트2","${post.body()}")
+                        }
                     }
                 }
                 isPopupVisible = false// Update coupleMemoryList when dialog is dismissed
@@ -287,8 +318,27 @@ fun CalendarScreen(navHostController: NavHostController) {
                                 colors = ButtonDefaults.buttonColors(backgroundColor = Color.Transparent),
                                 onClick = {
                                     coroutineScope.launch {
-                                        deleteComment(token!!, selection.date.toString())
+                                        val date = selection.date
+                                        var formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+                                        val dateString = date.format(formatter)
+                                        val delete: Any = deleteComment(token!!, dateString)
+                                        Log.d("삭제", "$delete, $dateString")
+
+                                        val getMemoryList: Response<List<GetMemory>> =
+                                            getComment(token!!)
+                                        formatter =
+                                            DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+                                        for (getMemory in getMemoryList.body()!!) {
+                                            val date = LocalDate.parse(getMemory.date, formatter)
+                                            val comment = getMemory.comment
+                                            val stringMemory =
+                                                StringMemory(date.toString(), comment)
+                                            stringMemoryList.add(stringMemory)
+                                        }
+                                        coupleMemoryList = convertToCoupleMemoryList(stringMemoryList)
+                                        coupleMemoryList.forEach{CoupleMemory -> Log.d("쉐어드2","$CoupleMemory") }
                                     }
+                                    isPopupVisible = false
                                 },
                                 elevation = null,
                                 contentPadding = PaddingValues(0.dp),
@@ -310,11 +360,21 @@ fun CalendarScreen(navHostController: NavHostController) {
                                     if(existingMemory != null) {
                                         coupleMemoryList.find{ it.date == selection.date }?.comment = editedcomment
                                         //sendComment
+                                        coroutineScope.launch{
+                                            val date = selection.date
+                                            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+                                            val dateString = date.format(formatter)
+                                            val put : Response<Any> = putComment(token!!, dateString, editedcomment)
+                                            Log.d("풑2","$put, $dateString, $editedcomment")
+                                        }
                                     } else {
                                         if ( editedcomment != ""){
                                             val newMemory = CoupleMemory(date = selection.date, comment = editedcomment)
                                             coupleMemoryList = coupleMemoryList.toMutableList().apply{add(newMemory)}
-
+                                            coroutineScope.launch{
+                                                val post : Response<Any> = postComment(token!!, CoupleMemory(selection.date, editedcomment))
+                                                Log.d("포스트4","${post.body()}")
+                                            }
                                         }
                                     }
                                     isPopupVisible = false
@@ -366,7 +426,6 @@ fun CalendarScreen(navHostController: NavHostController) {
 @Composable
 fun DefaultPreview() {
     val navController = rememberNavController()
-    val onDismissRequest : () -> Unit = {}
     LoveStoryTheme {
         CalendarScreen(navHostController = navController)
     }

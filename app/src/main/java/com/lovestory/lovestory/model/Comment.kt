@@ -27,6 +27,12 @@ data class GetMemory(
     @SerializedName("__v") val version: Int
 )
 
+data class PutCommentRequest(val content: String)
+
+data class DeleteMessage(
+    @SerializedName("message") val message: String
+)
+
 data class StringMemory(
     @SerializedName("date") val date: String,
     @SerializedName("comment") var comment: String

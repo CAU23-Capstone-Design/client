@@ -40,7 +40,7 @@ fun CalendarDialog(
     //onMemoryUpdated: (CoupleMemory) -> Unit,
     //onCommentChanged: (String) -> Unit,
     //editedComment: String,
-    editedcomment: String,
+    //editedcomment: String,
     onDismissRequest : ()-> Unit,
     properties: DialogProperties = DialogProperties(),
     content : @Composable () -> Unit,
