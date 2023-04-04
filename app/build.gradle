@@ -10,8 +10,8 @@ android {
 
     defaultConfig {
         applicationId "com.lovestory.lovestory"
-        minSdk 31
-        targetSdk 33
+        minSdk 29
+        targetSdk 31
         versionCode 1
         versionName "1.0"
 
@@ -57,6 +57,7 @@ dependencies {
     def nav_version = "2.5.3"
     def sheet_version = "1.1.1"
     def room_version = "2.5.0"
+    def activity_version = "1.6.1"
 
     implementation 'androidx.core:core-ktx:1.7.0'
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.3.1'
@@ -70,6 +71,7 @@ dependencies {
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:$compose_ui_version"
     debugImplementation "androidx.compose.ui:ui-tooling:$compose_ui_version"
     debugImplementation "androidx.compose.ui:ui-test-manifest:$compose_ui_version"
+    implementation "androidx.activity:activity-ktx:$activity_version"
 
     //splash screen
     implementation "androidx.navigation:navigation-compose:2.5.3"
@@ -124,4 +126,7 @@ dependencies {
 
     // Coil
     implementation "io.coil-kt:coil-compose:2.2.0"
+
+    // Exifinterface
+    implementation "androidx.exifinterface:exifinterface:1.3.6"
 }

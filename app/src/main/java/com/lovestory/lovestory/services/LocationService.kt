@@ -67,7 +67,7 @@ class LocationService : Service() {
         if (!permissionResult) {
             fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
                 location?.let {
-                    // Do something with the location
+
                     Log.d("Location", "${location.longitude} ${location.latitude}")
                 }
             }
@@ -78,7 +78,7 @@ class LocationService : Service() {
 
             val locationCallbackForMyApp = object : LocationCallback(){
                 override fun onLocationResult(locationResult: LocationResult) {
-                    // 새로 요청된 위치 정보
+
                     for (location in locationResult.locations){
                         location.latitude
                         location.longitude
@@ -89,28 +89,18 @@ class LocationService : Service() {
                             if(response.isSuccessful){
                                 Log.d("check nearby Location", "${response.body()}")
                                 if(response.body()!!.isNearby){
-                                    Log.d("LOCATION-SERVICE", "포토 서비스 시작 호출")
-
                                     sendBroadcastToSecondService(ACTION_START_PHOTO_PICKER_SERVICE)
                                 }
                                 else{
-                                    Log.d("LOCATION-SERVICE", "포토 서비스 종료 호출 ")
                                     sendBroadcastToSecondService(ACTION_STOP_PHOTO_PICKER_SERVICE)
                                 }
 
                             }else{
                                 Log.e("check nearby location error" , "${response.errorBody()}")
-                                Log.d("LOCATION-SERVICE", "포토 서비스 종료 호출 ")
                                 sendBroadcastToSecondService(ACTION_STOP_PHOTO_PICKER_SERVICE)
                             }
                         }
-//                        val result  = checkNearby(token)
                         Log.d("LOCATION-SERVICE", "current location : latitude ${location.latitude}, longitude : ${location.longitude}")
-//                        if(result){
-//
-//                        }else{
-//
-//                        }
                     }
                 }
             }
@@ -135,8 +125,6 @@ class LocationService : Service() {
     }
 
     private fun sendBroadcastToSecondService(action: String) {
-//        val intent = Intent(action)
-//        LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
         val intent = Intent(this, PhotoService::class.java)
         intent.action = action
         when (intent.action) {
