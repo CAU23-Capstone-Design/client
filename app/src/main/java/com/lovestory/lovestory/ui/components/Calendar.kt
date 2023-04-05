@@ -41,6 +41,7 @@ import java.util.*
 fun Day(
     day: CalendarDay,
     isSelected: Boolean = false,
+    isPopupVisible: Boolean = false,
     coupleMemoryList: List<CoupleMemory>,
     onOpenDialogRequest : () -> Unit,
     onClick: (CalendarDay) -> Unit = {},
@@ -82,6 +83,7 @@ fun Day(
             )
             Spacer(modifier = Modifier.height(2.dp))
 
+            //LaunchedEffect()
             coupleMemoryList.firstOrNull { it.date == day.date }?.let{
                 Box(modifier = Modifier
                     .size(8.dp)
