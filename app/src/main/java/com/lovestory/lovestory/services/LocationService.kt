@@ -6,32 +6,20 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
 import android.util.Log
-import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
-import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
-
 import android.app.Notification
 import androidx.core.app.NotificationCompat
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.os.*
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.android.gms.location.*
 import com.lovestory.lovestory.R
 import com.lovestory.lovestory.broadcasts.LocationToPhoto.ACTION_START_PHOTO_PICKER_SERVICE
 import com.lovestory.lovestory.broadcasts.LocationToPhoto.ACTION_STOP_PHOTO_PICKER_SERVICE
-import com.lovestory.lovestory.module.checkNearby
 import com.lovestory.lovestory.module.getToken
 import com.lovestory.lovestory.module.saveLocation
 import com.lovestory.lovestory.network.getNearbyCoupleFromServer
-import com.lovestory.lovestory.network.sendLocationToServer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -47,16 +35,17 @@ class LocationService : Service() {
         return null
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        handlerThread.quitSafely()
+    }
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val context = this
         Log.d("Locate - Service", "포그라운드 서비스 시작")
         createNotificationChannel()
 
-        val notification: Notification = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("LoveStory 위치 서비스")
-            .setContentText("위치 서비스가 실행중입니다.")
-            .setSmallIcon(R.drawable.lovestory_logo)
-            .build()
+        val notification: Notification = createNotificationForLocationService()
 
         startForeground(NOTIFICATION_ID, notification)
 
@@ -89,7 +78,7 @@ class LocationService : Service() {
                         CoroutineScope(Dispatchers.IO).launch{
                             val response = getNearbyCoupleFromServer(token)
                             if(response.isSuccessful){
-                                Log.d("check nearby Location", "${response.body()}")
+//                                Log.d("check nearby Location", "${response.body()}")
                                 if(response.body()!!.isNearby){
                                     sendBroadcastToSecondService(ACTION_START_PHOTO_PICKER_SERVICE)
                                 }
@@ -102,7 +91,7 @@ class LocationService : Service() {
                                 sendBroadcastToSecondService(ACTION_STOP_PHOTO_PICKER_SERVICE)
                             }
                         }
-                        Log.d("LOCATION-SERVICE", "current location : latitude ${location.latitude}, longitude : ${location.longitude}")
+//                        Log.d("LOCATION-SERVICE", "current location : latitude ${location.latitude}, longitude : ${location.longitude}")
                     }
                 }
             }
@@ -119,12 +108,6 @@ class LocationService : Service() {
 //            getLocationPermission()
         }
         return START_STICKY
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        handlerThread.quitSafely()
-//        handlerThread.quit()
     }
 
     private fun sendBroadcastToSecondService(action: String) {
@@ -155,41 +138,20 @@ class LocationService : Service() {
         }
     }
 
+    private fun createNotificationForLocationService():Notification{
+        return NotificationCompat.Builder(this, CHANNEL_ID)
+            .setContentTitle("LoveStory 사진 서비스")
+            .setContentText("사진 서비스가 실행중입니다.")
+            .setSmallIcon(R.drawable.lovestory_logo)
+            .build()
+    }
+
     companion object {
         private const val CHANNEL_ID = "location_service_channel"
         private const val NOTIFICATION_ID = 1
     }
 }
 
-@Composable
-fun getLocationPermission(){
-    val context = LocalContext.current
-    val permissions = arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
-    val permissionResult = ContextCompat.checkSelfPermission(context, permissions[0]) != PackageManager.PERMISSION_GRANTED
-            && ContextCompat.checkSelfPermission(context, permissions[1]) != PackageManager.PERMISSION_GRANTED
-
-    val locationPermissionRequest = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestMultiplePermissions()
-    ){permissions ->
-        when{
-            permissions.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false) -> {
-                Toast.makeText(context, "정확한 위치 권한 승인", Toast.LENGTH_SHORT).show()
-            }
-            permissions.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false) -> {
-                Toast.makeText(context, "대략적인 위치 권한 승인", Toast.LENGTH_SHORT).show()
-            }
-            else -> {
-                Toast.makeText(context, "위치 권한 얻기 실패...", Toast.LENGTH_SHORT).show()
-            }
-        }
-
-    }
-    if (permissionResult) {
-        SideEffect {
-            locationPermissionRequest.launch(permissions)
-        }
-    }
-}
 
 
 

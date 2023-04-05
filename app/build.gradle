@@ -10,8 +10,8 @@ android {
 
     defaultConfig {
         applicationId "com.lovestory.lovestory"
-        minSdk 30
-        targetSdk 31
+        minSdk 31
+        targetSdk 33
         versionCode 1
         versionName "1.0"
 

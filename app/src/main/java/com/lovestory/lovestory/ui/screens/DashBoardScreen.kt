@@ -30,10 +30,6 @@ import com.lovestory.lovestory.resource.vitro
 fun DashBoardScreen(navHostController: NavHostController) {
     val context = LocalContext.current
 
-    LaunchedEffect(key1 = null){
-
-    }
-
     Log.d("DashBoard-Screen", "DashBoard 스크린 호출")
     Column(
         verticalArrangement = Arrangement.Top,
@@ -55,12 +51,6 @@ fun DashBoardScreen(navHostController: NavHostController) {
                 intent.putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
                 intent.putExtra(Settings.EXTRA_SETTINGS_EMBEDDED_DEEP_LINK_INTENT_URI, Settings.ACTION_LOCATION_SOURCE_SETTINGS)
                 context.startActivity(intent)
-
-//                val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-//                val uri = Uri.fromParts("package", context.packageName, null)
-//                intent.data = uri
-//                intent.putExtra(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-//                context.startActivity(intent)
             }
         ){
             Text(text ="설정 열기")
@@ -68,18 +58,7 @@ fun DashBoardScreen(navHostController: NavHostController) {
         Button(
             onClick = {
                 val intent = Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION)
-
-//                val uri = Uri.fromParts("package", context.packageName, null)
-//                intent.data = uri
-//                intent.putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
-//                intent.putExtra(Settings.EXTRA_SETTINGS_EMBEDDED_DEEP_LINK_INTENT_URI, Settings.ACTION_LOCATION_SOURCE_SETTINGS)
-                context.startActivity(intent)
-
-//                val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-//                val uri = Uri.fromParts("package", context.packageName, null)
-//                intent.data = uri
-//                intent.putExtra(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-//                context.startActivity(intent)
+               context.startActivity(intent)
             }
         ){
             Text(text ="권한 얻기")
