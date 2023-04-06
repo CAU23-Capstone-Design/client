@@ -64,7 +64,7 @@ class LocationService : Service() {
             }
 
             val locationRequest = com.google.android.gms.location.LocationRequest
-                .Builder(Priority.PRIORITY_HIGH_ACCURACY, 10 * 1000)
+                .Builder(Priority.PRIORITY_HIGH_ACCURACY, 60 * 1000)
                 .build()
 
             val locationCallbackForMyApp = object : LocationCallback(){

@@ -26,6 +26,8 @@ import com.lovestory.lovestory.resource.vitro
 import com.lovestory.lovestory.ui.components.DisplayImageFromUri
 import com.lovestory.lovestory.view.PhotoViewModel
 import com.lovestory.lovestory.entity.Photo
+import com.lovestory.lovestory.graphs.GalleryStack
+import com.lovestory.lovestory.graphs.MainScreens
 
 @Composable
 fun GalleryScreen(navHostController: NavHostController, viewModel: PhotoViewModel, allPhotos : List<Photo>) {
@@ -33,8 +35,6 @@ fun GalleryScreen(navHostController: NavHostController, viewModel: PhotoViewMode
     Log.d("Gallery-Screen", "갤러리 스크린 호출")
 
     val pickMedia = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        // Callback is invoked after the user selects a media item or closes the
-        // photo picker.
         if (uri != null) {
             Log.d("PhotoPicker", "Selected URI: $uri")
 
@@ -43,10 +43,6 @@ fun GalleryScreen(navHostController: NavHostController, viewModel: PhotoViewMode
             Log.d("PhotoPicker", "No media selected")
         }
     }
-
-//    val photoViewModel: PhotoViewModel = viewModel()
-
-//    val photos = photoViewModel.allPhotos.observeAsState()
 
     Column(
         verticalArrangement = Arrangement.Top,
@@ -61,36 +57,39 @@ fun GalleryScreen(navHostController: NavHostController, viewModel: PhotoViewMode
             fontFamily = vitro,
             fontWeight = FontWeight.Normal)
         Button(
-            onClick = {  pickMedia.launch("image/*")},
+            onClick = { navHostController.navigate(GalleryStack.PhotoSync.route){
+                popUpTo(MainScreens.Gallery.route)
+            } },
         ){
-            Text(
-                text = "사진 가져오기",
-                modifier = Modifier.padding(start = 15.dp),
-                fontFamily = apple_bold,
-                fontWeight = FontWeight.Bold,
-                fontSize = 16.sp,
-            )
+            Text(text = "이미지 업로드 하기")
         }
-        DisplayImageFromUri(imageUri = "content://media/external/images/media/1000000152")
-        DisplayImageFromUri(imageUri = "content://media/external/images/media/1000000151")
-        DisplayImageFromUri(imageUri = "content://media/external/images/media/1000000150")
-
-        LazyColumn {
-            items(allPhotos.size) { index ->
-                Text(text = allPhotos[index].id)
-                Text(text = allPhotos[index].date.toString())
-                DisplayImageFromUri(imageUri = allPhotos[index].imageUrl.toString())
-                Text(text = allPhotos[index].imageUrl.toString())
-                Text(text = allPhotos[index].location.toString())
-                Text(text = allPhotos[index].isSynced.toString())
-                Text(text = allPhotos[index].latitude.toString())
-                Text(text = allPhotos[index].longitude.toString())
-                Divider(color = Color.Gray, modifier = Modifier
-                    .fillMaxWidth()
-                    .height(1.dp)
-                )
-            }
-        }
+//        Button(
+//            onClick = {  pickMedia.launch("image/*")},
+//        ){
+//            Text(
+//                text = "사진 가져오기",
+//                modifier = Modifier.padding(start = 15.dp),
+//                fontFamily = apple_bold,
+//                fontWeight = FontWeight.Bold,
+//                fontSize = 16.sp,
+//            )
+//        }
+//        LazyColumn {
+//            items(allPhotos.size) { index ->
+//                Text(text = allPhotos[index].id)
+//                Text(text = allPhotos[index].date.toString())
+//                DisplayImageFromUri(imageUri = allPhotos[index].imageUrl.toString())
+//                Text(text = allPhotos[index].imageUrl.toString())
+//                Text(text = allPhotos[index].location.toString())
+//                Text(text = allPhotos[index].isSynced.toString())
+//                Text(text = allPhotos[index].latitude.toString())
+//                Text(text = allPhotos[index].longitude.toString())
+//                Divider(color = Color.Gray, modifier = Modifier
+//                    .fillMaxWidth()
+//                    .height(1.dp)
+//                )
+//            }
+//        }
     }
 }
 

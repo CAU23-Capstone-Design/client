@@ -27,6 +27,9 @@ fun MainNavGraph(navHostController: NavHostController, viewModel : PhotoViewMode
         composable(MainScreens.Profile.route){
             ProfileScreen(navHostController = navHostController)
         }
+        composable(GalleryStack.PhotoSync.route){
+            PhotoSyncScreen(navHostController = navHostController, viewModel = viewModel, allPhotos = allPhotos)
+        }
     }
 }
 
@@ -36,4 +39,8 @@ sealed class MainScreens(val route : String, val title : String, val icon : Int)
     object Gallery : MainScreens(route = "GALLERY", title = "갤러리", icon = R.drawable.ic_gallery)
     object Calendar : MainScreens(route = "CALENDAR", title = "캘린더", icon = R.drawable.ic_calendar)
     object Profile : MainScreens(route = "PROFILE", title= "프로필", icon = R.drawable.ic_setting)
+}
+
+sealed class GalleryStack(val route : String){
+    object PhotoSync : GalleryStack(route = "PhotoSync")
 }
