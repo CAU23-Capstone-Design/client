@@ -6,14 +6,12 @@ import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.Button
+import androidx.compose.material.Divider
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -26,9 +24,11 @@ import androidx.navigation.NavHostController
 import com.lovestory.lovestory.resource.apple_bold
 import com.lovestory.lovestory.resource.vitro
 import com.lovestory.lovestory.ui.components.DisplayImageFromUri
+import com.lovestory.lovestory.view.PhotoViewModel
+import com.lovestory.lovestory.entity.Photo
 
 @Composable
-fun GalleryScreen(navHostController: NavHostController) {
+fun GalleryScreen(navHostController: NavHostController, viewModel: PhotoViewModel, allPhotos : List<Photo>) {
     val context = LocalContext.current
     Log.d("Gallery-Screen", "갤러리 스크린 호출")
 
@@ -43,6 +43,10 @@ fun GalleryScreen(navHostController: NavHostController) {
             Log.d("PhotoPicker", "No media selected")
         }
     }
+
+//    val photoViewModel: PhotoViewModel = viewModel()
+
+//    val photos = photoViewModel.allPhotos.observeAsState()
 
     Column(
         verticalArrangement = Arrangement.Top,
@@ -71,7 +75,22 @@ fun GalleryScreen(navHostController: NavHostController) {
         DisplayImageFromUri(imageUri = "content://media/external/images/media/1000000151")
         DisplayImageFromUri(imageUri = "content://media/external/images/media/1000000150")
 
-
+        LazyColumn {
+            items(allPhotos.size) { index ->
+                Text(text = allPhotos[index].id)
+                Text(text = allPhotos[index].date.toString())
+                DisplayImageFromUri(imageUri = allPhotos[index].imageUrl.toString())
+                Text(text = allPhotos[index].imageUrl.toString())
+                Text(text = allPhotos[index].location.toString())
+                Text(text = allPhotos[index].isSynced.toString())
+                Text(text = allPhotos[index].latitude.toString())
+                Text(text = allPhotos[index].longitude.toString())
+                Divider(color = Color.Gray, modifier = Modifier
+                    .fillMaxWidth()
+                    .height(1.dp)
+                )
+            }
+        }
     }
 }
 

@@ -1,20 +1,25 @@
 package com.lovestory.lovestory.graphs
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.lovestory.lovestory.R
 import com.lovestory.lovestory.ui.screens.*
+import com.lovestory.lovestory.view.PhotoViewModel
 
 @Composable
-fun MainNavGraph(navHostController: NavHostController){
+fun MainNavGraph(navHostController: NavHostController, viewModel : PhotoViewModel){
+    val allPhotos by viewModel.allPhotos.observeAsState(initial = listOf())
+
     NavHost(navController = navHostController, startDestination =MainScreens.DashBoard.route, route = Graph.MAIN){
         composable(MainScreens.DashBoard.route){
             DashBoardScreen(navHostController = navHostController)
         }
         composable(MainScreens.Gallery.route){
-            GalleryScreen(navHostController = navHostController)
+            GalleryScreen(navHostController = navHostController, viewModel = viewModel, allPhotos = allPhotos)
         }
         composable(MainScreens.Calendar.route){
             CalendarScreen(navHostController = navHostController)

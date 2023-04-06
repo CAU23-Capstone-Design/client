@@ -17,11 +17,10 @@ abstract class PhotoDatabase : RoomDatabase(){
 
         fun getDatabase(context: Context): PhotoDatabase {
             return INSTANCE ?: synchronized(this) {
-//                val instance = Room.databaseBuilder(
-                val instance = Room.inMemoryDatabaseBuilder(
+                val instance = Room.databaseBuilder(
                     context.applicationContext,
                     PhotoDatabase::class.java,
-//                    "photo_database"
+                    "photo_database"
                 ).build()
                 INSTANCE = instance
                 instance

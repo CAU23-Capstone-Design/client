@@ -1,5 +1,6 @@
 package com.lovestory.lovestory.services
 
+import android.annotation.SuppressLint
 import android.app.*
 import android.content.*
 import android.database.ContentObserver
@@ -12,18 +13,32 @@ import androidx.core.app.NotificationCompat
 import com.lovestory.lovestory.R
 import com.lovestory.lovestory.broadcasts.LocationToPhoto.ACTION_START_PHOTO_PICKER_SERVICE
 import com.lovestory.lovestory.broadcasts.LocationToPhoto.ACTION_STOP_PHOTO_PICKER_SERVICE
-import com.lovestory.lovestory.module.getLocationInfoFromImage
+import com.lovestory.lovestory.database.PhotoDatabase
+import com.lovestory.lovestory.entity.Photo
+import com.lovestory.lovestory.module.getInfoFromImage
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import org.apache.commons.codec.digest.DigestUtils
 
 class PhotoService : Service(){
     private lateinit var contentObserver: ContentObserver
+
     private lateinit var handlerThread: HandlerThread
     private lateinit var backgroundHandler: Handler
+
+    private lateinit var photoDatabase: PhotoDatabase
+
+    private val ioScope = CoroutineScope(Dispatchers.IO)
+
 
     override fun onBind(intent: Intent?): IBinder? {return null}
 
     override fun onCreate() {
         super.onCreate()
         Log.d("Photo-service", "포토 서비스 생성")
+        photoDatabase = PhotoDatabase.getDatabase(applicationContext)
         createNotificationChannel()
     }
 
@@ -64,6 +79,7 @@ class PhotoService : Service(){
         val processedUris = mutableSetOf<String>()
 
         contentObserver = object : ContentObserver(backgroundHandler) {
+            @SuppressLint("Recycle")
             override fun onChange(selfChange: Boolean, uri: Uri?) {
                 super.onChange(selfChange, uri)
                 val uriString = uri?.toString() ?: return
@@ -75,24 +91,35 @@ class PhotoService : Service(){
                 }else{
                     Log.d("CONTENT-OBSERVER", "$uri")
                     processedUris.add(uriString)
+                    ioScope.launch {
+                        try{
+                            var isPending = 1
+                            while(isPending == 1){
+                                getUriCursor(uri)?.use{isPending = getIsPending(it)}
+                                delay(1000)
+                                Log.d("CONTENT-OBSERVER", "isPending==0 인지 확인중")
+                            }
+                            Log.d("CONTENT-OBSERVER", "isPending==0 확인")
+                            val inputStream = applicationContext.contentResolver.openInputStream(uri)
+                            val exifInterface = inputStream?.let { androidx.exifinterface.media.ExifInterface(it) }
 
-                    try{
-                        var isPending = 1
-                        while(isPending == 1){
-                            getUriCursor(uri)?.use{isPending = getIsPending(it)}
+                            val uriItemInfo = getInfoFromImage(exifInterface = exifInterface)
+                            val photoId = getUriMD5Hash(uri = uri)
+
+                            val photoDao = photoDatabase.photoDao()
+
+                            val newPhoto = Photo(photoId!!, uriItemInfo.dateTime, uri.toString(), uriItemInfo.latitude, uriItemInfo.longitude)
+                            photoDao.insertPhoto(newPhoto)
+                            Log.d("CONTENT-OBSERVER", "db 추가 성공")
                         }
+                        catch (e: InterruptedException) {
+                            e.printStackTrace()
+                        }
+                        catch(e : Exception){
+                            Log.e("CONTENT-OBSERVER", "$e")
+                        }
+                    }
 
-                        val inputStream = applicationContext.contentResolver.openInputStream(uri)
-                        val exifInterface = inputStream?.let { androidx.exifinterface.media.ExifInterface(it) }
-
-                        getLocationInfoFromImage(exifInterface = exifInterface)
-                    }
-                    catch (e: InterruptedException) {
-                        e.printStackTrace()
-                    }
-                    catch(e : Exception){
-                        Log.e("CONTENT-OBSERVER", "$e")
-                    }
                 }
             }
         }
@@ -127,6 +154,17 @@ class PhotoService : Service(){
         val pending= cursor.getColumnIndexOrThrow(MediaStore.Images.Media.IS_PENDING)
         cursor.moveToNext()
         return cursor.getInt(pending)
+    }
+
+    private fun getUriMD5Hash(uri: Uri): String? {
+        return try {
+            val uriString = uri.toString()
+            val md5Hash = DigestUtils.md5Hex(uriString)
+            md5Hash
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
     }
 
     companion object {

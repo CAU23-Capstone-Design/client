@@ -3,7 +3,13 @@ package com.lovestory.lovestory.module
 import android.util.Log
 import androidx.exifinterface.media.ExifInterface
 
-fun getLocationInfoFromImage(exifInterface: ExifInterface?) {
+data class ExifInfo(
+    val dateTime : String,
+    val latitude : Double,
+    val longitude : Double
+)
+
+fun getInfoFromImage(exifInterface: ExifInterface?):ExifInfo {
     val dateTaken = exifInterface?.getAttribute(androidx.exifinterface.media.ExifInterface.TAG_DATETIME)
     val latitude = convertDMSToDecimal(exifInterface?.getAttribute(androidx.exifinterface.media.ExifInterface.TAG_GPS_LATITUDE))
     val longitude = convertDMSToDecimal(exifInterface?.getAttribute(androidx.exifinterface.media.ExifInterface.TAG_GPS_LONGITUDE))
@@ -11,6 +17,7 @@ fun getLocationInfoFromImage(exifInterface: ExifInterface?) {
     Log.e("FUNCTION-getLocationInfoFromImage", "data : $dateTaken")
     Log.d("FUNCTION-getLocationInfoFromImage", "latitude $latitude - longitude :$longitude")
 
+    return ExifInfo(dateTime = dateTaken!!, latitude = latitude!!, longitude = longitude!!)
 }
 
 fun convertDMSToDecimal(dms: String?): Double? {
