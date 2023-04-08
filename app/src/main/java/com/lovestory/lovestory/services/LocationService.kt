@@ -17,9 +17,9 @@ import com.google.android.gms.location.*
 import com.lovestory.lovestory.R
 import com.lovestory.lovestory.broadcasts.LocationToPhoto.ACTION_START_PHOTO_PICKER_SERVICE
 import com.lovestory.lovestory.broadcasts.LocationToPhoto.ACTION_STOP_PHOTO_PICKER_SERVICE
+import com.lovestory.lovestory.module.checkNearby
 import com.lovestory.lovestory.module.getToken
 import com.lovestory.lovestory.module.saveLocation
-import com.lovestory.lovestory.network.getNearbyCoupleFromServer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -75,23 +75,14 @@ class LocationService : Service() {
                         location.longitude
                         val token = getToken(context)
                         saveLocation(token, location.latitude, location.longitude)
-                        CoroutineScope(Dispatchers.IO).launch{
-                            val response = getNearbyCoupleFromServer(token)
-                            if(response.isSuccessful){
-//                                Log.d("check nearby Location", "${response.body()}")
-                                if(response.body()!!.isNearby){
-                                    sendBroadcastToSecondService(ACTION_START_PHOTO_PICKER_SERVICE)
-                                }
-                                else{
-                                    sendBroadcastToSecondService(ACTION_STOP_PHOTO_PICKER_SERVICE)
-                                }
-
-                            }else{
-                                Log.e("check nearby location error" , "${response.errorBody()}")
+                        CoroutineScope(Dispatchers.IO).launch {
+                            val isNearby = checkNearby(token)
+                            if (isNearby) {
+                                sendBroadcastToSecondService(ACTION_START_PHOTO_PICKER_SERVICE)
+                            } else {
                                 sendBroadcastToSecondService(ACTION_STOP_PHOTO_PICKER_SERVICE)
                             }
                         }
-//                        Log.d("LOCATION-SERVICE", "current location : latitude ${location.latitude}, longitude : ${location.longitude}")
                     }
                 }
             }

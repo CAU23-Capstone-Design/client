@@ -1,18 +1,18 @@
 package com.lovestory.lovestory.module
 
 import android.util.Log
-import com.lovestory.lovestory.network.sendLocationToServer
+import com.lovestory.lovestory.network.sendLocation
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 fun saveLocation(token : String?, latitude: Double, longitude: Double){
     CoroutineScope(Dispatchers.Main).launch{
-        val response = sendLocationToServer(token, latitude, longitude)
+        val response = sendLocation(token, latitude, longitude)
         if(response.isSuccessful){
-            Log.d("save Location", "${response.body()}")
+            Log.d("MODULE-saveLocation", "${response.body()}")
         }else{
-            Log.e("save location error" , "${response.errorBody()}")
+            Log.e("MODULE-saveLocation" , "${response.errorBody()}")
         }
     }
 }

@@ -1,16 +1,13 @@
 package com.lovestory.lovestory.module
 
 import android.content.Context
-import android.database.ContentObserver
 import android.net.Uri
 import android.util.Log
 import com.lovestory.lovestory.entity.Photo
-import com.lovestory.lovestory.network.sendLocationToServer
 import com.lovestory.lovestory.network.uploadPhotoToServer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import okhttp3.MediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -33,9 +30,9 @@ fun uploadPhoto(context : Context, sendPhotos : List<Photo>){
             CoroutineScope(Dispatchers.IO).launch{
                 val response = uploadPhotoToServer(token!!, imagePart!!, photo.id)
                 if(response.isSuccessful){
-                    Log.d("Upload Img", "${response.body()}")
+                    Log.d("MODULE-uploadPhoto", "${response.body()}")
                 }else{
-                    Log.e("upload Img error" , "${response.errorBody()}")
+                    Log.e("MODULE-uploadPhoto" , "${response.errorBody()}")
                 }
             }
 

@@ -18,3 +18,8 @@ data class PhotoBody(
     @SerializedName("latitude")
     val latitude : Double,
 )
+
+data class PhotoTable(
+    @SerializedName("PhotoTable")
+    val photoList: List<String>,
+)
