@@ -43,11 +43,25 @@ interface PhotoDao {
     fun getAllPhotos(): LiveData<List<Photo>>
 
     @Query("SELECT * FROM photos WHERE photo_id = :id")
-    suspend fun getPhotoById(id: Int): Photo?
+    suspend fun getPhotoById(id: String): Photo?
 
     @Query("SELECT * FROM photos WHERE date = :requestDate")
-    fun getRequestDatePhotos(requestDate : String) : LiveData<List<Photo>>
+    fun getRequestDatePhotos(requestDate : String) : LiveData<List<Photo>?>
+
+    @Query("SELECT * FROM photos WHERE isSynced = 0")
+    fun getNotSyncedPhotos() : LiveData<List<Photo>>
+
+    @Query("SELECT * FROM photos WHERE isSynced = 1")
+    fun getSyncedPhotos() : LiveData<List<Photo>>
 
     @Insert
     fun insertPhoto(photo: Photo)
+
+    @Update
+    fun updatePhoto(photo: Photo)
+    @Query("UPDATE photos SET isSynced = 1, location = :location WHERE photo_id = :id")
+    suspend fun updatePhotoSyncStatusAndLocationById(id: String, location: String)
+//    @Query("UPDATE photos SET isSynced = 1 WHERE photo_id = :id")
+//    suspend fun setPhotoSyncedById(id: String)
+
 }

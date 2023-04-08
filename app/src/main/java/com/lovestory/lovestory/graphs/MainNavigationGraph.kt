@@ -13,13 +13,15 @@ import com.lovestory.lovestory.view.PhotoViewModel
 @Composable
 fun MainNavGraph(navHostController: NavHostController, viewModel : PhotoViewModel){
     val allPhotos by viewModel.allPhotos.observeAsState(initial = listOf())
+    val syncedPhotos by viewModel.syncedPhotos.observeAsState(initial = listOf())
+    val notSyncedPhotos by viewModel.notSyncedPhotos.observeAsState(initial = listOf())
 
     NavHost(navController = navHostController, startDestination =MainScreens.DashBoard.route, route = Graph.MAIN){
         composable(MainScreens.DashBoard.route){
             DashBoardScreen(navHostController = navHostController)
         }
         composable(MainScreens.Gallery.route){
-            GalleryScreen(navHostController = navHostController, viewModel = viewModel, allPhotos = allPhotos)
+            GalleryScreen(navHostController = navHostController, viewModel = viewModel, syncedPhotos = syncedPhotos)
         }
         composable(MainScreens.Calendar.route){
             CalendarScreen(navHostController = navHostController)
@@ -28,7 +30,7 @@ fun MainNavGraph(navHostController: NavHostController, viewModel : PhotoViewMode
             ProfileScreen(navHostController = navHostController)
         }
         composable(GalleryStack.PhotoSync.route){
-            PhotoSyncScreen(navHostController = navHostController, viewModel = viewModel, allPhotos = allPhotos)
+            PhotoSyncScreen(navHostController = navHostController, viewModel = viewModel, notSyncedPhotos = notSyncedPhotos)
         }
     }
 }

@@ -8,10 +8,13 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.Button
 import androidx.compose.material.Divider
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -30,7 +33,7 @@ import com.lovestory.lovestory.graphs.GalleryStack
 import com.lovestory.lovestory.graphs.MainScreens
 
 @Composable
-fun GalleryScreen(navHostController: NavHostController, viewModel: PhotoViewModel, allPhotos : List<Photo>) {
+fun GalleryScreen(navHostController: NavHostController, viewModel: PhotoViewModel, syncedPhotos : List<Photo>) {
     val context = LocalContext.current
     Log.d("Gallery-Screen", "갤러리 스크린 호출")
 
@@ -62,6 +65,16 @@ fun GalleryScreen(navHostController: NavHostController, viewModel: PhotoViewMode
             } },
         ){
             Text(text = "이미지 업로드 하기")
+        }
+        LazyVerticalGrid(
+            columns = GridCells.Adaptive(minSize = 120.dp)
+        ) {
+            items(syncedPhotos.size) { index ->
+                DisplayImageFromUri(
+                    index = index,
+                    imageUri = syncedPhotos[index].imageUrl.toString(),
+                )
+            }
         }
 //        Button(
 //            onClick = {  pickMedia.launch("image/*")},

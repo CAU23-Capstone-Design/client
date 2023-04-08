@@ -3,8 +3,10 @@ package com.lovestory.lovestory.module
 import android.content.Context
 import android.net.Uri
 import android.util.Log
+import com.lovestory.lovestory.database.PhotoDatabase
 import com.lovestory.lovestory.entity.Photo
 import com.lovestory.lovestory.network.uploadPhotoToServer
+import com.lovestory.lovestory.repository.PhotoRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -12,7 +14,10 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 
-fun uploadPhoto(context : Context, sendPhotos : List<Photo>){
+suspend fun uploadPhoto(context : Context, sendPhotos : List<Photo>){
+    val photoDatabase: PhotoDatabase = PhotoDatabase.getDatabase(context)
+    val photoDao = photoDatabase.photoDao()
+    val repository = PhotoRepository(photoDao)
     val token = getToken(context)
 
     for(photo in sendPhotos){
@@ -34,6 +39,8 @@ fun uploadPhoto(context : Context, sendPhotos : List<Photo>){
                 }else{
                     Log.e("MODULE-uploadPhoto" , "${response.errorBody()}")
                 }
+
+                repository.updatePhotoSyncStatusAndLocation(photoId = photo.id, location = response.body()!!.message.toString())
             }
 
         }

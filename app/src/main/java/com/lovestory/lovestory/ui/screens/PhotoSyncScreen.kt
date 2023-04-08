@@ -14,23 +14,28 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.lovestory.lovestory.entity.Photo
+import com.lovestory.lovestory.module.checkExistNeedPhotoForSync
 import com.lovestory.lovestory.module.uploadPhoto
+import com.lovestory.lovestory.ui.components.CheckableDisplayImageFromUri
 import com.lovestory.lovestory.ui.components.DisplayImageFromUri
 import com.lovestory.lovestory.view.PhotoViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @Composable
-fun PhotoSyncScreen(navHostController: NavHostController, viewModel: PhotoViewModel, allPhotos : List<Photo>){
+fun PhotoSyncScreen(navHostController: NavHostController, viewModel: PhotoViewModel, notSyncedPhotos : List<Photo>){
     val context = LocalContext.current
 
     var checkPhotoList = remember {
-        mutableStateOf(MutableList<Boolean>(allPhotos.size) { true })
+        mutableStateOf(MutableList<Boolean>(notSyncedPhotos.size) { true })
     }
 
-    Log.d("PhtoSyncScreen", "${allPhotos.size}")
+    Log.d("PhtoSyncScreen", "${notSyncedPhotos.size}")
 
-    LaunchedEffect(key1 = allPhotos.size) {
-        if (allPhotos.size > checkPhotoList.value.size) {
-            val newSize = allPhotos.size
+    LaunchedEffect(key1 = notSyncedPhotos.size) {
+        if (notSyncedPhotos.size > checkPhotoList.value.size) {
+            val newSize = notSyncedPhotos.size
             val oldSize = checkPhotoList.value.size
             val newCheckPhotoList = checkPhotoList.value.toMutableList()
 
@@ -56,7 +61,6 @@ fun PhotoSyncScreen(navHostController: NavHostController, viewModel: PhotoViewMo
         }
     }
 
-
     Column(
         modifier = Modifier
             .background(Color.White)
@@ -67,22 +71,24 @@ fun PhotoSyncScreen(navHostController: NavHostController, viewModel: PhotoViewMo
         LazyVerticalGrid(
             columns = GridCells.Adaptive(minSize = 120.dp)
         ) {
-            items(allPhotos.size) { index ->
-                if (index < allPhotos.size && index < checkPhotoList.value.size){
-                    DisplayImageFromUri(
+            items(notSyncedPhotos.size) { index ->
+                if (index < notSyncedPhotos.size && index < checkPhotoList.value.size){
+                    CheckableDisplayImageFromUri(
                         index = index,
                         checked = checkPhotoList.value[index],
-                        imageUri = allPhotos[index].imageUrl.toString(),
+                        imageUri = notSyncedPhotos[index].imageUrl.toString(),
                         onChangeChecked = onChangeChecked
                     )
                 }
-
             }
         }
 
         Button(onClick = {
-            val sendPhotos = getListOfCheckedPhoto(allPhotos, checkPhotoList)
-            uploadPhoto(context,sendPhotos)
+            val sendPhotos = getListOfCheckedPhoto(notSyncedPhotos, checkPhotoList)
+            CoroutineScope(Dispatchers.IO).launch {
+                uploadPhoto(context, sendPhotos)
+                checkExistNeedPhotoForSync(context)
+            }
         }) {
             Text("업로드 하기")
         }

@@ -16,7 +16,7 @@ import coil.request.ImageRequest
 
 
 @Composable
-fun DisplayImageFromUri(index : Int,    checked : Boolean, imageUri: String, onChangeChecked : (Int)->Unit) {
+fun CheckableDisplayImageFromUri(index : Int,    checked : Boolean, imageUri: String, onChangeChecked : (Int)->Unit) {
     val borderColor = if (checked) Color.Blue else Color.Transparent
 
     Image(
@@ -33,6 +33,25 @@ fun DisplayImageFromUri(index : Int,    checked : Boolean, imageUri: String, onC
             .padding(5.dp)
             .border(width = 2.dp, color = borderColor)
             .clickable { onChangeChecked(index) },
+        contentScale = ContentScale.Crop
+    )
+}
+
+@Composable
+fun DisplayImageFromUri(index : Int, imageUri: String) {
+
+    Image(
+        painter = rememberAsyncImagePainter(
+            ImageRequest
+                .Builder(LocalContext.current)
+                .data(data = imageUri)
+                .build()
+        ),
+        contentDescription = null,
+        modifier = Modifier
+            .height(100.dp)
+            .width(100.dp)
+            .padding(5.dp),
         contentScale = ContentScale.Crop
     )
 }

@@ -27,6 +27,4 @@ abstract class PhotoDatabase : RoomDatabase(){
             }
         }
     }
-
-
 }
