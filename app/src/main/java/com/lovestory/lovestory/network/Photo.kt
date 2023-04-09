@@ -35,12 +35,27 @@ suspend fun getPhotoTable(token : String):Response<List<String>>{
 
 //    return apiService.getImageTable(jwt)
     return try {
-        return apiService.getImageTable(jwt)
+       apiService.getImageTable(jwt)
     } catch (e: HttpException) {
         Log.e("NETWORK-getPhotoTable", "$e")
         Response.error(e.code(), e.response()?.errorBody())
     } catch (e: Exception) {
         Log.e("NETWORK-getPhotoTable", "$e")
+        Response.error(500, ResponseBody.create(null, "Unknown error"))
+    }
+}
+
+suspend fun getNotSyncImage(token: String, photo_id: String):Response<ResponseBody>{
+    val jwt : String = "Bearer $token"
+    val apiService: PhotoService = createApiService()
+
+    return try{
+        apiService.getImage(jwt, photo_id)
+    }catch (e: HttpException) {
+        Log.e("NETWORK-getNotSyncImage", "$e")
+        Response.error(e.code(), e.response()?.errorBody())
+    } catch (e: Exception) {
+        Log.e("NETWORK-getNotSyncImage", "$e")
         Response.error(500, ResponseBody.create(null, "Unknown error"))
     }
 }

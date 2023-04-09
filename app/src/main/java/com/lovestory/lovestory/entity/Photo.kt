@@ -19,9 +19,14 @@ class Photo {
     @NotNull
     var isSynced: Boolean = false
 
-    @ColumnInfo(name = "location")
-    var location: String? = null
+    @ColumnInfo(name = "area1")
+    var area1: String? = null
 
+    @ColumnInfo(name = "area2")
+    var area2: String? = null
+
+    @ColumnInfo(name = "area3")
+    var area3 : String? = null
 
     var imageUrl: String? = null
     var latitude: Double = 0.0
@@ -63,8 +68,8 @@ interface PhotoDao {
     @Delete
     fun deletePhoto(photo: Photo)
 
-    @Query("UPDATE photos SET isSynced = 1, location = :location WHERE photo_id = :id")
-    suspend fun updatePhotoSyncStatusAndLocationById(id: String, location: String)
+    @Query("UPDATE photos SET isSynced = 1, area1 = :area1, area2 = :area2, area3 = :area3 WHERE photo_id = :id")
+    suspend fun updatePhotoSyncStatusAndLocationById(id: String, area1: String, area2: String, area3: String)
 //    @Query("UPDATE photos SET isSynced = 1 WHERE photo_id = :id")
 //    suspend fun setPhotoSyncedById(id: String)
 

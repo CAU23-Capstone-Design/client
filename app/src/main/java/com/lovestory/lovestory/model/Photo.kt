@@ -1,5 +1,4 @@
 package com.lovestory.lovestory.model
-
 import com.google.gson.annotations.SerializedName
 
 data class PhotoBody(
@@ -7,7 +6,7 @@ data class PhotoBody(
     val local_id: String,
 
     @SerializedName("location")
-    val message : String,
+    val location : AreaInfo,
 
     @SerializedName("date")
     val date : String,
@@ -18,6 +17,18 @@ data class PhotoBody(
     @SerializedName("latitude")
     val latitude : Double,
 )
+
+data class AreaInfo(
+    @SerializedName("area1")
+    val area1 : String,
+
+    @SerializedName("area2")
+    val area2 : String,
+
+    @SerializedName("area3")
+    val area3 : String,
+)
+
 
 data class PhotoTable(
 //    @SerializedName("PhotoTable")

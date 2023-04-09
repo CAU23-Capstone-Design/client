@@ -15,6 +15,7 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody
 
 suspend fun uploadPhoto(context : Context, sendPhotos : List<Photo>, viewModel: PhotoViewModel){
+    Log.d("MODULE-uploadPhoto", "setUploadPhotos 호출")
     viewModel.setUploadPhotos(sendPhotos.size)
     val photoDatabase: PhotoDatabase = PhotoDatabase.getDatabase(context)
     val photoDao = photoDatabase.photoDao()
@@ -43,7 +44,12 @@ suspend fun uploadPhoto(context : Context, sendPhotos : List<Photo>, viewModel: 
             }else{
                 Log.e("MODULE-uploadPhoto" , "${response.errorBody()}")
             }
-            repository.updatePhotoSyncStatusAndLocation(photoId = photo.id, location = response.body()!!.message.toString())
+            repository.updatePhotoSyncStatusAndLocation(
+                photoId = photo.id,
+                area1 = response.body()!!.location.area1,
+                area2= response.body()!!.location.area2,
+                area3= response.body()!!.location.area3
+            )
         }
         viewModel.addCurrentUploadPhotos()
     }

@@ -1,6 +1,7 @@
 package com.lovestory.lovestory.view
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import com.lovestory.lovestory.database.PhotoDatabase
@@ -28,6 +29,7 @@ class PhotoViewModel(application : Application) : ViewModel() {
     var totalUploadPhotos = 0
 
     fun setUploadPhotos(numOfPhotos : Int){
+        Log.d("VIEW-PhotoViewModel", "setUplaodPhotos 호출됨")
         isUploadPhotos = true
         totalUploadPhotos = numOfPhotos
     }

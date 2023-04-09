@@ -23,6 +23,7 @@ suspend fun checkExistNeedPhotoForSync(context : Context){
             for(local_id in response.body()!!){
                 if(!repository.isPhotoExistById(local_id)){
                     Log.d("MODULE-checkExistNeedPhotoForSync", "not existed $local_id")
+                    getImageById(context, token, local_id)
                 }
             }
         }

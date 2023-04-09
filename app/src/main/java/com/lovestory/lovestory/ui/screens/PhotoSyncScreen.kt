@@ -39,6 +39,7 @@ fun PhotoSyncScreen(navHostController: NavHostController, viewModel: PhotoViewMo
 //    var isUploadPhotos by remember {
 //        mutableStateOf(viewModel.isUploadPhotos)
 //    }
+
     var isUploadPhotos = viewModel.isUploadPhotos
     var currentUploadPhotos = viewModel.currentUploadPhotos
     var totalUploadPhotos = viewModel.totalUploadPhotos
@@ -65,6 +66,10 @@ fun PhotoSyncScreen(navHostController: NavHostController, viewModel: PhotoViewMo
 
             checkPhotoList.value = newCheckPhotoList
         }
+    }
+
+    LaunchedEffect(key1 = viewModel.isUploadPhotos){
+        isUploadPhotos = viewModel.isUploadPhotos
     }
 
     val onChangeChecked: (Int) -> Unit = { index ->

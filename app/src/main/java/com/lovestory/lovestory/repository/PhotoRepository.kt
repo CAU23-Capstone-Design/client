@@ -18,9 +18,9 @@ class PhotoRepository(private val photoDao: PhotoDao) {
         return photoDao.getPhotoById(id = photo_id) != null
     }
 
-    fun updatePhotoSyncStatusAndLocation(photoId: String, location: String) {
+    fun updatePhotoSyncStatusAndLocation(photoId: String, area1 : String, area2 : String, area3 : String) {
         coroutineScope.launch(Dispatchers.IO) {
-            photoDao.updatePhotoSyncStatusAndLocationById(photoId, location)
+            photoDao.updatePhotoSyncStatusAndLocationById(photoId, area1 = area1, area2 = area2, area3 = area3)
         }
     }
 }
