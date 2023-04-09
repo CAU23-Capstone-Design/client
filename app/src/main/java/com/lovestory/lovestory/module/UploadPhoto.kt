@@ -7,14 +7,15 @@ import com.lovestory.lovestory.database.PhotoDatabase
 import com.lovestory.lovestory.entity.Photo
 import com.lovestory.lovestory.network.uploadPhotoToServer
 import com.lovestory.lovestory.repository.PhotoRepository
-import kotlinx.coroutines.CoroutineScope
+import com.lovestory.lovestory.view.PhotoViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 
-suspend fun uploadPhoto(context : Context, sendPhotos : List<Photo>){
+suspend fun uploadPhoto(context : Context, sendPhotos : List<Photo>, viewModel: PhotoViewModel){
+    viewModel.setUploadPhotos(sendPhotos.size)
     val photoDatabase: PhotoDatabase = PhotoDatabase.getDatabase(context)
     val photoDao = photoDatabase.photoDao()
     val repository = PhotoRepository(photoDao)
@@ -23,6 +24,7 @@ suspend fun uploadPhoto(context : Context, sendPhotos : List<Photo>){
     for(photo in sendPhotos){
         val uri = Uri.parse(photo.imageUrl)
         context.contentResolver.openInputStream(uri)?.use { inputStream ->
+            Log.d("MODULE-uploadPhoto", "사진 불러오기")
             val byteArray = inputStream.readBytes()
 
             val requestFile = byteArray?.let {
@@ -32,17 +34,18 @@ suspend fun uploadPhoto(context : Context, sendPhotos : List<Photo>){
                 MultipartBody.Part.createFormData("image", "image.jpg", it)
             }
 
-            CoroutineScope(Dispatchers.IO).launch{
-                val response = uploadPhotoToServer(token!!, imagePart!!, photo.id)
-                if(response.isSuccessful){
-                    Log.d("MODULE-uploadPhoto", "${response.body()}")
-                }else{
-                    Log.e("MODULE-uploadPhoto" , "${response.errorBody()}")
-                }
-
-                repository.updatePhotoSyncStatusAndLocation(photoId = photo.id, location = response.body()!!.message.toString())
+            val response = withContext(Dispatchers.IO) {
+                uploadPhotoToServer(token!!, imagePart!!, photo.id)
             }
-
+            Log.d("MODULE-uploadPhoto", "사진 업로드 실행")
+            if(response.isSuccessful){
+                Log.d("MODULE-uploadPhoto", "${response.body()}")
+            }else{
+                Log.e("MODULE-uploadPhoto" , "${response.errorBody()}")
+            }
+            repository.updatePhotoSyncStatusAndLocation(photoId = photo.id, location = response.body()!!.message.toString())
         }
+        viewModel.addCurrentUploadPhotos()
     }
+    viewModel.setFinishedUploadPhotos()
 }

@@ -15,6 +15,8 @@ import androidx.compose.material.Divider
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -33,19 +35,9 @@ import com.lovestory.lovestory.graphs.GalleryStack
 import com.lovestory.lovestory.graphs.MainScreens
 
 @Composable
-fun GalleryScreen(navHostController: NavHostController, viewModel: PhotoViewModel, syncedPhotos : List<Photo>) {
-    val context = LocalContext.current
-    Log.d("Gallery-Screen", "갤러리 스크린 호출")
-
-    val pickMedia = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        if (uri != null) {
-            Log.d("PhotoPicker", "Selected URI: $uri")
-
-            getRotationFromImageUri(uri = uri, context = context)
-        } else {
-            Log.d("PhotoPicker", "No media selected")
-        }
-    }
+fun GalleryScreen(navHostController: NavHostController, viewModel: PhotoViewModel) {
+    val syncedPhotos by viewModel.syncedPhotos.observeAsState(initial = listOf())
+//    val context = LocalContext.current
 
     Column(
         verticalArrangement = Arrangement.Top,
@@ -76,46 +68,5 @@ fun GalleryScreen(navHostController: NavHostController, viewModel: PhotoViewMode
                 )
             }
         }
-//        Button(
-//            onClick = {  pickMedia.launch("image/*")},
-//        ){
-//            Text(
-//                text = "사진 가져오기",
-//                modifier = Modifier.padding(start = 15.dp),
-//                fontFamily = apple_bold,
-//                fontWeight = FontWeight.Bold,
-//                fontSize = 16.sp,
-//            )
-//        }
-//        LazyColumn {
-//            items(allPhotos.size) { index ->
-//                Text(text = allPhotos[index].id)
-//                Text(text = allPhotos[index].date.toString())
-//                DisplayImageFromUri(imageUri = allPhotos[index].imageUrl.toString())
-//                Text(text = allPhotos[index].imageUrl.toString())
-//                Text(text = allPhotos[index].location.toString())
-//                Text(text = allPhotos[index].isSynced.toString())
-//                Text(text = allPhotos[index].latitude.toString())
-//                Text(text = allPhotos[index].longitude.toString())
-//                Divider(color = Color.Gray, modifier = Modifier
-//                    .fillMaxWidth()
-//                    .height(1.dp)
-//                )
-//            }
-//        }
     }
-}
-
-fun getRotationFromImageUri(context: Context, uri: Uri) {
-    val inputStream = context.contentResolver.openInputStream(uri)
-    val exifInterface = inputStream?.let { ExifInterface(it) }
-
-    val orientation = exifInterface?.getAttribute(ExifInterface.TAG_ORIENTATION)
-    val dateTaken = exifInterface?.getAttribute(ExifInterface.TAG_DATETIME)
-
-    val latitude = exifInterface?.getAttribute(android.media.ExifInterface.TAG_GPS_LATITUDE)
-    val longitude = exifInterface?.getAttribute(android.media.ExifInterface.TAG_GPS_LONGITUDE)
-
-    Log.e("dsfgsdj.kfbgjzdbfgjkbfdg", "$orientation &&&& $dateTaken")
-    Log.d("getPhotoeExif", "$latitude - $longitude")
 }

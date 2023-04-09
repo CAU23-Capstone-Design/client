@@ -21,6 +21,26 @@ class PhotoViewModel(application : Application) : ViewModel() {
         allPhotos = repository.allPhotos
         syncedPhotos = repository.syncedPhotos
         notSyncedPhotos = repository.notSyncedPhotos
+    }
 
+    var isUploadPhotos = false
+    var currentUploadPhotos = 0
+    var totalUploadPhotos = 0
+
+    fun setUploadPhotos(numOfPhotos : Int){
+        isUploadPhotos = true
+        totalUploadPhotos = numOfPhotos
+    }
+
+    fun addCurrentUploadPhotos(){
+        if(isUploadPhotos){
+            currentUploadPhotos += 1
+        }
+    }
+
+    fun setFinishedUploadPhotos(){
+        isUploadPhotos = false
+        currentUploadPhotos = 0
+        totalUploadPhotos = 0
     }
 }

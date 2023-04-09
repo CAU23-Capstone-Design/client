@@ -59,6 +59,10 @@ interface PhotoDao {
 
     @Update
     fun updatePhoto(photo: Photo)
+
+    @Delete
+    fun deletePhoto(photo: Photo)
+
     @Query("UPDATE photos SET isSynced = 1, location = :location WHERE photo_id = :id")
     suspend fun updatePhotoSyncStatusAndLocationById(id: String, location: String)
 //    @Query("UPDATE photos SET isSynced = 1 WHERE photo_id = :id")

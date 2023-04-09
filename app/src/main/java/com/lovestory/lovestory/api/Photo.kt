@@ -18,10 +18,10 @@ interface PhotoService{
 
     @Headers("Content-Type: application/json")
     @GET("/images/local-ids")
-    suspend fun getImageTable(@Header("Authorization") jwtToken: String) : PhotoTable
+    suspend fun getImageTable(@Header("Authorization") jwtToken: String) : Response<List<String>>
 
     @Headers("Content-Type: application/json")
-    @GET("images/{local_id}")
+    @GET("/images/{local_id}")
     @Streaming
     suspend fun getImage(@Header("Authorization") jwtToken: String, @Path("local_id") localId: String): Response<ResponseBody>
 }

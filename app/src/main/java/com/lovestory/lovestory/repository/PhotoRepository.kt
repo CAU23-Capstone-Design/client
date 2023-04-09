@@ -23,31 +23,5 @@ class PhotoRepository(private val photoDao: PhotoDao) {
             photoDao.updatePhotoSyncStatusAndLocationById(photoId, location)
         }
     }
-
-
-//
-//    fun insertPhoto(photo : Photo){
-//        coroutineScope.launch(Dispatchers.IO) {
-//            photoDao.insertPhoto(photo = photo)
-//        }
-//    }
-//
-//    fun updatePhoto(photo: Photo){
-//        coroutineScope.launch(Dispatchers.IO) {
-//            photoDao.updatePhoto(photo = photo)
-//        }
-//    }
-//
-//    fun getListRequestDataPhotos(requestDate : String){
-//        coroutineScope.launch(Dispatchers.IO){
-//            photoDao.getRequestDatePhotos(requestDate = requestDate)
-//        }
-//    }
-//
-//    fun isExistPhotoById(photo_id : String){
-//        coroutineScope.launch(Dispatchers.IO){
-//            photoDao.getPhotoById(id = photo_id)
-//        }
-//    }
 }
 

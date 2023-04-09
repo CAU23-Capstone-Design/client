@@ -29,19 +29,18 @@ suspend fun uploadPhotoToServer(
     }
 }
 
-suspend fun getPhotoTable(token : String):Response<PhotoTable>{
+suspend fun getPhotoTable(token : String):Response<List<String>>{
     val jwt : String = "Bearer $token"
     val apiService: PhotoService = createApiService()
 
-    return try{
-        val call = apiService.getImageTable(token)
-        Response.success(call)
-    }catch (e : HttpException){
+//    return apiService.getImageTable(jwt)
+    return try {
+        return apiService.getImageTable(jwt)
+    } catch (e: HttpException) {
         Log.e("NETWORK-getPhotoTable", "$e")
         Response.error(e.code(), e.response()?.errorBody())
-    }catch (e : Exception){
+    } catch (e: Exception) {
         Log.e("NETWORK-getPhotoTable", "$e")
         Response.error(500, ResponseBody.create(null, "Unknown error"))
     }
-
 }

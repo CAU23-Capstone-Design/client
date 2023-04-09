@@ -20,6 +20,6 @@ data class PhotoBody(
 )
 
 data class PhotoTable(
-    @SerializedName("PhotoTable")
+//    @SerializedName("PhotoTable")
     val photoList: List<String>,
 )
