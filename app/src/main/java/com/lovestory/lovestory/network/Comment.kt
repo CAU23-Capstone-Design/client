@@ -20,7 +20,7 @@ suspend fun getComment(token : String):Response<List<GetMemory>>{
     //val couple = CoupleInfo(code = code, firstDate = meetDay)
    // val couplememory = CoupleMemory(date = LocalDate.parse(date), comment = comment)
     val retrofit = Retrofit.Builder()
-        .baseUrl("http://3.34.189.103:3000")
+        .baseUrl("https://api.cau-lovestory.site:3000/api-docs/")
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
@@ -46,7 +46,7 @@ suspend fun postComment(token : String, coupleMemory: CoupleMemory):Response<Any
     //val couple = CoupleInfo(code = code, firstDate = meetDay)
     // val couplememory = CoupleMemory(date = LocalDate.parse(date), comment = comment)
     val retrofit = Retrofit.Builder()
-        .baseUrl("http://3.34.189.103:3000")
+        .baseUrl("https://api.cau-lovestory.site:3000/api-docs/")
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
@@ -67,7 +67,7 @@ suspend fun postComment(token : String, coupleMemory: CoupleMemory):Response<Any
 suspend fun deleteComment(token : String, date: String):Response<Any>{
     val jwt : String = "Bearer $token"
     val retrofit = Retrofit.Builder()
-        .baseUrl("http://3.34.189.103:3000")
+        .baseUrl("https://api.cau-lovestory.site:3000/api-docs/")
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
@@ -88,7 +88,7 @@ suspend fun deleteComment(token : String, date: String):Response<Any>{
 suspend fun putComment(token : String, date: String, comment : String):Response<Any>{
     val jwt : String = "Bearer $token"
     val retrofit = Retrofit.Builder()
-        .baseUrl("http://3.34.189.103:3000")
+        .baseUrl("https://api.cau-lovestory.site:3000/api-docs/")
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 

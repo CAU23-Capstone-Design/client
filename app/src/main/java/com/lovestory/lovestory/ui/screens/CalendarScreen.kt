@@ -1,6 +1,7 @@
 package com.lovestory.lovestory.ui.screens
 
 import android.annotation.SuppressLint
+import android.os.Bundle
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -12,6 +13,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -56,16 +58,19 @@ import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.*
 import androidx.lifecycle.lifecycleScope
+import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
-import com.google.maps.android.compose.GoogleMap
-import com.google.maps.android.compose.Marker
-import com.google.maps.android.compose.MarkerState
-import com.google.maps.android.compose.rememberCameraPositionState
+import com.google.android.gms.maps.model.Polyline
+import com.google.android.gms.maps.model.PolylineOptions
+import com.google.maps.android.compose.*
 import com.lovestory.lovestory.R
+import com.lovestory.lovestory.graphs.CalendarNavGraph
+import com.lovestory.lovestory.graphs.MainScreens
 import com.lovestory.lovestory.network.deleteComment
 import com.lovestory.lovestory.network.putComment
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.selects.select
 import okhttp3.Dispatcher
 
 
@@ -77,11 +82,33 @@ fun CalendarScreen(navHostController: NavHostController) {
     val endMonth = remember { currentMonth.plusMonths(100) } // Adjust as needed
     val daysOfWeek = remember { daysOfWeek() }
 
+    //val navigateToMapScreen = remember { mutableStateOf(false) }
+    //if (navigateToMapScreen.value) {
+    //    MapScreen()
+    //}
+
+    var selectionSave by rememberSaveable { mutableStateOf(CalendarDay(date = LocalDate.now(), position = DayPosition.MonthDate))}
+    var isPopupVisibleSave by rememberSaveable { mutableStateOf(false) }
+    Log.d("세이브", "$selectionSave, $isPopupVisibleSave")
+
     var selection by remember { mutableStateOf(CalendarDay(date = LocalDate.now(), position = DayPosition.MonthDate))}
-
     var isPopupVisible by remember { mutableStateOf(false) }
+    Log.d("세이브", "$selection, $isPopupVisible")
+    //Log.d("셀렉션1", "${selection.date}")
 
-    val onOpenDialogRequest : ()->Unit = {isPopupVisible = true}
+    if(isPopupVisibleSave != isPopupVisible){
+        selection = selectionSave
+        isPopupVisible = isPopupVisibleSave
+    }
+
+    //var selection = rememberSaveable { mutableStateOf(CalendarDay(date = LocalDate.now(), position = DayPosition.MonthDate))}
+    //var isPopupVisible = rememberSaveable { mutableStateOf(false) }
+
+
+    val onOpenDialogRequest : ()->Unit = {
+        isPopupVisible = true
+        isPopupVisibleSave = true
+    }
     val onDismissRequest : () -> Unit = {isPopupVisible = false}
 
     val state = rememberCalendarState(
@@ -250,6 +277,7 @@ fun CalendarScreen(navHostController: NavHostController) {
                     }
                 }
                 isPopupVisible = false// Update coupleMemoryList when dialog is dismissed
+                isPopupVisibleSave = false
             }, //onDismissRequest,
             properties = DialogProperties(dismissOnBackPress = true, dismissOnClickOutside = true)
         ) {
@@ -320,6 +348,7 @@ fun CalendarScreen(navHostController: NavHostController) {
 
                                     }
                                     isPopupVisible = false
+                                    isPopupVisibleSave = false
                                 },
                                 elevation = null,
                                 contentPadding = PaddingValues(0.dp),
@@ -362,6 +391,7 @@ fun CalendarScreen(navHostController: NavHostController) {
                                         }
                                     }
                                     isPopupVisible = false
+                                    isPopupVisibleSave = false
                                 },
                                 elevation = null,
                                 contentPadding = PaddingValues(0.dp),
@@ -394,20 +424,31 @@ fun CalendarScreen(navHostController: NavHostController) {
                                 .height(300.dp)
                                 .background(color = Color.Gray, RoundedCornerShape(12.dp))
                         ){
-                            val singapore = LatLng(1.35, 103.87)
+
+                            val viewposition = averageLatLng(points1)
                             val cameraPositionState = rememberCameraPositionState {
-                                position = CameraPosition.fromLatLngZoom(singapore, 10f)
+                                position = CameraPosition.fromLatLngZoom(viewposition!!, 15f)
                             }
+                            selectionSave = selection
+                            isPopupVisibleSave = isPopupVisible
+
                             GoogleMap(
                                 modifier = Modifier.fillMaxSize(),
-                                cameraPositionState = cameraPositionState
+                                cameraPositionState = cameraPositionState,
+                                onMapClick = {
+                                    isPopupVisible = false
+                                    Log.d("구글", "구글 맵 누름")
+                                    navHostController.navigate(MainScreens.Map.route) {
+                                        launchSingleTop = true
+                                    }
+                                }
                             ) {
-                                Marker(
-                                    state = MarkerState(position = singapore),
-                                    title = "Singapore",
-                                    snippet = "Marker in Singapore"
+                                Polyline(
+                                    points = points1,
+                                    color = Color.Black
                                 )
                             }
+
                         }
                         Spacer(modifier = Modifier.height(20.dp))
                     }
@@ -415,6 +456,10 @@ fun CalendarScreen(navHostController: NavHostController) {
             //}
         //}
     }
+
+    //if(isMapVisible){
+    //    Log.d("셀렉션2", "${selection.date}")
+    //}
 
 }
 
@@ -425,6 +470,7 @@ fun CalendarScreen(navHostController: NavHostController) {
 fun DefaultPreview() {
     val navController = rememberNavController()
     LoveStoryTheme {
-        CalendarScreen(navHostController = navController)
+        //CalendarScreen(navHostController = navController, onNavigateToMapScreen = )
     }
 }
+
