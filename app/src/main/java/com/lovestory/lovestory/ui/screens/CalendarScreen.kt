@@ -441,7 +441,8 @@ fun CalendarScreen(navHostController: NavHostController) {
                                     navHostController.navigate(MainScreens.Map.route) {
                                         launchSingleTop = true
                                     }
-                                }
+                                },
+                                uiSettings = uiSettings
                             ) {
                                 Polyline(
                                     points = points1,
@@ -462,6 +463,20 @@ fun CalendarScreen(navHostController: NavHostController) {
     //}
 
 }
+
+val uiSettings = MapUiSettings(
+        compassEnabled = false,
+        indoorLevelPickerEnabled = false,
+        mapToolbarEnabled = false,
+        myLocationButtonEnabled = false,
+        rotationGesturesEnabled = false,
+        scrollGesturesEnabled = false,
+        scrollGesturesEnabledDuringRotateOrZoom = false,
+        tiltGesturesEnabled = false,
+        zoomControlsEnabled = false,
+        zoomGesturesEnabled = false
+    )
+
 
 
 
