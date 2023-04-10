@@ -100,6 +100,13 @@ class PhotoService : Service(){
                             }
                             Log.d("CONTENT-OBSERVER", "isPending==0 확인")
                             val inputStream = applicationContext.contentResolver.openInputStream(uri)
+
+                            val realFilePath = getPathFromUri(applicationContext, uri)
+                            Log.d("CONTENT-OBSERVER", "filePath = $realFilePath")
+                            if (realFilePath != null && realFilePath.contains("Download/lovestory")) {
+                                return@launch
+                            }
+
                             val exifInterface = inputStream?.let { androidx.exifinterface.media.ExifInterface(it) }
 
                             val uriItemInfo = getInfoFromImage(exifInterface = exifInterface)
@@ -125,6 +132,17 @@ class PhotoService : Service(){
         applicationContext.contentResolver.registerContentObserver(
             MediaStore.Images.Media.EXTERNAL_CONTENT_URI, true,contentObserver
         )
+    }
+
+    fun getPathFromUri(context: Context, uri: Uri): String? {
+        val projection = arrayOf(MediaStore.Images.Media.DATA)
+        context.contentResolver.query(uri, projection, null, null, null)?.use { cursor ->
+            if (cursor.moveToFirst()) {
+                val columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
+                return cursor.getString(columnIndex)
+            }
+        }
+        return null
     }
 
     private fun createNotificationChannel() {

@@ -7,14 +7,14 @@ import com.lovestory.lovestory.database.PhotoDatabase
 import com.lovestory.lovestory.entity.Photo
 import com.lovestory.lovestory.network.uploadPhotoToServer
 import com.lovestory.lovestory.repository.PhotoRepository
-import com.lovestory.lovestory.view.PhotoViewModel
+import com.lovestory.lovestory.view.PhotoView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 
-suspend fun uploadPhoto(context : Context, sendPhotos : List<Photo>, viewModel: PhotoViewModel){
+suspend fun uploadPhoto(context : Context, sendPhotos : List<Photo>, viewModel: PhotoView){
     Log.d("MODULE-uploadPhoto", "setUploadPhotos 호출")
     viewModel.setUploadPhotos(sendPhotos.size)
     val photoDatabase: PhotoDatabase = PhotoDatabase.getDatabase(context)

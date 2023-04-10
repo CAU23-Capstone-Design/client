@@ -59,3 +59,18 @@ suspend fun getNotSyncImage(token: String, photo_id: String):Response<ResponseBo
         Response.error(500, ResponseBody.create(null, "Unknown error"))
     }
 }
+
+suspend fun getNotSyncImageInfo(token: String, photo_id: String):Response<PhotoBody>{
+    val jwt : String = "Bearer $token"
+    val apiService: PhotoService = createApiService()
+
+    return try{
+        apiService.getImageMetadata(jwt, photo_id)
+    }catch (e: HttpException) {
+        Log.e("NETWORK-getNotSyncImageInfo", "$e")
+        Response.error(e.code(), e.response()?.errorBody())
+    } catch (e: Exception) {
+        Log.e("NETWORK-getNotSyncImageInfo", "$e")
+        Response.error(500, ResponseBody.create(null, "Unknown error"))
+    }
+}

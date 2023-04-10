@@ -5,11 +5,12 @@ import android.util.Log
 import com.lovestory.lovestory.database.PhotoDatabase
 import com.lovestory.lovestory.network.getPhotoTable
 import com.lovestory.lovestory.repository.PhotoRepository
+import com.lovestory.lovestory.view.ImageSyncView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-suspend fun checkExistNeedPhotoForSync(context : Context){
+suspend fun checkExistNeedPhotoForSync(context : Context, imageSyncView : ImageSyncView){
     lateinit var repository : PhotoRepository
     val token = getToken(context)
 
@@ -23,7 +24,7 @@ suspend fun checkExistNeedPhotoForSync(context : Context){
             for(local_id in response.body()!!){
                 if(!repository.isPhotoExistById(local_id)){
                     Log.d("MODULE-checkExistNeedPhotoForSync", "not existed $local_id")
-                    getImageById(context, token, local_id)
+                    imageSyncView.getImageFromServer(context, token, local_id)
                 }
             }
         }

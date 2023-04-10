@@ -1,10 +1,8 @@
 package com.lovestory.lovestory.ui.screens
 
 import android.util.Log
-import androidx.compose.animation.AnimatedVisibility
+import android.widget.Toast
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.scaleIn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -13,7 +11,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.Text
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
@@ -29,20 +26,20 @@ import com.lovestory.lovestory.entity.Photo
 import com.lovestory.lovestory.module.checkExistNeedPhotoForSync
 import com.lovestory.lovestory.module.uploadPhoto
 import com.lovestory.lovestory.ui.components.CheckableDisplayImageFromUri
-import com.lovestory.lovestory.view.PhotoViewModel
+import com.lovestory.lovestory.view.PhotoView
 import kotlinx.coroutines.*
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun PhotoSyncScreen(navHostController: NavHostController, viewModel: PhotoViewModel){
-    val notSyncedPhotos by viewModel.notSyncedPhotos.observeAsState(initial = listOf())
+fun PhotoSyncScreen(navHostController: NavHostController, galleryView: PhotoView){
+    val notSyncedPhotos by galleryView.notSyncedPhotos.observeAsState(initial = listOf())
 //    var isUploadPhotos by remember {
-//        mutableStateOf(viewModel.isUploadPhotos)
+//        mutableStateOfgalleryView.isUploadPhotos)
 //    }
 
-    var isUploadPhotos = viewModel.isUploadPhotos
-    var currentUploadPhotos = viewModel.currentUploadPhotos
-    var totalUploadPhotos = viewModel.totalUploadPhotos
+    var isUploadPhotos =galleryView.isUploadPhotos
+    var currentUploadPhotos =galleryView.currentUploadPhotos
+    var totalUploadPhotos =galleryView.totalUploadPhotos
 
     Log.d("SCREEN-PhotoSyncScreen", "$isUploadPhotos, $currentUploadPhotos, $totalUploadPhotos")
 
@@ -68,8 +65,8 @@ fun PhotoSyncScreen(navHostController: NavHostController, viewModel: PhotoViewMo
         }
     }
 
-    LaunchedEffect(key1 = viewModel.isUploadPhotos){
-        isUploadPhotos = viewModel.isUploadPhotos
+    LaunchedEffect(key1 =galleryView.isUploadPhotos){
+        isUploadPhotos =galleryView.isUploadPhotos
     }
 
     val onChangeChecked: (Int) -> Unit = { index ->
@@ -110,10 +107,15 @@ fun PhotoSyncScreen(navHostController: NavHostController, viewModel: PhotoViewMo
 
         Button(onClick = {
             val sendPhotos = getListOfCheckedPhoto(notSyncedPhotos, checkPhotoList)
-            CoroutineScope(Dispatchers.IO).launch {
-                uploadPhoto(context, sendPhotos, viewModel)
-                checkExistNeedPhotoForSync(context)
+            if(sendPhotos.isNotEmpty()){
+                CoroutineScope(Dispatchers.IO).launch {
+                    uploadPhoto(context, sendPhotos,galleryView)
+//                checkExistNeedPhotoForSync(context)
+                }
+            }else{
+                Toast.makeText(context, "선택된 사진이 없습니다.", Toast.LENGTH_SHORT).show()
             }
+
         }) {
             Text("업로드 하기")
         }

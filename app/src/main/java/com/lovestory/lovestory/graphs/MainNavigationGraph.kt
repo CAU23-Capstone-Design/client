@@ -8,18 +8,19 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.lovestory.lovestory.R
 import com.lovestory.lovestory.ui.screens.*
-import com.lovestory.lovestory.view.PhotoViewModel
+import com.lovestory.lovestory.view.ImageSyncView
+import com.lovestory.lovestory.view.PhotoView
 
 @Composable
-fun MainNavGraph(navHostController: NavHostController, viewModel : PhotoViewModel){
-    val allPhotos by viewModel.allPhotos.observeAsState(initial = listOf())
+fun MainNavGraph(navHostController: NavHostController, galleryView : PhotoView, imageSyncView : ImageSyncView){
+    val allPhotos by galleryView.allPhotos.observeAsState(initial = listOf())
 
     NavHost(navController = navHostController, startDestination =MainScreens.DashBoard.route, route = Graph.MAIN){
         composable(MainScreens.DashBoard.route){
             DashBoardScreen(navHostController = navHostController)
         }
         composable(MainScreens.Gallery.route){
-            GalleryScreen(navHostController = navHostController, viewModel = viewModel)
+            GalleryScreen(navHostController = navHostController, galleryView = galleryView, imageSyncView = imageSyncView)
         }
         composable(MainScreens.Calendar.route){
             CalendarScreen(navHostController = navHostController)
@@ -28,7 +29,7 @@ fun MainNavGraph(navHostController: NavHostController, viewModel : PhotoViewMode
             ProfileScreen(navHostController = navHostController)
         }
         composable(GalleryStack.PhotoSync.route){
-            PhotoSyncScreen(navHostController = navHostController, viewModel = viewModel)
+            PhotoSyncScreen(navHostController = navHostController, galleryView = galleryView)
         }
     }
 }

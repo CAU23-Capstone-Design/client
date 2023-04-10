@@ -8,7 +8,7 @@ import com.lovestory.lovestory.database.PhotoDatabase
 import com.lovestory.lovestory.entity.Photo
 import com.lovestory.lovestory.repository.PhotoRepository
 
-class PhotoViewModel(application : Application) : ViewModel() {
+class PhotoView(application : Application) : ViewModel() {
     lateinit var allPhotos: LiveData<List<Photo>>
     lateinit var syncedPhotos : LiveData<List<Photo>>
     lateinit var notSyncedPhotos : LiveData<List<Photo>>

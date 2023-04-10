@@ -40,6 +40,24 @@ class Photo {
         this.latitude = latitude
         this.longitude = longitude
     }
+    constructor(
+        id: String,
+        date : String,
+        imageUrl : String,
+        latitude : Double,
+        longitude : Double,
+        isSynced : Boolean,
+        area1: String,
+        area2: String,
+        area3: String
+    ){
+        this.id = id
+        this.date = date
+        this.imageUrl = imageUrl
+        this.latitude = latitude
+        this.longitude = longitude
+        this.isSynced = true
+    }
 }
 
 @Dao

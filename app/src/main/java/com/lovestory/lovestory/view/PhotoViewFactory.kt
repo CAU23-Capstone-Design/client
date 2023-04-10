@@ -4,8 +4,8 @@ import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 
-class PhotoViewModelFactory(val application: Application) :ViewModelProvider.Factory{
+class PhotoViewFactory(val application: Application) :ViewModelProvider.Factory{
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return PhotoViewModel(application) as T
+        return PhotoView(application) as T
     }
 }

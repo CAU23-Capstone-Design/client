@@ -23,5 +23,9 @@ class PhotoRepository(private val photoDao: PhotoDao) {
             photoDao.updatePhotoSyncStatusAndLocationById(photoId, area1 = area1, area2 = area2, area3 = area3)
         }
     }
+
+    fun insetPhoto(photo: Photo){
+        photoDao.insertPhoto(photo)
+    }
 }
 

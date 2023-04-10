@@ -13,15 +13,15 @@ import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.lovestory.lovestory.database.PhotoDatabase
 import com.lovestory.lovestory.graphs.MainNavGraph
 import com.lovestory.lovestory.module.getLocationPermission
-import com.lovestory.lovestory.module.getMediaPermission
 import com.lovestory.lovestory.module.isServiceRunning
 import com.lovestory.lovestory.services.*
 import com.lovestory.lovestory.ui.components.BottomNaviagtionBar
-import com.lovestory.lovestory.view.PhotoViewModel
-import com.lovestory.lovestory.view.PhotoViewModelFactory
+import com.lovestory.lovestory.view.ImageSyncView
+import com.lovestory.lovestory.view.ImageSyncViewFactory
+import com.lovestory.lovestory.view.PhotoView
+import com.lovestory.lovestory.view.PhotoViewFactory
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
@@ -33,13 +33,20 @@ fun MainScreen(navHostController: NavHostController = rememberNavController()) {
 //    val photoDatabase = PhotoDatabase.getDatabase(context)
 
     val owner = LocalViewModelStoreOwner.current
-    lateinit var viewModel : PhotoViewModel
+    lateinit var galleryView : PhotoView
+    lateinit var imageSyncView: ImageSyncView
 
     owner?.let {
-        viewModel = viewModel(
+        galleryView = viewModel(
             it,
             "PhotoViewModel",
-            PhotoViewModelFactory(LocalContext.current.applicationContext as Application)
+            PhotoViewFactory(LocalContext.current.applicationContext as Application)
+        )
+
+        imageSyncView= viewModel(
+            it,
+            "ImageSyncViewModel",
+            ImageSyncViewFactory()
         )
     }
 
@@ -60,6 +67,6 @@ fun MainScreen(navHostController: NavHostController = rememberNavController()) {
         bottomBar = {BottomNaviagtionBar(navHostController = navHostController)},
         backgroundColor = Color.White
     ) {
-        MainNavGraph(navHostController = navHostController, viewModel = viewModel)
+        MainNavGraph(navHostController = navHostController, galleryView = galleryView, imageSyncView = imageSyncView)
     }
 }
