@@ -57,6 +57,9 @@ class Photo {
         this.latitude = latitude
         this.longitude = longitude
         this.isSynced = true
+        this.area1 = area1
+        this.area2 = area2
+        this.area3 = area3
     }
 }
 

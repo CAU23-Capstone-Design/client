@@ -21,6 +21,8 @@ suspend fun getImageInfoById(context: Context, token : String, photo_id : String
         if (response.isSuccessful){
             val imageInfo = response.body()!!
 
+            Log.d("MODULE-getImageInfoById", "$imageInfo")
+
             repository.insetPhoto(
                 Photo(
                     id = imageInfo.local_id,
