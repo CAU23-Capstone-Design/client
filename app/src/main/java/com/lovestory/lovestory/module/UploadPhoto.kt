@@ -24,6 +24,7 @@ suspend fun uploadPhoto(context : Context, sendPhotos : List<Photo>, viewModel: 
 
     for(photo in sendPhotos){
         val uri = Uri.parse(photo.imageUrl)
+//        val compressedImageUri = compressImage(context, uri, 75)
         context.contentResolver.openInputStream(uri)?.use { inputStream ->
             Log.d("MODULE-uploadPhoto", "사진 불러오기")
             val byteArray = inputStream.readBytes()

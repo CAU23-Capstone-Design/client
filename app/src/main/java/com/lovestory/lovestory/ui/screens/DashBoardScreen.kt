@@ -30,7 +30,6 @@ import com.lovestory.lovestory.resource.vitro
 fun DashBoardScreen(navHostController: NavHostController) {
     val context = LocalContext.current
 
-    Log.d("DashBoard-Screen", "DashBoard 스크린 호출")
     Column(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start,

@@ -44,17 +44,32 @@ fun GalleryScreen(navHostController: NavHostController, galleryView : PhotoView,
             .fillMaxSize()
             .padding(horizontal = 20.dp, vertical = 20.dp)
     ){
-        Text(text = "Gallery",
-            fontSize = 30.sp,
-            fontFamily = vitro,
-            fontWeight = FontWeight.Normal)
-        Button(
-            onClick = { navHostController.navigate(GalleryStack.PhotoSync.route){
-                popUpTo(MainScreens.Gallery.route)
-            } },
-        ){
-            Text(text = "이미지 업로드 하기")
+        Row() {
+            Text(text = "Gallery",
+                fontSize = 30.sp,
+                fontFamily = vitro,
+                fontWeight = FontWeight.Normal)
+            Button(
+                onClick = { navHostController.navigate(GalleryStack.PhotoSync.route){
+                    popUpTo(MainScreens.Gallery.route)
+                } },
+            ){
+                Text(text = "이미지 업로드 하기")
+            }
+            Spacer(modifier = Modifier.width(10.dp))
+            Button(onClick = {
+                val token = "your_jwt_token"
+                val photoId = "your_photo_id"
+                CoroutineScope(Dispatchers.IO).launch{
+                    checkExistNeedPhotoForSync(context, imageSyncView)
+                }
+//
+//            imageSyncView.getImageFromServer(token, photoId)
+            }) {
+                Text("동기화 하기")
+            }
         }
+
         LazyVerticalGrid(
             columns = GridCells.Adaptive(minSize = 120.dp)
         ) {
@@ -65,17 +80,7 @@ fun GalleryScreen(navHostController: NavHostController, galleryView : PhotoView,
                 )
             }
         }
-        Button(onClick = {
-            val token = "your_jwt_token"
-            val photoId = "your_photo_id"
-            CoroutineScope(Dispatchers.IO).launch{
-                checkExistNeedPhotoForSync(context, imageSyncView)
-            }
-//
-//            imageSyncView.getImageFromServer(token, photoId)
-        }) {
-            Text("동기화 하기")
-        }
+
 
 //        if (downloadStatus.isNotEmpty()) {
 //            LaunchedEffect(key1 = downloadStatus) {
