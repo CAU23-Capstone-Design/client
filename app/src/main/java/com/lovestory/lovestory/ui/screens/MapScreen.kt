@@ -41,6 +41,7 @@ fun MapScreen(navHostController: NavHostController){
                 color = Color.Black
             )
         }
+
         Button(onClick = { navHostController.popBackStack() }) {
             Text(text = "Go Back")
         }

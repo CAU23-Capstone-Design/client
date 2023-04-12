@@ -43,8 +43,6 @@ import com.lovestory.lovestory.model.*
 import com.lovestory.lovestory.module.getSavedComment
 import com.lovestory.lovestory.module.getToken
 import com.lovestory.lovestory.module.saveComment
-import com.lovestory.lovestory.network.getComment
-import com.lovestory.lovestory.network.postComment
 import com.lovestory.lovestory.resource.vitro
 import com.lovestory.lovestory.ui.components.*
 import com.lovestory.lovestory.ui.theme.LoveStoryTheme
@@ -67,8 +65,7 @@ import com.google.maps.android.compose.*
 import com.lovestory.lovestory.R
 import com.lovestory.lovestory.graphs.CalendarNavGraph
 import com.lovestory.lovestory.graphs.MainScreens
-import com.lovestory.lovestory.network.deleteComment
-import com.lovestory.lovestory.network.putComment
+import com.lovestory.lovestory.network.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.selects.select
 import okhttp3.Dispatcher
@@ -89,16 +86,16 @@ fun CalendarScreen(navHostController: NavHostController) {
 
     var selectionSave by rememberSaveable { mutableStateOf(CalendarDay(date = LocalDate.now(), position = DayPosition.MonthDate))}
     var isPopupVisibleSave by rememberSaveable { mutableStateOf(false) }
-    Log.d("세이브", "$selectionSave, $isPopupVisibleSave")
+    //Log.d("세이브", "$selectionSave, $isPopupVisibleSave")
 
     var selection by remember { mutableStateOf(CalendarDay(date = LocalDate.now(), position = DayPosition.MonthDate))}
     var isPopupVisible by remember { mutableStateOf(false) }
-    Log.d("세이브", "$selection, $isPopupVisible")
+    //Log.d("세이브", "$selection, $isPopupVisible")
     //Log.d("셀렉션1", "${selection.date}")
 
-    if(isPopupVisibleSave != isPopupVisible){
+    if(isPopupVisibleSave){
         selection = selectionSave
-        isPopupVisible = isPopupVisibleSave
+        isPopupVisible = true
     }
 
     //var selection = rememberSaveable { mutableStateOf(CalendarDay(date = LocalDate.now(), position = DayPosition.MonthDate))}
@@ -107,7 +104,7 @@ fun CalendarScreen(navHostController: NavHostController) {
 
     val onOpenDialogRequest : ()->Unit = {
         isPopupVisible = true
-        isPopupVisibleSave = true
+        //isPopupVisibleSave = true
     }
     val onDismissRequest : () -> Unit = {isPopupVisible = false}
 
@@ -137,36 +134,43 @@ fun CalendarScreen(navHostController: NavHostController) {
     //해야 되는 게 코루틴 정리. 룸 db
     LaunchedEffect(key1 = true) {
         //내부 db
-        val data = withContext(Dispatchers.IO) {
-            getSavedComment(context)
+        //Log.d("세이브","$isPopupVisibleSave")
+        if(!isPopupVisibleSave) {
+            val data = withContext(Dispatchers.IO) {
+                getSavedComment(context)
+            }
+            coupleMemoryList = data
+            coupleMemoryList.forEach { CoupleMemory -> Log.d("쉐어드1", "$CoupleMemory") }
+            //saveComment(context, coupleMemoryList) // 이 부분 주석 처리하면 shared preference 초기화 가능
+
+            //서버 통신
+            val getMemoryList: Response<List<GetMemory>> = getComment(token!!)
+            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+            for (getMemory in getMemoryList.body()!!) {
+                val date = LocalDate.parse(getMemory.date, formatter)
+                val comment = getMemory.comment
+                val coupleMemory = CoupleMemory(date, comment)
+
+                val newCoupleMemoryList = coupleMemoryList.plus(coupleMemory)
+                coupleMemoryList = newCoupleMemoryList
+
+                //val stringMemory = StringMemory(date.toString(), comment)
+                //stringMemoryList.add(stringMemory)
+            }
+
+            saveComment(context, coupleMemoryList)
+            //coupleMemoryList = convertToCoupleMemoryList(stringMemoryList)
+            //coupleMemoryList.forEach{CoupleMemory -> Log.d("서버2","$CoupleMemory") }
         }
-        coupleMemoryList = data
-        coupleMemoryList.forEach{CoupleMemory -> Log.d("쉐어드1","$CoupleMemory") }
-        //saveComment(context, coupleMemoryList) // 이 부분 주석 처리하면 shared preference 초기화 가능
-
-        //서버 통신
-        val getMemoryList: Response<List<GetMemory>> = getComment(token!!)
-        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
-        for (getMemory in getMemoryList.body()!!) {
-            val date = LocalDate.parse(getMemory.date, formatter)
-            val comment = getMemory.comment
-            val coupleMemory = CoupleMemory(date, comment)
-
-            val newCoupleMemoryList = coupleMemoryList.plus(coupleMemory)
-            coupleMemoryList = newCoupleMemoryList
-
-            //val stringMemory = StringMemory(date.toString(), comment)
-            //stringMemoryList.add(stringMemory)
-        }
-
-        saveComment(context, coupleMemoryList)
-        //coupleMemoryList = convertToCoupleMemoryList(stringMemoryList)
-        //coupleMemoryList.forEach{CoupleMemory -> Log.d("서버2","$CoupleMemory") }
     }
-    //Log.d("토큰","$token")
 
+
+
+    //Log.d("토큰","$token")
+/*
     LaunchedEffect(isPopupVisible){
         if(!isPopupVisible){
+            /*
             val getMemoryList: Response<List<GetMemory>> = getComment(token!!)
             val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
             for (getMemory in getMemoryList.body()!!) {
@@ -177,11 +181,13 @@ fun CalendarScreen(navHostController: NavHostController) {
                 val newCoupleMemoryList = coupleMemoryList.plus(coupleMemory)
                 coupleMemoryList = newCoupleMemoryList
             }
+
+             */
             saveComment(context, coupleMemoryList)
             //coupleMemoryList.forEach{CoupleMemory -> Log.d("서버2","$CoupleMemory") }
         }
     }
-
+ */
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -229,7 +235,7 @@ fun CalendarScreen(navHostController: NavHostController) {
         )
     }
 
-    if (isPopupVisible) {
+    if (isPopupVisible || isPopupVisibleSave) {
         //getComment 서버 통신
         coroutineScope.launch {
             val getMemoryList: Response<List<GetMemory>> = getComment(token!!)
@@ -261,7 +267,8 @@ fun CalendarScreen(navHostController: NavHostController) {
                         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
                         val dateString = date.format(formatter)
                         val put : Response<Any> = putComment(token!!, dateString, editedcomment)
-                        Log.d("풑1","$put, $dateString, $editedcomment")
+                        //Log.d("풑1","$put, $dateString, $editedcomment")
+                        saveComment(context, coupleMemoryList)
                     }
                 } else {
                     if ( editedcomment != ""){
@@ -272,7 +279,8 @@ fun CalendarScreen(navHostController: NavHostController) {
                             val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
                             val dateString = date.format(formatter)
                             val put : Response<Any> = putComment(token!!, dateString, editedcomment)
-                            Log.d("풑2","$put, $dateString, $editedcomment")
+                            //Log.d("풑2","$put, $dateString, $editedcomment")
+                            saveComment(context, coupleMemoryList)
                         }
                     }
                 }
@@ -345,8 +353,8 @@ fun CalendarScreen(navHostController: NavHostController) {
                                         val dateString = date.format(formatter)
                                         val delete: Any = deleteComment(token!!, dateString)
                                         Log.d("삭제", "$delete, $dateString")
-
                                     }
+                                    saveComment(context, coupleMemoryList)
                                     isPopupVisible = false
                                     isPopupVisibleSave = false
                                 },
@@ -375,7 +383,8 @@ fun CalendarScreen(navHostController: NavHostController) {
                                             val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
                                             val dateString = date.format(formatter)
                                             val put : Response<Any> = putComment(token!!, dateString, editedcomment)
-                                            Log.d("풑3","$put, $dateString, $editedcomment")
+                                            //Log.d("풑3","$put, $dateString, $editedcomment")
+                                            saveComment(context, coupleMemoryList)
                                         }
                                     } else {
                                         if ( editedcomment != ""){
@@ -386,7 +395,8 @@ fun CalendarScreen(navHostController: NavHostController) {
                                                 val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
                                                 val dateString = date.format(formatter)
                                                 val put : Response<Any> = putComment(token!!, dateString, editedcomment)
-                                                Log.d("풑4","$put, $dateString, $editedcomment")
+                                                //Log.d("풑4","$put, $dateString, $editedcomment")
+                                                saveComment(context, coupleMemoryList)
                                             }
                                         }
                                     }
@@ -424,20 +434,26 @@ fun CalendarScreen(navHostController: NavHostController) {
                                 .height(300.dp)
                                 .background(color = Color.Gray, RoundedCornerShape(12.dp))
                         ){
-
+                            coroutineScope.launch {
+                                val date = selection.date
+                                val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+                                val dateString = date.format(formatter)
+                                //val gps = getGps(token!!, dateString)
+                                //Log.d("위치정보", "${gps.body()}")
+                            }
                             val viewposition = averageLatLng(points1)
                             val cameraPositionState = rememberCameraPositionState {
                                 position = CameraPosition.fromLatLngZoom(viewposition!!, 15f)
                             }
                             selectionSave = selection
-                            isPopupVisibleSave = isPopupVisible
+                            //isPopupVisibleSave = isPopupVisible
 
                             GoogleMap(
                                 modifier = Modifier.fillMaxSize(),
                                 cameraPositionState = cameraPositionState,
                                 onMapClick = {
                                     isPopupVisible = false
-                                    Log.d("구글", "구글 맵 누름")
+                                    isPopupVisibleSave = true
                                     navHostController.navigate(MainScreens.Map.route) {
                                         launchSingleTop = true
                                     }
@@ -449,7 +465,6 @@ fun CalendarScreen(navHostController: NavHostController) {
                                     color = Color.Black
                                 )
                             }
-
                         }
                         Spacer(modifier = Modifier.height(20.dp))
                     }
