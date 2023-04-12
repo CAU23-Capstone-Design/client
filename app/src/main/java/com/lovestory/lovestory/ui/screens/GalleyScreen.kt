@@ -71,7 +71,7 @@ fun GalleryScreen(navHostController: NavHostController, galleryView : PhotoView,
         }
 
         LazyVerticalGrid(
-            columns = GridCells.Adaptive(minSize = 120.dp)
+            columns = GridCells.Adaptive(minSize = 110.dp)
         ) {
             items(syncedPhotos.size) { index ->
                 DisplayImageFromUri(

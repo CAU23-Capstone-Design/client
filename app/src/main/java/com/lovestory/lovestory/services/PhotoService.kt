@@ -84,8 +84,6 @@ class PhotoService : Service(){
                 super.onChange(selfChange, uri)
                 val uriString = uri?.toString() ?: return
 
-                val projection = arrayOf(MediaStore.Images.Media.IS_PENDING,)
-
                 if (processedUris.contains(uriString)) {
                     return
                 }else{
@@ -102,7 +100,6 @@ class PhotoService : Service(){
                             val inputStream = applicationContext.contentResolver.openInputStream(uri)
 
                             val realFilePath = getPathFromUri(applicationContext, uri)
-                            Log.d("CONTENT-OBSERVER", "filePath = $realFilePath")
                             if (realFilePath != null && realFilePath.contains("Download/lovestory")) {
                                 return@launch
                             }
