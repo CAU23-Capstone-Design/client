@@ -28,9 +28,8 @@ class MainActivity : ComponentActivity() {
         setContent {
 
             val navController = rememberNavController()
-            var keyHash = Utility.getKeyHash(this)
-            Log.d("hash","$keyHash")
-
+            //var keyHash = Utility.getKeyHash(this)
+            //Log.d("hash","$keyHash")
 
             val systemUiController = rememberSystemUiController()
             val useDarkIcons = MaterialTheme.colors.isLight

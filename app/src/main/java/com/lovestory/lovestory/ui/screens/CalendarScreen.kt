@@ -1,8 +1,11 @@
 package com.lovestory.lovestory.ui.screens
 
 import android.annotation.SuppressLint
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -28,6 +31,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
+import androidx.core.content.ContextCompat
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 //import com.google.android.gms.maps.model.CameraPosition
@@ -74,6 +78,7 @@ import okhttp3.Dispatcher
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 fun CalendarScreen(navHostController: NavHostController) {
+
     val currentMonth = remember { YearMonth.now() }
     val startMonth = remember { currentMonth.minusMonths(100) } // Adjust as needed
     val endMonth = remember { currentMonth.plusMonths(100) } // Adjust as needed
@@ -135,13 +140,14 @@ fun CalendarScreen(navHostController: NavHostController) {
     LaunchedEffect(key1 = true) {
         //내부 db
         //Log.d("세이브","$isPopupVisibleSave")
-        if(!isPopupVisibleSave) {
+        //if(!isPopupVisibleSave) {
             val data = withContext(Dispatchers.IO) {
                 getSavedComment(context)
             }
             coupleMemoryList = data
             coupleMemoryList.forEach { CoupleMemory -> Log.d("쉐어드1", "$CoupleMemory") }
             //saveComment(context, coupleMemoryList) // 이 부분 주석 처리하면 shared preference 초기화 가능
+        //}
 
             //서버 통신
             val getMemoryList: Response<List<GetMemory>> = getComment(token!!)
@@ -161,7 +167,8 @@ fun CalendarScreen(navHostController: NavHostController) {
             saveComment(context, coupleMemoryList)
             //coupleMemoryList = convertToCoupleMemoryList(stringMemoryList)
             //coupleMemoryList.forEach{CoupleMemory -> Log.d("서버2","$CoupleMemory") }
-        }
+
+
     }
 
 
