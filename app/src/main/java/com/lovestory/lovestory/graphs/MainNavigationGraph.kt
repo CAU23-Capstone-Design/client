@@ -44,4 +44,5 @@ sealed class MainScreens(val route : String, val title : String, val icon : Int)
 
 sealed class GalleryStack(val route : String){
     object PhotoSync : GalleryStack(route = "PhotoSync")
+    object DetailPhoto : GalleryStack(route= "DetailPhoto")
 }

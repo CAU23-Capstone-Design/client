@@ -28,16 +28,16 @@ class MainActivity : ComponentActivity() {
             val systemUiController = rememberSystemUiController()
             val useDarkIcons = MaterialTheme.colors.isLight
 
-//            val intent = Intent(this, LocationService::class.java)
-//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//                startForegroundService(intent)
-//            } else {
-//                startService(intent)
-//            }
+            val intent = Intent(this, LocationService::class.java)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(intent)
+            } else {
+                startService(intent)
+            }
 
             SideEffect {
                 systemUiController.setSystemBarsColor(
-                    color = Color.White,
+                    color = Color(0xFFF3F3F3),
                     darkIcons = useDarkIcons
                 )
             }

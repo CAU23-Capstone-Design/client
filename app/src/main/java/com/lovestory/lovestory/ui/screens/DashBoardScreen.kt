@@ -10,19 +10,26 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.Icon
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.startActivity
 import androidx.navigation.NavHostController
+import com.lovestory.lovestory.R
 import com.lovestory.lovestory.resource.vitro
 
 
@@ -32,16 +39,14 @@ fun DashBoardScreen(navHostController: NavHostController) {
 
     Column(
         verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.Start,
+        horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .background(Color.White)
             .fillMaxSize()
             .padding(horizontal = 20.dp, vertical = 20.dp)
     ){
-        Text(text = "DashBoard",
-            fontSize = 30.sp,
-            fontFamily = vitro,
-            fontWeight = FontWeight.Normal)
+        Text(text = "DashBoard 구상중...",
+            fontSize = 30.sp)
         Button(
             onClick = {
                 val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
@@ -50,17 +55,26 @@ fun DashBoardScreen(navHostController: NavHostController) {
                 intent.putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
                 intent.putExtra(Settings.EXTRA_SETTINGS_EMBEDDED_DEEP_LINK_INTENT_URI, Settings.ACTION_LOCATION_SOURCE_SETTINGS)
                 context.startActivity(intent)
+            },
+            modifier = Modifier
+                .padding(bottom = 70.dp),
+//                            .align(Alignment.CenterHorizontally),
+            colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFEEC9C9)),
+            shape = RoundedCornerShape(25.dp),
+            content = {
+                Icon(
+                    imageVector = Icons.Default.Settings,
+                    contentDescription = "open app setting"
+                )
             }
-        ){
-            Text(text ="설정 열기")
-        }
-        Button(
-            onClick = {
-                val intent = Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION)
-               context.startActivity(intent)
-            }
-        ){
-            Text(text ="권한 얻기")
-        }
+        )
+//        Button(
+//            onClick = {
+//                val intent = Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION)
+//               context.startActivity(intent)
+//            }
+//        ){
+//            Text(text ="권한 얻기")
+//        }
     }
 }

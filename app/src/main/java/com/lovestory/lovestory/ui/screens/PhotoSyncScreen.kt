@@ -58,7 +58,7 @@ fun PhotoSyncScreen(navHostController: NavHostController, galleryView: PhotoView
             val newCheckPhotoList = checkPhotoList.value.toMutableList()
 
             for (i in oldSize until newSize) {
-                newCheckPhotoList.add(false)
+                newCheckPhotoList.add(true)
             }
 
             checkPhotoList.value = newCheckPhotoList

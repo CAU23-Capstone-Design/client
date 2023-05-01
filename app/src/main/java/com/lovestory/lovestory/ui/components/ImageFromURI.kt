@@ -5,10 +5,13 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
@@ -39,6 +42,8 @@ fun CheckableDisplayImageFromUri(index : Int,    checked : Boolean, imageUri: St
 
 @Composable
 fun DisplayImageFromUri(index : Int, imageUri: String) {
+    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+    val imageWidth = screenWidth / 3 - 10.dp
 
     Image(
         painter = rememberAsyncImagePainter(
@@ -49,9 +54,12 @@ fun DisplayImageFromUri(index : Int, imageUri: String) {
         ),
         contentDescription = null,
         modifier = Modifier
-            .height(100.dp)
-            .width(100.dp)
-            .padding(5.dp),
+//            .height(imageWidth)
+            .width(imageWidth)
+            .aspectRatio(1f)
+            .padding(2.dp)
+//            .clip(RoundedCornerShape(10.dp))
+        ,
         contentScale = ContentScale.Crop
     )
 }
