@@ -73,6 +73,7 @@ import com.lovestory.lovestory.network.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.selects.select
 import okhttp3.Dispatcher
+import java.time.DayOfWeek
 
 
 @SuppressLint("CoroutineCreationDuringComposition")
@@ -426,7 +427,10 @@ fun CalendarScreen(navHostController: NavHostController) {
                                 )
                             }
                         }
-                        Divider(color = Color.Black, thickness = 1.dp, modifier = Modifier.padding(start = 15.dp, end = 15.dp))
+                        Divider(color = Color.Black, thickness = 1.dp, modifier = Modifier.padding(start = 20.dp, end = 20
+
+
+                            .dp))
                         Spacer(modifier = Modifier.height(15.dp))
                         EditableTextField(
                             initialValue = editedcomment,

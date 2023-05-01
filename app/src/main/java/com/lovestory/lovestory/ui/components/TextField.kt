@@ -1,6 +1,8 @@
 package com.lovestory.lovestory.ui.components
 
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -94,6 +96,16 @@ fun EditableTextField(initialValue: String, onValueChanged: (String) -> Unit) {
             value = it
             onValueChanged(it)
         },
-        label = { Text("Enter comment") }
+        modifier = Modifier
+            .height(52.dp)
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp),
+        shape = RoundedCornerShape(15f.dp),
+        colors = TextFieldDefaults.textFieldColors(
+            backgroundColor = Color(0xFFF8F8F8),
+            textColor = Color(0xFF000000),
+            focusedIndicatorColor = Color.Transparent,//Color(0xFFFFFFFF),
+            unfocusedIndicatorColor = Color.Transparent// Color(0xFFF8F8F8)
+        )
     )
 }

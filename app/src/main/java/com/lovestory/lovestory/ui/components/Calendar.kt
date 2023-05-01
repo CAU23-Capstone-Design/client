@@ -59,15 +59,20 @@ fun Day(
                     onOpenDialogRequest()
                 }
             )
-            .background(color = if (day.date == LocalDate.now()) colorResource(com.lovestory.lovestory.R.color.ls_pink) else Color.Transparent),
+            .background(color = if (day.date == LocalDate.now() && day.position == DayPosition.MonthDate) colorResource(com.lovestory.lovestory.R.color.ls_pink) else Color.Transparent),
         contentAlignment = Alignment.TopCenter //텍스트 상단 중앙 배치
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             val textColor = when (day.position) {
-                DayPosition.MonthDate -> coupleMemoryList.firstOrNull { it.date == day.date }?.let {
-                    colorResource(R.color.black)//R.color.ls_pink) // 공휴일 색 넣는 로직 넣을 예정
-                } ?: Color.Black // 공휴일 색 바꾸는 로직 필요
-                DayPosition.InDate, DayPosition.OutDate -> Color.White // 해당 월에 속하지 않은 날들의 숫자 색
+                DayPosition.MonthDate -> when (day.date.dayOfWeek) {
+                    DayOfWeek.SATURDAY -> Color.Blue
+                    DayOfWeek.SUNDAY -> Color.Red
+                    else -> Color.Black
+                }
+                    // coupleMemoryList.firstOrNull { it.date == day.date }?.let {
+                    //colorResource(R.color.black)//R.color.ls_pink) // 공휴일 색 넣는 로직 넣을 예정
+                //} ?: Color.Black // 공휴일 색 바꾸는 로직 필요
+                DayPosition.InDate, DayPosition.OutDate -> Color.Transparent // 해당 월에 속하지 않은 날들의 숫자 색
             }
             val circleColor = when (day.position){
                 DayPosition.MonthDate -> colorResource(R.color.ls_pink)
@@ -106,6 +111,11 @@ fun DaysOfWeekTitle(daysOfWeek: List<DayOfWeek>) {
                 fontWeight = FontWeight.Bold, //굵기 조절
                 text = dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault()),
                 fontSize = 18.sp,
+                color = when (dayOfWeek) {
+                    DayOfWeek.SATURDAY -> Color.Blue
+                    DayOfWeek.SUNDAY -> Color.Red
+                    else -> Color.Black
+                },
             )
         }
     }
