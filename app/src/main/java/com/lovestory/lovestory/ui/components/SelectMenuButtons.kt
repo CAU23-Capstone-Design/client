@@ -39,7 +39,8 @@ fun SelectMenuButton(
         onClick = onClick,
         colors = ButtonDefaults.textButtonColors(
             backgroundColor =  if (isSelected) Color(0xFFEEC9C9) else Color.Transparent,
-            contentColor = Color.Black
+            contentColor = Color.Black,
+            disabledContentColor = Color.Black.copy(alpha = 0f)
         ),
         shape = RoundedCornerShape(25.dp),
         elevation = ButtonDefaults.elevation(defaultElevation = 0.dp),
@@ -48,6 +49,6 @@ fun SelectMenuButton(
             .height(40.dp),
         content = {
             Text(text = buttonText, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-        }
+        },
     )
 }

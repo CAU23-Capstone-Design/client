@@ -53,7 +53,7 @@ fun PhotoSyncScreen(navHostController: NavHostController, photoForSyncView: Phot
     var currentUploadPhotos = photoForSyncView.currentUploadPhotos
     var totalUploadPhotos = photoForSyncView.totalUploadPhotos
 
-    Log.d("SCREEN-PhotoSyncScreen", "$isUploadPhotos, $currentUploadPhotos, $totalUploadPhotos")
+//    Log.d("SCREEN-PhotoSyncScreen", "$isUploadPhotos, $currentUploadPhotos, $totalUploadPhotos")
 
     val context = LocalContext.current
 
@@ -114,7 +114,8 @@ fun PhotoSyncScreen(navHostController: NavHostController, photoForSyncView: Phot
                         index = index,
                         checked = checkPhotoList.value[index],
                         imageUri = notSyncedPhotos[index].imageUrl.toString(),
-                        onChangeChecked = onChangeChecked
+                        onChangeChecked = onChangeChecked,
+                        navHostController = navHostController
                     )
                 }
             }

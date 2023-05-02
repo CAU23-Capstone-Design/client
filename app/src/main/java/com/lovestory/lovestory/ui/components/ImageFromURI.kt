@@ -23,9 +23,12 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.lovestory.lovestory.R
+import com.lovestory.lovestory.graphs.GalleryStack
+import com.lovestory.lovestory.graphs.MainScreens
 import com.lovestory.lovestory.module.photo.getThumbnailForPhoto
 import com.lovestory.lovestory.network.getThumbnailById
 
@@ -101,7 +104,7 @@ fun DisplayImageFromBitmap(index: Int, bitmap: Bitmap) {
 
 
 @Composable
-fun CheckableDisplayImageFromUri(index : Int, checked : Boolean, imageUri: String, onChangeChecked : (Int)->Unit) {
+fun CheckableDisplayImageFromUri(navHostController :NavHostController,index : Int, checked : Boolean, imageUri: String, onChangeChecked : (Int)->Unit) {
     val borderColor = if (checked) Color(0xFFEEC9C9) else Color.Transparent
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
     val imageWidth = screenWidth / 3 - 4.dp
@@ -118,9 +121,12 @@ fun CheckableDisplayImageFromUri(index : Int, checked : Boolean, imageUri: Strin
             modifier = Modifier
                 .width(imageWidth)
                 .aspectRatio(1f)
-                .padding(2.dp),
+                .padding(2.dp)
 //                .border(width = 2.dp, color = borderColor)
-//                .clickable { onChangeChecked(index) },
+                .clickable {
+                    navHostController.navigate(GalleryStack.DetailPhoto.route) {
+                        popUpTo(GalleryStack.PhotoSync.route)
+                    } },
             contentScale = ContentScale.Crop
         )
 

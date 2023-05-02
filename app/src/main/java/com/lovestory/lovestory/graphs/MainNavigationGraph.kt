@@ -37,6 +37,10 @@ fun MainNavGraph(
         composable(GalleryStack.PhotoSync.route){
             PhotoSyncScreen(navHostController = navHostController, photoForSyncView = photoForSyncView)
         }
+        composable(GalleryStack.DetailPhoto.route){
+//            val imageUrl = it.arguments?.getString("imageUrl")
+            PhotoDetailScreen(navController = navHostController, imageUri = "content://media/external/images/media/1000000435")
+        }
     }
 }
 
