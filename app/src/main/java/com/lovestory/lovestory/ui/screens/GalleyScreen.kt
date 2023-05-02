@@ -16,7 +16,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -25,7 +24,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.lovestory.lovestory.ui.components.DisplayImageFromUri
-import com.lovestory.lovestory.view.PhotoView
 import com.lovestory.lovestory.graphs.GalleryStack
 import com.lovestory.lovestory.graphs.MainScreens
 import com.lovestory.lovestory.module.checkExistNeedPhotoForSync
@@ -35,10 +33,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import com.lovestory.lovestory.R
 import com.lovestory.lovestory.ui.components.SelectMenuButtons
+import com.lovestory.lovestory.view.SyncedPhotoView
 
 @Composable
-fun GalleryScreen(navHostController: NavHostController, galleryView : PhotoView, imageSyncView : ImageSyncView) {
-    val syncedPhotos by galleryView.syncedPhotos.observeAsState(initial = listOf())
+fun GalleryScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhotoView) {
+    val syncedPhotos by syncedPhotoView.listOfSyncPhotos.observeAsState(initial = listOf())
 //    val downloadStatus by imageSyncView.downloadStatus.observeAsState("")
     val context = LocalContext.current
 
@@ -60,12 +59,13 @@ fun GalleryScreen(navHostController: NavHostController, galleryView : PhotoView,
                 .fillMaxSize(),
         ) {
             items(syncedPhotos.size) { index ->
-                DisplayImageFromUri(
-                    index = index,
-                    imageUri = syncedPhotos[index].imageUrl.toString(),
-                )
+//                DisplayImageFromUri(
+//                    index = index,
+//                    imageUri = syncedPhotos[index].imageUrl.toString(),
+//                )
             }
         }
+
         // gallery header and floating bar Section
         Column(
             verticalArrangement = Arrangement.Top,
@@ -85,7 +85,7 @@ fun GalleryScreen(navHostController: NavHostController, galleryView : PhotoView,
             ) {
                 Text(
                     text = "갤러리",
-                    fontSize = 24.sp,
+                    fontSize = 22.sp,
                     fontWeight = FontWeight.Bold
                 )
 
@@ -93,7 +93,7 @@ fun GalleryScreen(navHostController: NavHostController, galleryView : PhotoView,
                     painter = painterResource(id = R.drawable.baseline_sync_24),
                     contentDescription = "sync photo",
                     modifier = Modifier.clickable { CoroutineScope(Dispatchers.IO).launch {
-                        checkExistNeedPhotoForSync(context, imageSyncView)
+//                        checkExistNeedPhotoForSync(context, imageSyncView)
                     } }
                 )
             }
@@ -131,80 +131,3 @@ fun GalleryScreen(navHostController: NavHostController, galleryView : PhotoView,
         }
     }
 }
-
-
-//        // gallery Layout Container
-//        Column(
-//            verticalArrangement = Arrangement.Top,
-//            horizontalAlignment = Alignment.Start,
-//            modifier = Modifier
-//                .background(Color.White)
-//                .fillMaxSize()
-//
-//        ){
-//
-//
-//
-//            // gallery header
-//            Column() {
-//                Row(
-//                    horizontalArrangement = Arrangement.SpaceBetween,
-//                    modifier = Modifier.background(Color(0X55F3F3F3))
-//                ){
-//                    Text(text = "갤러리",
-//                        fontSize = 24.sp,
-//                        fontWeight = FontWeight.Bold)
-//
-//                    Button(
-//                        onClick = {
-//                            CoroutineScope(Dispatchers.IO).launch{
-//                                checkExistNeedPhotoForSync(context, imageSyncView)
-//                            }
-//                        },
-//                        modifier = Modifier
-//                            .padding(start = 70.dp),
-////                            .align(Alignment.CenterHorizontally),
-//                        colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFEEC9C9)),
-//                        shape = RoundedCornerShape(25.dp),
-//                        content = {
-//                            Icon(
-//                                painter = painterResource(id = R.drawable.baseline_sync_24),
-//                                contentDescription = "sync photo"
-//                            )
-//                        }
-//                    )
-//
-//                }
-//
-//            }
-//
-//
-//
-//            // floating bar Section
-//            Row(){
-//                Box() {
-//                    Button(
-//                        onClick = { navHostController.navigate(GalleryStack.PhotoSync.route){
-//                            popUpTo(MainScreens.Gallery.route)
-//                        } },
-//                        modifier = Modifier
-//                            .padding(bottom = 70.dp),
-////                            .align(Alignment.CenterHorizontally),
-//                        colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFEEC9C9)),
-//                        shape = RoundedCornerShape(25.dp),
-//                        content = {
-//                            Icon(
-//                                painter = painterResource(id = R.drawable.baseline_upload_24),
-//                                contentDescription = "upload photo"
-//                            )
-//                        }
-//                    )
-//                }
-//            }
-//        }
-
-//        if (downloadStatus.isNotEmpty()) {
-//            LaunchedEffect(key1 = downloadStatus) {
-//                Toast.makeText(context, downloadStatus, Toast.LENGTH_SHORT).show()
-//            }
-//        }

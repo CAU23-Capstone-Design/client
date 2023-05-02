@@ -1,43 +1,162 @@
 package com.lovestory.lovestory.ui.components
 
+import android.graphics.Bitmap
+import android.util.Log
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
+import com.lovestory.lovestory.R
+import com.lovestory.lovestory.module.photo.getThumbnailForPhoto
+import com.lovestory.lovestory.network.getThumbnailById
+
+@Composable
+fun Skeleton(modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .background(Color.LightGray)
+            .animateContentSize()
+    )
+}
+
+@Composable
+fun ThumbnailOfPhotoFromServer(index: Int, token: String, photoId: String) {
+    val context = LocalContext.current
+    val bitmap = remember { mutableStateOf<Bitmap?>(null) }
+    val cacheKey = photoId
+//    lateinit var bitmapOfThumbnail : Bitmap
+
+    LaunchedEffect(photoId) {
+//        val cachedBitmap = getBitmapFromCache(cacheKey)
+
+        val getResult = getThumbnailForPhoto(token, photoId)
+        if(getResult != null){
+            bitmap.value = getResult
+        }
+        else{
+            Log.d("COMPONENT-ThumbnailOfPhotoFromServer", "Error in transfer bitmap")
+        }
+    }
+
+    if (bitmap.value != null) {
+        DisplayImageFromBitmap(index, bitmap.value!!)
+    } else {
+        val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+        val imageWidth = screenWidth / 3 - 10.dp
+        Skeleton(modifier = Modifier
+            .width(imageWidth)
+            .aspectRatio(1f)
+            .padding(2.dp))
+    }
+}
+
+@Composable
+fun DisplayImageFromBitmap(index: Int, bitmap: Bitmap) {
+    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+    val imageWidth = screenWidth / 3 - 10.dp
+
+    Image(
+        bitmap = bitmap.asImageBitmap(),
+        contentDescription = null,
+        modifier = Modifier
+            .width(imageWidth)
+            .aspectRatio(1f)
+            .padding(2.dp),
+        contentScale = ContentScale.Crop
+    )
+}
+
+
+//val cacheSize = 1024 * 1024 * 50 // 캐시 크기를 50MB로 설정
+//val bitmapCache = object : LruCache<String, Bitmap>(cacheSize) {
+//    override fun sizeOf(key: String, value: Bitmap): Int {
+//        return value.byteCount
+//    }
+//}
+//fun cacheBitmap(key: String, bitmap: Bitmap) {
+//    bitmapCache.put(key, bitmap)
+//}
+//fun getBitmapFromCache(key: String): Bitmap? {
+//    return bitmapCache.get(key)
+//}
 
 
 @Composable
-fun CheckableDisplayImageFromUri(index : Int,    checked : Boolean, imageUri: String, onChangeChecked : (Int)->Unit) {
-    val borderColor = if (checked) Color.Blue else Color.Transparent
+fun CheckableDisplayImageFromUri(index : Int, checked : Boolean, imageUri: String, onChangeChecked : (Int)->Unit) {
+    val borderColor = if (checked) Color(0xFFEEC9C9) else Color.Transparent
+    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+    val imageWidth = screenWidth / 3 - 4.dp
 
-    Image(
-        painter = rememberAsyncImagePainter(
-            ImageRequest
-                .Builder(LocalContext.current)
-                .data(data = imageUri)
-                .build()
-        ),
-        contentDescription = null,
-        modifier = Modifier
-            .height(100.dp)
-            .width(100.dp)
-            .padding(5.dp)
-            .border(width = 2.dp, color = borderColor)
-            .clickable { onChangeChecked(index) },
-        contentScale = ContentScale.Crop
-    )
+    Box{
+        Image(
+            painter = rememberAsyncImagePainter(
+                ImageRequest
+                    .Builder(LocalContext.current)
+                    .data(data = imageUri)
+                    .build()
+            ),
+            contentDescription = null,
+            modifier = Modifier
+                .width(imageWidth)
+                .aspectRatio(1f)
+                .padding(2.dp),
+//                .border(width = 2.dp, color = borderColor)
+//                .clickable { onChangeChecked(index) },
+            contentScale = ContentScale.Crop
+        )
+
+        if(checked){
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .background(Color(0x88DFA8A8))
+                    .width(imageWidth)
+                    .aspectRatio(1f)
+                    .padding(2.dp),
+//                .border(width = 2.dp, color = borderColor)
+            ){}
+            Icon(
+                painter = painterResource(id = R.drawable.baseline_check_circle_24),
+                contentDescription = null,
+                tint = Color(0xFFF8B0B0),
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(end = 14.dp, top = 10.dp)
+                    .clickable { onChangeChecked(index) },
+            )
+        }
+        else{
+            Icon(
+                painter = painterResource(id = R.drawable.baseline_check_circle_outline_24),
+                contentDescription = null,
+                tint = Color(0xFF6B6B6B),
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(end = 14.dp, top = 10.dp)
+                    .clickable { onChangeChecked(index) }
+            )
+        }
+    }
 }
 
 @Composable

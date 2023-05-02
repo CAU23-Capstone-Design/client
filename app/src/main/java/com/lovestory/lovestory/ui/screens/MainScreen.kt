@@ -2,8 +2,6 @@ package com.lovestory.lovestory.ui.screens
 
 import android.annotation.SuppressLint
 import android.app.Application
-import android.content.Intent
-import android.os.Build
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -15,13 +13,9 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.lovestory.lovestory.graphs.MainNavGraph
 import com.lovestory.lovestory.module.getLocationPermission
-import com.lovestory.lovestory.module.isServiceRunning
 import com.lovestory.lovestory.services.*
 import com.lovestory.lovestory.ui.components.BottomNaviagtionBar
-import com.lovestory.lovestory.view.ImageSyncView
-import com.lovestory.lovestory.view.ImageSyncViewFactory
-import com.lovestory.lovestory.view.PhotoView
-import com.lovestory.lovestory.view.PhotoViewFactory
+import com.lovestory.lovestory.view.*
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
@@ -33,14 +27,22 @@ fun MainScreen(navHostController: NavHostController = rememberNavController()) {
 //    val photoDatabase = PhotoDatabase.getDatabase(context)
 
     val owner = LocalViewModelStoreOwner.current
-    lateinit var galleryView : PhotoView
+    lateinit var photoForSyncView: PhotoForSyncView
+    lateinit var syncedPhotoView: SyncedPhotoView
+
     lateinit var imageSyncView: ImageSyncView
 
     owner?.let {
-        galleryView = viewModel(
+        photoForSyncView = viewModel(
             it,
-            "PhotoViewModel",
-            PhotoViewFactory(LocalContext.current.applicationContext as Application)
+            "PhotoForSyncViewModel",
+            PhotoForSyncViewFactory(LocalContext.current.applicationContext as Application)
+        )
+
+        syncedPhotoView = viewModel(
+            it,
+            "SyncedPhotoViewModel",
+            SyncedPhotoViewFactory(LocalContext.current.applicationContext as Application)
         )
 
         imageSyncView= viewModel(
@@ -67,6 +69,11 @@ fun MainScreen(navHostController: NavHostController = rememberNavController()) {
         bottomBar = {BottomNaviagtionBar(navHostController = navHostController)},
         backgroundColor = Color.White
     ) {
-        MainNavGraph(navHostController = navHostController, galleryView = galleryView, imageSyncView = imageSyncView)
+        MainNavGraph(
+            navHostController = navHostController,
+            photoForSyncView = photoForSyncView,
+            syncedPhotoView =  syncedPhotoView,
+            imageSyncView = imageSyncView
+        )
     }
 }

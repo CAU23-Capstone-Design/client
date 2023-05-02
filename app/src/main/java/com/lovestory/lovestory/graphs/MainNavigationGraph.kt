@@ -1,26 +1,32 @@
 package com.lovestory.lovestory.graphs
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.lovestory.lovestory.R
 import com.lovestory.lovestory.ui.screens.*
 import com.lovestory.lovestory.view.ImageSyncView
-import com.lovestory.lovestory.view.PhotoView
+import com.lovestory.lovestory.view.PhotoForSyncView
+import com.lovestory.lovestory.view.SyncedPhotoView
 
 @Composable
-fun MainNavGraph(navHostController: NavHostController, galleryView : PhotoView, imageSyncView : ImageSyncView){
-    val allPhotos by galleryView.allPhotos.observeAsState(initial = listOf())
+fun MainNavGraph(
+    navHostController: NavHostController,
+    photoForSyncView: PhotoForSyncView,
+    syncedPhotoView : SyncedPhotoView,
+    imageSyncView : ImageSyncView
+){
+//    val allPhotos by photoForSyncView.listOfPhotoForSync.observeAsState(initial = listOf())
 
     NavHost(navController = navHostController, startDestination =MainScreens.DashBoard.route, route = Graph.MAIN){
         composable(MainScreens.DashBoard.route){
             DashBoardScreen(navHostController = navHostController)
         }
         composable(MainScreens.Gallery.route){
-            GalleryScreen(navHostController = navHostController, galleryView = galleryView, imageSyncView = imageSyncView)
+            GalleryScreen(
+                navHostController = navHostController,
+                syncedPhotoView = syncedPhotoView)
         }
         composable(MainScreens.Calendar.route){
             CalendarScreen(navHostController = navHostController)
@@ -29,7 +35,7 @@ fun MainNavGraph(navHostController: NavHostController, galleryView : PhotoView, 
             ProfileScreen(navHostController = navHostController)
         }
         composable(GalleryStack.PhotoSync.route){
-            PhotoSyncScreen(navHostController = navHostController, galleryView = galleryView)
+            PhotoSyncScreen(navHostController = navHostController, photoForSyncView = photoForSyncView)
         }
     }
 }

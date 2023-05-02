@@ -28,4 +28,9 @@ interface PhotoService{
     @GET("/images/{local_id}/info")
     @Streaming
     suspend fun getImageMetadata(@Header("Authorization") jwtToken: String, @Path("local_id") localId: String): Response<PhotoBody>
+
+    @Headers("Content-Type: application/json")
+    @GET("/images/{local_id}/thumbnail")
+    @Streaming
+    suspend fun getPhotoThumbnailById(@Header("Authorization") jwtToken: String, @Path("local_id") localId: String):Response<ResponseBody>
 }

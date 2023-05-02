@@ -4,52 +4,37 @@ import android.content.Context
 import android.net.Uri
 import android.util.Log
 import com.lovestory.lovestory.database.PhotoDatabase
-import com.lovestory.lovestory.entity.Photo
+import com.lovestory.lovestory.database.entities.PhotoForSync
+import com.lovestory.lovestory.database.entities.PhotoForSyncDao
+import com.lovestory.lovestory.database.entities.SyncedPhoto
+import com.lovestory.lovestory.database.entities.SyncedPhotoDao
+import com.lovestory.lovestory.database.repository.PhotoForSyncRepository
+import com.lovestory.lovestory.database.repository.SyncedPhotoRepository
 import com.lovestory.lovestory.network.uploadPhotoToServer
-import com.lovestory.lovestory.repository.PhotoRepository
-import com.lovestory.lovestory.view.PhotoView
+import com.lovestory.lovestory.view.PhotoForSyncView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import okhttp3.MediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
-import java.io.File
 
-suspend fun uploadPhoto(context : Context, sendPhotos : List<Photo>, viewModel: PhotoView){
-    Log.d("MODULE-uploadPhoto", "setUploadPhotos 호출")
-    viewModel.setUploadPhotos(sendPhotos.size)
+suspend fun uploadPhoto(context : Context, sendPhotos : List<PhotoForSync>, photoForSyncView : PhotoForSyncView){
+    photoForSyncView.setUploadPhotos(sendPhotos.size)
+
     val photoDatabase: PhotoDatabase = PhotoDatabase.getDatabase(context)
-    val photoDao = photoDatabase.photoDao()
-    val repository = PhotoRepository(photoDao)
+
+    val photoForSyncDao : PhotoForSyncDao = photoDatabase.photoForSyncDao()
+    val syncedPhotoDao : SyncedPhotoDao = photoDatabase.syncedPhotoDao()
+
+    val photoForSyncRepository = PhotoForSyncRepository(photoForSyncDao)
+    val syncedPhotoRepository = SyncedPhotoRepository(syncedPhotoDao)
+
     val token = getToken(context)
 
     for(photo in sendPhotos){
         Log.d("MODULE-uploadPhoto", "Uri : ${photo.imageUrl}")
         val uri = Uri.parse(photo.imageUrl)
         Log.d("MODULE-uploadPhoto", "Uri : $uri")
-//        val compressedImageUri = compressImage(context, uri, 75)
-//        val file = File(compressedImageUri!!.path)
-//        val requestBody = RequestBody.create("image/*".toMediaTypeOrNull(), file)
-//        val multipartBody = MultipartBody.Part.createFormData("image", file.name, requestBody)
-//
-//        val response = withContext(Dispatchers.IO) {
-//            uploadPhotoToServer(token!!, multipartBody!!, photo.id)
-//        }
-//
-//        Log.d("MODULE-uploadPhoto", "사진 업로드 실행")
-//        Log.d("MODULE-uploadPhoto", "사진 ${response.body()}")
-//        if(response.isSuccessful){
-//            Log.d("MODULE-uploadPhoto", "${response.body()}")
-//        }else{
-//            Log.e("MODULE-uploadPhoto" , "${response.errorBody()}")
-//        }
-//        repository.updatePhotoSyncStatusAndLocation(
-//            photoId = photo.id,
-//            area1 = response.body()!!.location.area1,
-//            area2= response.body()!!.location.area2,
-//            area3= response.body()!!.location.area3
-//        )
 
         context.contentResolver.openInputStream(uri)?.use { inputStream ->
             Log.d("MODULE-uploadPhoto", "사진 불러오기")
@@ -68,17 +53,26 @@ suspend fun uploadPhoto(context : Context, sendPhotos : List<Photo>, viewModel: 
             Log.d("MODULE-uploadPhoto", "사진 업로드 실행")
             if(response.isSuccessful){
                 Log.d("MODULE-uploadPhoto", "${response.body()}")
+
+                syncedPhotoRepository.insertSyncedPhoto(
+                    SyncedPhoto(
+                        id = photo.id,
+                        date = photo.date,
+                        area1 = response.body()!!.location.area1,
+                        area2 = response.body()!!.location.area2,
+                        area3 = response.body()!!.location.area3,
+                        latitude = photo.latitude,
+                        longitude = photo.longitude
+                    )
+                )
+
+                photoForSyncRepository.deletePhotoForSync(photo)
+
             }else{
                 Log.e("MODULE-uploadPhoto" , "${response.errorBody()}")
             }
-            repository.updatePhotoSyncStatusAndLocation(
-                photoId = photo.id,
-                area1 = response.body()!!.location.area1,
-                area2= response.body()!!.location.area2,
-                area3= response.body()!!.location.area3
-            )
         }
-        viewModel.addCurrentUploadPhotos()
+        photoForSyncView.addCurrentUploadPhotos()
     }
-    viewModel.setFinishedUploadPhotos()
+    photoForSyncView.setFinishedUploadPhotos()
 }

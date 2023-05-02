@@ -1,5 +1,6 @@
 package com.lovestory.lovestory.network
 
+import android.graphics.Bitmap
 import android.util.Log
 import com.lovestory.lovestory.api.PhotoService
 import com.lovestory.lovestory.model.PhotoBody
@@ -71,6 +72,21 @@ suspend fun getNotSyncImageInfo(token: String, photo_id: String):Response<PhotoB
         Response.error(e.code(), e.response()?.errorBody())
     } catch (e: Exception) {
         Log.e("NETWORK-getNotSyncImageInfo", "$e")
+        Response.error(500, ResponseBody.create(null, "Unknown error"))
+    }
+}
+
+suspend fun getThumbnailById(token: String, photo_id : String): Response<ResponseBody> {
+    val jwt : String = "Bearer $token"
+    val apiService: PhotoService = createApiService()
+
+    return try{
+        apiService.getPhotoThumbnailById(jwt, photo_id)
+    }catch (e: HttpException){
+        Log.e("NETWORK-GetThumbnailById", "$e")
+        Response.error(e.code(), e.response()?.errorBody())
+    }catch (e : Exception){
+        Log.e("NETWORK-GetThumbnailById", "$e")
         Response.error(500, ResponseBody.create(null, "Unknown error"))
     }
 }

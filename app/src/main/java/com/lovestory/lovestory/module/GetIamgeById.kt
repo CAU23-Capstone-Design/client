@@ -8,8 +8,8 @@ import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
 import androidx.annotation.RequiresApi
+import com.lovestory.lovestory.database.repository.PhotoForSyncRepository
 import com.lovestory.lovestory.network.getNotSyncImage
-import com.lovestory.lovestory.repository.PhotoRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -18,7 +18,7 @@ import java.io.IOException
 
 suspend fun getImageById(context: Context ,token : String, photo_id : String){
     Log.d("MODULE-getImageById", "호출됨")
-    lateinit var repository : PhotoRepository
+    lateinit var repository : PhotoForSyncRepository
     val localId = System.currentTimeMillis().toString()
 
     CoroutineScope(Dispatchers.IO).launch {

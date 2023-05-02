@@ -1,0 +1,74 @@
+package com.lovestory.lovestory.database.entities
+
+import androidx.lifecycle.LiveData
+import androidx.room.*
+import org.jetbrains.annotations.NotNull
+
+@Entity(tableName = "photoForSync")
+class PhotoForSync {
+    @PrimaryKey
+    @NotNull
+    @ColumnInfo(name = "photo_id")
+    var id: String = ""
+
+    @ColumnInfo(name = "date")
+    @NotNull
+    var date: String = ""
+
+    var imageUrl: String? = null
+    var latitude: Double = 0.0
+    var longitude: Double = 0.0
+
+    constructor(id: String, date : String, imageUrl : String, latitude : Double, longitude : Double){
+        this.id = id
+        this.date = date
+        this.imageUrl = imageUrl
+        this.latitude = latitude
+        this.longitude = longitude
+    }
+}
+
+
+//@Dao
+//interface PhotoForSyncDao {
+//    @Query("SELECT * FROM photoForSync")
+//    fun getAll(): List<PhotoForSync>
+//
+//    @Insert
+//    fun insert(photoForSync: PhotoForSync)
+//
+//    @Delete
+//    fun delete(photoForSync: PhotoForSync)
+//}
+
+@Dao
+interface PhotoForSyncDao {
+    @Query("SELECT * FROM photoForSync")
+    fun getAll(): LiveData<List<PhotoForSync>>
+
+    @Query("SELECT * FROM photoForSync WHERE photo_id = :id")
+    suspend fun getPhotoById(id: String): PhotoForSync?
+
+//    @Query("SELECT * FROM photos WHERE date = :requestDate")
+//    fun getRequestDatePhotos(requestDate : String) : LiveData<List<PhotoForSync>?>
+
+//    @Query("SELECT * FROM photos WHERE isSynced = 0")
+//    fun getNotSyncedPhotos() : LiveData<List<PhotoForSync>>
+
+//    @Query("SELECT * FROM photos WHERE isSynced = 1")
+//    fun getSyncedPhotos() : LiveData<List<PhotoForSync>>
+
+    @Insert
+    fun insertPhoto(photo: PhotoForSync)
+
+//    @Update
+//    fun updatePhoto(photo: PhotoForSync)
+
+    @Delete
+    fun deletePhoto(photo: PhotoForSync)
+
+//    @Query("UPDATE photos SET isSynced = 1, area1 = :area1, area2 = :area2, area3 = :area3 WHERE photo_id = :id")
+//    suspend fun updatePhotoSyncStatusAndLocationById(id: String, area1: String, area2: String, area3: String)
+////    @Query("UPDATE photos SET isSynced = 1 WHERE photo_id = :id")
+////    suspend fun setPhotoSyncedById(id: String)
+}

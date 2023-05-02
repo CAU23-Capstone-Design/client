@@ -5,23 +5,19 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import com.lovestory.lovestory.database.PhotoDatabase
-import com.lovestory.lovestory.entity.Photo
-import com.lovestory.lovestory.repository.PhotoRepository
+import com.lovestory.lovestory.database.entities.PhotoForSync
+import com.lovestory.lovestory.database.repository.PhotoForSyncRepository
 
-class PhotoView(application : Application) : ViewModel() {
-    lateinit var allPhotos: LiveData<List<Photo>>
-    lateinit var syncedPhotos : LiveData<List<Photo>>
-    lateinit var notSyncedPhotos : LiveData<List<Photo>>
-    private lateinit var repository : PhotoRepository
+class PhotoForSyncView(application : Application) : ViewModel() {
+    lateinit var listOfPhotoForSync : LiveData<List<PhotoForSync>>
+    private lateinit var photoForSyncRepository: PhotoForSyncRepository
 
     init {
         val photoDatabase = PhotoDatabase.getDatabase(application)
-        val photoDao = photoDatabase.photoDao()
-        repository = PhotoRepository(photoDao)
+        val photoForSyncDao = photoDatabase.photoForSyncDao()
+        photoForSyncRepository = PhotoForSyncRepository(photoForSyncDao)
 
-        allPhotos = repository.allPhotos
-        syncedPhotos = repository.syncedPhotos
-        notSyncedPhotos = repository.notSyncedPhotos
+        listOfPhotoForSync = photoForSyncRepository.getAllPhotosForSync
     }
 
     var isUploadPhotos = false

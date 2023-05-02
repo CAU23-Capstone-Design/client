@@ -14,7 +14,7 @@ import com.lovestory.lovestory.R
 import com.lovestory.lovestory.broadcasts.LocationToPhoto.ACTION_START_PHOTO_PICKER_SERVICE
 import com.lovestory.lovestory.broadcasts.LocationToPhoto.ACTION_STOP_PHOTO_PICKER_SERVICE
 import com.lovestory.lovestory.database.PhotoDatabase
-import com.lovestory.lovestory.entity.Photo
+import com.lovestory.lovestory.database.entities.PhotoForSync
 import com.lovestory.lovestory.module.getInfoFromImage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -100,19 +100,17 @@ class PhotoService : Service(){
                             val inputStream = applicationContext.contentResolver.openInputStream(uri)
 
                             val realFilePath = getPathFromUri(applicationContext, uri)
-                            if (realFilePath != null && realFilePath.contains("Download/lovestory")) {
-                                return@launch
-                            }
+                            if (realFilePath != null && realFilePath.contains("Download/lovestory")) { return@launch }
 
                             val exifInterface = inputStream?.let { androidx.exifinterface.media.ExifInterface(it) }
 
                             val uriItemInfo = getInfoFromImage(exifInterface = exifInterface)
                             val photoId = getUriMD5Hash(uri = uri)
 
-                            val photoDao = photoDatabase.photoDao()
+                            val photoForSyncDao = photoDatabase.photoForSyncDao()
 
-                            val newPhoto = Photo(photoId!!, uriItemInfo.dateTime, uri.toString(), uriItemInfo.latitude, uriItemInfo.longitude)
-                            photoDao.insertPhoto(newPhoto)
+                            val newPhoto = PhotoForSync(photoId!!, uriItemInfo.dateTime, uri.toString(), uriItemInfo.latitude, uriItemInfo.longitude)
+                            photoForSyncDao.insertPhoto(newPhoto)
                             Log.d("CONTENT-OBSERVER", "db 추가 성공")
                         }
                         catch (e: InterruptedException) {

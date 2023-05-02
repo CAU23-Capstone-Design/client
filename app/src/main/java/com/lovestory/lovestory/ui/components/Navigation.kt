@@ -92,7 +92,6 @@ fun RowScope.AddItem(
             .background(background)
             .then(borderModifier)
             .clickable {
-
                 navController.navigate(screen.route) {
                     popUpTo(navController.graph.findStartDestination().id)
                     launchSingleTop = true

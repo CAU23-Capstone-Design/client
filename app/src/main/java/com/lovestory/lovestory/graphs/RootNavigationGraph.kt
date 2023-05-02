@@ -43,9 +43,7 @@ fun RootNavigationGraph(){
                 route = Graph.ROOT,
                 startDestination = Graph.MAIN
             ) {
-                composable(route = Graph.MAIN) {
-                    MainScreen()
-                }
+                composable(route = Graph.MAIN) {MainScreen()}
             }
         }
         else{
@@ -55,9 +53,7 @@ fun RootNavigationGraph(){
                 startDestination = Graph.AUTH
             ) {
                 loginNavGraph(navHostController = navHostController)
-                composable(route = Graph.MAIN) {
-                    MainScreen(navHostController = navHostController)
-                }
+                composable(route = Graph.MAIN) {MainScreen(navHostController = navHostController)}
             }
         }
     }
@@ -68,9 +64,7 @@ fun RootNavigationGraph(){
             startDestination = Graph.AUTH
         ) {
             loginNavGraph(navHostController = navHostController)
-            composable(route = Graph.MAIN) {
-                MainScreen()
-            }
+            composable(route = Graph.MAIN) {MainScreen()}
         }
     }
 }
