@@ -5,16 +5,15 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -38,6 +37,8 @@ import com.lovestory.lovestory.ui.components.SelectMenuButtons
 import com.lovestory.lovestory.ui.components.ThumbnailOfPhotoFromServer
 import com.lovestory.lovestory.view.SyncedPhotoView
 import kotlinx.coroutines.withContext
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun GalleryScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhotoView) {
@@ -45,10 +46,15 @@ fun GalleryScreen(navHostController: NavHostController, syncedPhotoView : Synced
 //    val downloadStatus by imageSyncView.downloadStatus.observeAsState("")
     val context = LocalContext.current
 
+    val listState = rememberLazyGridState()
+
     val (selectedButton, setSelectedButton) = remember { mutableStateOf("전체") }
     val items = listOf<String>(
         "년", "월", "일", "전체"
     )
+
+    val inputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+    val outputFormatter = DateTimeFormatter.ofPattern("yyyy년 M월 d일")
 
     val token = getToken(context)
 
@@ -61,21 +67,19 @@ fun GalleryScreen(navHostController: NavHostController, syncedPhotoView : Synced
         LazyVerticalGrid(
             columns = GridCells.Fixed(3),
             modifier = Modifier
-                .padding(start = 2.dp, end = 2.dp, top = 48.dp, bottom = 70.dp)
+                .padding(start = 2.dp, end = 2.dp, bottom = 70.dp)
                 .fillMaxSize(),
-            contentPadding = PaddingValues(bottom = 75.dp),
+            contentPadding = PaddingValues(top=53.dp, bottom = 75.dp),
             reverseLayout = true,
+            state = listState,
+            userScrollEnabled = true,
+
         ) {
             items(syncedPhotos.size) { index ->
-//                DisplayImageFromUri(
-//                    index = index,
-//                    imageUri = syncedPhotos[index].imageUrl.toString(),
-//                )
                 if (token != null) {
                     ThumbnailOfPhotoFromServer(index = index, token = token, photoId = syncedPhotos[syncedPhotos.size-index-1].id, navHostController= navHostController)
                 }
             }
-//            Spacer(modifier = Modifier.height(50.dp))
         }
 
         // gallery header and floating bar Section
@@ -90,12 +94,13 @@ fun GalleryScreen(navHostController: NavHostController, syncedPhotoView : Synced
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
-                    .background(Color(0xFFF3F3F3))
+                    .background(Color(0xBBF3F3F3))
                     .fillMaxWidth()
                     .height(48.dp)
                     .padding(horizontal = 20.dp)
             ) {
                 Text(
+//                    text = "갤러리 ${if(syncedPhotos.isNotEmpty()) LocalDateTime.parse(syncedPhotos[listState.firstVisibleItemIndex].date, inputFormatter).format(outputFormatter) else ""}",
                     text = "갤러리",
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold
@@ -133,7 +138,7 @@ fun GalleryScreen(navHostController: NavHostController, syncedPhotoView : Synced
                             popUpTo(MainScreens.Gallery.route)
                         }
                     },
-                    colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFEEC9C9)),
+                    colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFFCC5C5)),
                     modifier = Modifier
                         .height(55.dp)
                         .width(55.dp),

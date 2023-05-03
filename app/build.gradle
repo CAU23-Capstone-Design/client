@@ -134,4 +134,8 @@ dependencies {
 
     // MD5
     implementation 'commons-codec:commons-codec:1.15'
+
+    // pager
+//    implementation "androidx.paging:paging-compose:1.0.0-alpha14"
+//    implementation "androidx.paging:paging-runtime:3.1.0"
 }

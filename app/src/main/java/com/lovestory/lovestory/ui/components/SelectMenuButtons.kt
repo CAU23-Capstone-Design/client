@@ -38,7 +38,7 @@ fun SelectMenuButton(
     Button(
         onClick = onClick,
         colors = ButtonDefaults.textButtonColors(
-            backgroundColor =  if (isSelected) Color(0xFFEEC9C9) else Color.Transparent,
+            backgroundColor =  if (isSelected) Color(0xFFFCC5C5) else Color.Transparent,
             contentColor = Color.Black,
             disabledContentColor = Color.Black.copy(alpha = 0f)
         ),
