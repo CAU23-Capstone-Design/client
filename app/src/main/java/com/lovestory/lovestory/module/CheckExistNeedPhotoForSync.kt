@@ -25,12 +25,7 @@ suspend fun checkExistNeedPhotoForSync(context : Context){
             val photoDao = photoDatabase.syncedPhotoDao()
             repository = SyncedPhotoRepository(photoDao)
             Log.d("MODULE-checkExistNeedPhotoForSync", "${response.body()}")
-//            for(local_id in response.body()!!){
-//                if(!repository.getPhotoForSyncById(local_id)){
-//                    Log.d("MODULE-checkExistNeedPhotoForSync", "not existed $local_id")
-////                    imageSyncView.getImageFromServer(context, token, local_id)
-//                }
-//            }
+
             val syncedPhotos = repository.listOfGetAllSyncedPhoto()
 
             val serverPhotosIdList = response.body()!!.map{it.local_id}

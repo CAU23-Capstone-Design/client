@@ -37,9 +37,13 @@ fun MainNavGraph(
         composable(GalleryStack.PhotoSync.route){
             PhotoSyncScreen(navHostController = navHostController, photoForSyncView = photoForSyncView)
         }
-        composable(GalleryStack.DetailPhoto.route){
+        composable(GalleryStack.DetailPhotoFromDevice.route){
 //            val imageUrl = it.arguments?.getString("imageUrl")
-            PhotoDetailScreen(navHostController = navHostController, imageUri = "content://media/external/images/media/1000000435")
+            PhotoDetailScreenFromDevice(navHostController = navHostController, imageUri = "content://media/external/images/media/1000000435")
+        }
+        composable(GalleryStack.DetailPhotoFromServer.route+"/{photo_id}"){
+            val photoId = it.arguments?.getString("photo_id")
+            PhotoDetailScreenFromServer(navHostController = navHostController, photoId = photoId!!)
         }
     }
 }
@@ -54,5 +58,7 @@ sealed class MainScreens(val route : String, val title : String, val icon : Int)
 
 sealed class GalleryStack(val route : String){
     object PhotoSync : GalleryStack(route = "PhotoSync")
-    object DetailPhoto : GalleryStack(route= "DetailPhoto")
+    object DetailPhotoFromDevice : GalleryStack(route= "DetailPhoto")
+
+    object DetailPhotoFromServer : GalleryStack(route = "DetailPhotoFromServer")
 }

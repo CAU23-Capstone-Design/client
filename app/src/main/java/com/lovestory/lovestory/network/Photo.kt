@@ -91,3 +91,18 @@ suspend fun getThumbnailById(token: String, photo_id : String): Response<Respons
         Response.error(500, ResponseBody.create(null, "Unknown error"))
     }
 }
+
+suspend fun getDetailById(token: String, photo_id : String): Response<ResponseBody> {
+    val jwt : String = "Bearer $token"
+    val apiService: PhotoService = createApiService()
+
+    return try{
+        apiService.getPhotoDetailById(jwt, photo_id, 20)
+    }catch (e: HttpException){
+        Log.e("NETWORK-GetThumbnailById", "$e")
+        Response.error(e.code(), e.response()?.errorBody())
+    }catch (e : Exception){
+        Log.e("NETWORK-GetThumbnailById", "$e")
+        Response.error(500, ResponseBody.create(null, "Unknown error"))
+    }
+}

@@ -29,7 +29,9 @@ import coil.request.ImageRequest
 import com.lovestory.lovestory.R
 import com.lovestory.lovestory.graphs.GalleryStack
 import com.lovestory.lovestory.graphs.MainScreens
+import com.lovestory.lovestory.module.loadBitmapFromDiskCache
 import com.lovestory.lovestory.module.photo.getThumbnailForPhoto
+import com.lovestory.lovestory.module.saveBitmapToDiskCache
 import com.lovestory.lovestory.network.getThumbnailById
 
 @Composable
@@ -42,26 +44,35 @@ fun Skeleton(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun ThumbnailOfPhotoFromServer(index: Int, token: String, photoId: String) {
+fun ThumbnailOfPhotoFromServer(index: Int, token: String, photoId: String, navHostController: NavHostController) {
     val context = LocalContext.current
     val bitmap = remember { mutableStateOf<Bitmap?>(null) }
 //    val cacheKey = "lovestory_ca"+photoId
 //    lateinit var bitmapOfThumbnail : Bitmap
+    val cacheKey = "thumbnail_$photoId"
 
     LaunchedEffect(photoId) {
 //        val cachedBitmap = getBitmapFromCache(cacheKey)
 
-        val getResult = getThumbnailForPhoto(token, photoId)
-        if(getResult != null){
-            bitmap.value = getResult
-        }
-        else{
-            Log.d("COMPONENT-ThumbnailOfPhotoFromServer", "Error in transfer bitmap")
+        val cachedBitmap = loadBitmapFromDiskCache(context, cacheKey)
+        if (cachedBitmap != null) {
+            Log.d("Thumbnail","cache에서 로드")
+            bitmap.value = cachedBitmap
+        } else {
+            val getResult = getThumbnailForPhoto(token, photoId)
+            if(getResult != null){
+                saveBitmapToDiskCache(context, getResult, cacheKey)
+                bitmap.value = getResult
+                Log.d("Thumbnail","서버에서 로드")
+            }
+            else{
+                Log.d("COMPONENT-ThumbnailOfPhotoFromServer", "Error in transfer bitmap")
+            }
         }
     }
 
     if (bitmap.value != null) {
-        DisplayImageFromBitmap(index, bitmap.value!!)
+        DisplayImageFromBitmap(index, bitmap.value!!, navHostController=navHostController, photoId = photoId)
     } else {
         val screenWidth = LocalConfiguration.current.screenWidthDp.dp
         val imageWidth = screenWidth / 3 - 10.dp
@@ -73,7 +84,7 @@ fun ThumbnailOfPhotoFromServer(index: Int, token: String, photoId: String) {
 }
 
 @Composable
-fun DisplayImageFromBitmap(index: Int, bitmap: Bitmap) {
+fun DisplayImageFromBitmap(index: Int, bitmap: Bitmap, navHostController: NavHostController, photoId: String) {
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
     val imageWidth = screenWidth / 3 - 10.dp
 
@@ -83,8 +94,13 @@ fun DisplayImageFromBitmap(index: Int, bitmap: Bitmap) {
         modifier = Modifier
             .width(imageWidth)
             .aspectRatio(1f)
-            .padding(2.dp),
-        contentScale = ContentScale.Crop
+            .padding(2.dp)
+            .clickable {
+                navHostController.navigate(GalleryStack.DetailPhotoFromServer.route+"/$photoId") {
+                    popUpTo(GalleryStack.PhotoSync.route)
+                }
+            },
+        contentScale = ContentScale.Crop,
     )
 }
 
@@ -124,7 +140,7 @@ fun CheckableDisplayImageFromUri(navHostController :NavHostController,index : In
                 .padding(2.dp)
 //                .border(width = 2.dp, color = borderColor)
                 .clickable {
-                    navHostController.navigate(GalleryStack.DetailPhoto.route) {
+                    navHostController.navigate(GalleryStack.DetailPhotoFromDevice.route) {
                         popUpTo(GalleryStack.PhotoSync.route)
                     } },
             contentScale = ContentScale.Crop

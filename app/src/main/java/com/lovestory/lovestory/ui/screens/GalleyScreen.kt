@@ -1,5 +1,6 @@
 package com.lovestory.lovestory.ui.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -36,6 +37,7 @@ import com.lovestory.lovestory.module.getToken
 import com.lovestory.lovestory.ui.components.SelectMenuButtons
 import com.lovestory.lovestory.ui.components.ThumbnailOfPhotoFromServer
 import com.lovestory.lovestory.view.SyncedPhotoView
+import kotlinx.coroutines.withContext
 
 @Composable
 fun GalleryScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhotoView) {
@@ -61,6 +63,8 @@ fun GalleryScreen(navHostController: NavHostController, syncedPhotoView : Synced
             modifier = Modifier
                 .padding(start = 2.dp, end = 2.dp, top = 48.dp, bottom = 70.dp)
                 .fillMaxSize(),
+            contentPadding = PaddingValues(bottom = 75.dp),
+            reverseLayout = true,
         ) {
             items(syncedPhotos.size) { index ->
 //                DisplayImageFromUri(
@@ -68,9 +72,10 @@ fun GalleryScreen(navHostController: NavHostController, syncedPhotoView : Synced
 //                    imageUri = syncedPhotos[index].imageUrl.toString(),
 //                )
                 if (token != null) {
-                    ThumbnailOfPhotoFromServer(index = index, token = token, photoId = syncedPhotos[index].id)
+                    ThumbnailOfPhotoFromServer(index = index, token = token, photoId = syncedPhotos[syncedPhotos.size-index-1].id, navHostController= navHostController)
                 }
             }
+//            Spacer(modifier = Modifier.height(50.dp))
         }
 
         // gallery header and floating bar Section
@@ -99,9 +104,15 @@ fun GalleryScreen(navHostController: NavHostController, syncedPhotoView : Synced
                 Icon(
                     painter = painterResource(id = R.drawable.baseline_sync_24),
                     contentDescription = "sync photo",
-                    modifier = Modifier.clickable { CoroutineScope(Dispatchers.IO).launch {
-                        checkExistNeedPhotoForSync(context)
-                    } }
+                    modifier = Modifier.clickable {
+                        Toast.makeText(context,"사진 동기화를 시작합니다.", Toast.LENGTH_SHORT).show()
+                        CoroutineScope(Dispatchers.IO).launch {
+                            checkExistNeedPhotoForSync(context)
+                            withContext(Dispatchers.Main) {
+                                Toast.makeText(context, "사진 동기화가 완료되었습니다.", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    }
                 )
             }
 

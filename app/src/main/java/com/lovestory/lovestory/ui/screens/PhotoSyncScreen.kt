@@ -242,8 +242,10 @@ fun PhotoSyncScreen(navHostController: NavHostController, photoForSyncView: Phot
                         if (sendPhotos.isNotEmpty()) {
                             CoroutineScope(Dispatchers.IO).launch {
                                 uploadPhoto(context, sendPhotos, photoForSyncView)
+                                withContext(Dispatchers.Main){
+                                    Toast.makeText(context, "${sendPhotos.size}개의 사진을 업로드 했습니다.", Toast.LENGTH_SHORT).show()
+                                }
                             }
-//                            Toast.makeText(context, "${sendPhotos.size}개의 사진을 업로드 했습니다.", Toast.LENGTH_SHORT).show()
                         } else {
                             Toast
                                 .makeText(context, "선택된 사진이 없습니다.", Toast.LENGTH_SHORT)
