@@ -1,6 +1,7 @@
 package com.lovestory.lovestory.api
 
 import com.lovestory.lovestory.model.PhotoBody
+import com.lovestory.lovestory.model.PhotoInfo
 import okhttp3.MultipartBody
 import okhttp3.ResponseBody
 import retrofit2.Response
@@ -16,8 +17,8 @@ interface PhotoService{
     : PhotoBody
 
     @Headers("Content-Type: application/json")
-    @GET("/images/local-ids")
-    suspend fun getImageTable(@Header("Authorization") jwtToken: String) : Response<List<String>>
+    @GET("/images/local-ids/info")
+    suspend fun getImageTable(@Header("Authorization") jwtToken: String) : Response<List<PhotoInfo>>
 
     @Headers("Content-Type: application/json")
     @GET("/images/{local_id}")

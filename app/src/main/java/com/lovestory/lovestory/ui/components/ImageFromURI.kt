@@ -45,7 +45,7 @@ fun Skeleton(modifier: Modifier = Modifier) {
 fun ThumbnailOfPhotoFromServer(index: Int, token: String, photoId: String) {
     val context = LocalContext.current
     val bitmap = remember { mutableStateOf<Bitmap?>(null) }
-    val cacheKey = photoId
+//    val cacheKey = "lovestory_ca"+photoId
 //    lateinit var bitmapOfThumbnail : Bitmap
 
     LaunchedEffect(photoId) {

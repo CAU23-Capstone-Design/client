@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.util.Log
 import com.lovestory.lovestory.api.PhotoService
 import com.lovestory.lovestory.model.PhotoBody
+import com.lovestory.lovestory.model.PhotoInfo
 import com.lovestory.lovestory.model.PhotoTable
 import okhttp3.MultipartBody
 import okhttp3.ResponseBody
@@ -30,7 +31,7 @@ suspend fun uploadPhotoToServer(
     }
 }
 
-suspend fun getPhotoTable(token : String):Response<List<String>>{
+suspend fun getPhotoTable(token : String):Response<List<PhotoInfo>>{
     val jwt : String = "Bearer $token"
     val apiService: PhotoService = createApiService()
 

@@ -32,7 +32,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import com.lovestory.lovestory.R
+import com.lovestory.lovestory.module.getToken
 import com.lovestory.lovestory.ui.components.SelectMenuButtons
+import com.lovestory.lovestory.ui.components.ThumbnailOfPhotoFromServer
 import com.lovestory.lovestory.view.SyncedPhotoView
 
 @Composable
@@ -45,6 +47,8 @@ fun GalleryScreen(navHostController: NavHostController, syncedPhotoView : Synced
     val items = listOf<String>(
         "년", "월", "일", "전체"
     )
+
+    val token = getToken(context)
 
     Box(
         modifier = Modifier
@@ -63,6 +67,9 @@ fun GalleryScreen(navHostController: NavHostController, syncedPhotoView : Synced
 //                    index = index,
 //                    imageUri = syncedPhotos[index].imageUrl.toString(),
 //                )
+                if (token != null) {
+                    ThumbnailOfPhotoFromServer(index = index, token = token, photoId = syncedPhotos[index].id)
+                }
             }
         }
 
@@ -93,7 +100,7 @@ fun GalleryScreen(navHostController: NavHostController, syncedPhotoView : Synced
                     painter = painterResource(id = R.drawable.baseline_sync_24),
                     contentDescription = "sync photo",
                     modifier = Modifier.clickable { CoroutineScope(Dispatchers.IO).launch {
-//                        checkExistNeedPhotoForSync(context, imageSyncView)
+                        checkExistNeedPhotoForSync(context)
                     } }
                 )
             }

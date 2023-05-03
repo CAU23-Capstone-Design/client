@@ -39,7 +39,7 @@ fun MainNavGraph(
         }
         composable(GalleryStack.DetailPhoto.route){
 //            val imageUrl = it.arguments?.getString("imageUrl")
-            PhotoDetailScreen(navController = navHostController, imageUri = "content://media/external/images/media/1000000435")
+            PhotoDetailScreen(navHostController = navHostController, imageUri = "content://media/external/images/media/1000000435")
         }
     }
 }

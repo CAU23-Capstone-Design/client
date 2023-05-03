@@ -34,3 +34,29 @@ data class PhotoTable(
 //    @SerializedName("PhotoTable")
     val photoList: List<String>,
 )
+
+data class PhotoInfo(
+    @SerializedName("_id")
+    val id: String,
+
+    @SerializedName("couple_id")
+    val couple_id: String,
+
+    @SerializedName("user_id")
+    val user_id: String,
+
+    @SerializedName("local_id")
+    val local_id: String,
+
+    @SerializedName("date")
+    val date : String,
+
+    @SerializedName("location")
+    val location : AreaInfo,
+
+    @SerializedName("longitude")
+    val longitude : Double,
+
+    @SerializedName("latitude")
+    val latitude : Double,
+)

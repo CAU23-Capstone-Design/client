@@ -42,8 +42,14 @@ interface SyncedPhotoDao {
     @Query("SELECT * FROM syncedPhotos")
     fun getAll(): LiveData<List<SyncedPhoto>>
 
+    @Query("SELECT * FROM syncedPhotos")
+    fun listOfGetAll(): List<SyncedPhoto>
+
     @Insert
     fun insert(syncedPhoto: SyncedPhoto)
+
+    @Insert
+    fun insertAllSyncedPhotos(syncedPhotos: List<SyncedPhoto>)
 
     @Delete
     fun delete(syncedPhoto: SyncedPhoto)

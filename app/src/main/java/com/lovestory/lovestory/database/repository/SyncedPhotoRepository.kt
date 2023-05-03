@@ -13,7 +13,12 @@ class SyncedPhotoRepository(private val syncedPhotoDao: SyncedPhotoDao) {
 
     val getAllSyncedPhotos : LiveData<List<SyncedPhoto>> = syncedPhotoDao.getAll()
 
+//    val listOfGetAllSyncedPhoto :List<SyncedPhoto> = withContext(Dispatchers.IO){syncedPhotoDao.listOfGetAll()}
+    suspend fun listOfGetAllSyncedPhoto():List<SyncedPhoto>{return withContext(Dispatchers.IO){syncedPhotoDao.listOfGetAll()}}
+
     fun insertSyncedPhoto(item : SyncedPhoto){coroutineScope.launch { syncedPhotoDao.insert(item) }}
+
+    fun insertSyncedPhotosByList(syncedPhotos : List<SyncedPhoto>){coroutineScope.launch { syncedPhotoDao.insertAllSyncedPhotos(syncedPhotos) }}
     fun deleteSyncedPhoto(item : SyncedPhoto){coroutineScope.launch { syncedPhotoDao.delete(item) }}
 
     suspend fun getSyncedPhotosByDate(targetDate : String): List<SyncedPhoto> {return withContext(Dispatchers.IO){syncedPhotoDao.getPhotosByDate(targetDate)} }
