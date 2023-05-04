@@ -243,6 +243,7 @@ fun CalendarScreen(navHostController: NavHostController) {
         )
     }
 
+
     if (isPopupVisible || isPopupVisibleSave) {
         //getComment 서버 통신
         coroutineScope.launch {
@@ -444,20 +445,26 @@ fun CalendarScreen(navHostController: NavHostController) {
                                 .padding(start = 20.dp, end = 20.dp)
                                 .height(300.dp)
                                 .background(color = Color.Gray, RoundedCornerShape(12.dp))
+//                                .clickable {
+//                                    isPopupVisible = false
+//                                    isPopupVisibleSave = true
+//
+//                                }
                         ){
-                            coroutineScope.launch {
-                                val date = selection.date
-                                val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-                                val dateString = date.format(formatter)
-                                //val gps = getGps(token!!, dateString)
-                                //Log.d("위치정보", "${gps.body()}")
-                            }
+//                            coroutineScope.launch {
+//                                val date = selection.date
+//                                val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+//                                val dateString = date.format(formatter)
+//                                //val gps = getGps(token!!, dateString)
+//                                //Log.d("위치정보", "${gps.body()}")
+//                            }
                             val viewposition = averageLatLng(points1)
                             val cameraPositionState = rememberCameraPositionState {
                                 position = CameraPosition.fromLatLngZoom(viewposition!!, 15f)
                             }
                             selectionSave = selection
                             //isPopupVisibleSave = isPopupVisible
+
 
                             GoogleMap(
                                 modifier = Modifier.fillMaxSize(),
@@ -467,6 +474,7 @@ fun CalendarScreen(navHostController: NavHostController) {
                                     isPopupVisibleSave = true
                                     navHostController.navigate(MainScreens.Map.route) {
                                         launchSingleTop = true
+                                        Log.d("클릭","클릭")
                                     }
                                 },
                                 uiSettings = uiSettings

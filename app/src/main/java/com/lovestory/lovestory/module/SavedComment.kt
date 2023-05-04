@@ -19,7 +19,8 @@ fun saveComment(context: Context, coupleMemoryList: List<CoupleMemory>){
 
 fun getSavedComment(context: Context): List<CoupleMemory> {
     val sharedPref = context.getSharedPreferences("comment", Context.MODE_PRIVATE)
-    val coupleMemoryListJson = sharedPref.getString("coupleMemoryList", null)
+    val coupleMemoryListJson = sharedPref.getString("coupleMemoryList", null
+    )
 
     if (coupleMemoryListJson != null) {
         val gson = Gson()

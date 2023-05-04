@@ -45,11 +45,12 @@ fun CustomMarker(uri: Uri, size: Dp = 30.dp): BitmapDescriptor {
         val scaledSize = (size * density).toInt()
         Bitmap.createScaledBitmap(it, scaledSize, scaledSize, false)
     }
+    //Canvas(bitma)
     return scaledBitmap?.let { BitmapDescriptorFactory.fromBitmap(it) } ?: BitmapDescriptorFactory.defaultMarker()
 }
 
 /*
-@Composable
+@Composable'
 fun CustomMarker(uri: Uri, size: Dp = 48.dp): BitmapDescriptor {
     val context = LocalContext.current
     val bitmap = context.contentResolver.openFileDescriptor(uri, "r")?.use { descriptor ->
@@ -75,6 +76,6 @@ fun CustomMarker(uri: Uri, size: Dp = 48.dp): BitmapDescriptor {
  */
 
 @Composable
-private fun Dp.toInt(): Int {
+public fun Dp.toInt(): Int {
     return (this.value * LocalDensity.current.density).toInt()
 }

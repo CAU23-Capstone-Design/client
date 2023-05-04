@@ -1,9 +1,6 @@
 package com.lovestory.lovestory.ui.components
 
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -97,7 +94,7 @@ fun EditableTextField(initialValue: String, onValueChanged: (String) -> Unit) {
             onValueChanged(it)
         },
         modifier = Modifier
-            .height(52.dp)
+            .wrapContentHeight()
             .fillMaxWidth()
             .padding(horizontal = 20.dp),
         shape = RoundedCornerShape(15f.dp),
