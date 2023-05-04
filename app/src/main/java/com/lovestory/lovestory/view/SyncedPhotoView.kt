@@ -8,8 +8,11 @@ import com.lovestory.lovestory.database.entities.SyncedPhoto
 import com.lovestory.lovestory.database.repository.SyncedPhotoRepository
 
 class SyncedPhotoView(application:Application): ViewModel() {
-    lateinit var listOfSyncPhotos : LiveData<List<SyncedPhoto>>
     private lateinit var syncedPhotoRepository: SyncedPhotoRepository
+
+    lateinit var listOfSyncPhotos : LiveData<List<SyncedPhoto>>
+    lateinit var dayListOfSyncedPhotos :LiveData<List<SyncedPhoto>>
+
 
     init {
         val photoDatabase = PhotoDatabase.getDatabase(application)
@@ -17,5 +20,6 @@ class SyncedPhotoView(application:Application): ViewModel() {
         syncedPhotoRepository = SyncedPhotoRepository(syncedPhotoDao)
 
         listOfSyncPhotos = syncedPhotoRepository.getAllSyncedPhotos
+        dayListOfSyncedPhotos = syncedPhotoRepository.getDaySyncedPhotos
     }
 }

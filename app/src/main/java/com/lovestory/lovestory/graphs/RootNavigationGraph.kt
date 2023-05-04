@@ -3,6 +3,7 @@ package com.lovestory.lovestory.graphs
 import android.content.Intent
 import android.os.Build
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
@@ -14,9 +15,14 @@ import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.lovestory.lovestory.model.LoginPayload
+import com.lovestory.lovestory.module.checkExistNeedPhotoForSync
 import com.lovestory.lovestory.module.getToken
 import com.lovestory.lovestory.services.LocationService
 import com.lovestory.lovestory.ui.screens.MainScreen
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.*
 
 @Composable
@@ -38,6 +44,11 @@ fun RootNavigationGraph(){
         Log.d("LoveStory Token", "$data")
 
         if(data.couple != null){
+            LaunchedEffect(true){
+                CoroutineScope(Dispatchers.IO).launch {
+                    checkExistNeedPhotoForSync(context)
+                }
+            }
             NavHost(
                 navController = navHostController,
                 route = Graph.ROOT,

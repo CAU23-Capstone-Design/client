@@ -11,7 +11,9 @@ import kotlinx.coroutines.withContext
 class SyncedPhotoRepository(private val syncedPhotoDao: SyncedPhotoDao) {
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
 
-    val getAllSyncedPhotos : LiveData<List<SyncedPhoto>> = syncedPhotoDao.getAll()
+    val getAllSyncedPhotos : LiveData<List<SyncedPhoto>> = syncedPhotoDao.getAllSyncedPhotosSortedByDate()
+
+    val getDaySyncedPhotos : LiveData<List<SyncedPhoto>> = syncedPhotoDao.getFirstPhotoForEachDay()
 
 //    val listOfGetAllSyncedPhoto :List<SyncedPhoto> = withContext(Dispatchers.IO){syncedPhotoDao.listOfGetAll()}
     suspend fun listOfGetAllSyncedPhoto():List<SyncedPhoto>{return withContext(Dispatchers.IO){syncedPhotoDao.listOfGetAll()}}

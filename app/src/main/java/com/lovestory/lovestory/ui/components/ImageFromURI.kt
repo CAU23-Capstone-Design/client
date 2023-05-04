@@ -104,21 +104,6 @@ fun DisplayImageFromBitmap(index: Int, bitmap: Bitmap, navHostController: NavHos
     )
 }
 
-
-//val cacheSize = 1024 * 1024 * 50 // 캐시 크기를 50MB로 설정
-//val bitmapCache = object : LruCache<String, Bitmap>(cacheSize) {
-//    override fun sizeOf(key: String, value: Bitmap): Int {
-//        return value.byteCount
-//    }
-//}
-//fun cacheBitmap(key: String, bitmap: Bitmap) {
-//    bitmapCache.put(key, bitmap)
-//}
-//fun getBitmapFromCache(key: String): Bitmap? {
-//    return bitmapCache.get(key)
-//}
-
-
 @Composable
 fun CheckableDisplayImageFromUri(navHostController :NavHostController,index : Int, checked : Boolean, imageUri: String, onChangeChecked : (Int)->Unit) {
     val borderColor = if (checked) Color(0xFFEEC9C9) else Color.Transparent

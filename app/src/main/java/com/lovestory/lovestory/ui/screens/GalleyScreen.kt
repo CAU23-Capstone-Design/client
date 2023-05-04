@@ -1,8 +1,10 @@
 package com.lovestory.lovestory.ui.screens
 
 import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
@@ -43,6 +45,7 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun GalleryScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhotoView) {
     val syncedPhotos by syncedPhotoView.listOfSyncPhotos.observeAsState(initial = listOf())
+    val daySyncedPhoto by syncedPhotoView.dayListOfSyncedPhotos.observeAsState(initial = listOf())
 //    val downloadStatus by imageSyncView.downloadStatus.observeAsState("")
     val context = LocalContext.current
 
@@ -58,28 +61,58 @@ fun GalleryScreen(navHostController: NavHostController, syncedPhotoView : Synced
 
     val token = getToken(context)
 
+    var offset  = 0
+    var photoIndex = 0
+
     Box(
         modifier = Modifier
             .background(Color.White)
             .fillMaxSize()
     ) {
         // Gallery List
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(3),
-            modifier = Modifier
-                .padding(start = 2.dp, end = 2.dp, bottom = 70.dp)
-                .fillMaxSize(),
-            contentPadding = PaddingValues(top=53.dp, bottom = 75.dp),
-            reverseLayout = true,
-            state = listState,
-            userScrollEnabled = true,
+        AnimatedVisibility(visible = selectedButton =="전체"){
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(3),
+                modifier = Modifier
+                    .padding(start = 2.dp, end = 2.dp, bottom = 70.dp)
+                    .fillMaxSize(),
+                contentPadding = PaddingValues(top=53.dp, bottom = 75.dp),
+//            reverseLayout = true,
+                state = listState,
+                userScrollEnabled = true,
 
-        ) {
-            items(syncedPhotos.size) { index ->
-                if (token != null) {
-                    ThumbnailOfPhotoFromServer(index = index, token = token, photoId = syncedPhotos[syncedPhotos.size-index-1].id, navHostController= navHostController)
+                ) {
+                items(syncedPhotos.size) { index ->
+                    if (token != null) {
+                        ThumbnailOfPhotoFromServer(index = index, token = token, photoId = syncedPhotos[index].id, navHostController= navHostController)
+                    }
                 }
             }
+        }
+
+        AnimatedVisibility(visible = selectedButton =="일") {
+            LazyColumn(
+                modifier = Modifier
+                    .padding(start = 2.dp, end = 2.dp, bottom = 70.dp)
+                    .fillMaxSize(),
+                contentPadding = PaddingValues(top=53.dp, bottom = 75.dp),
+                userScrollEnabled = true,
+
+                ) {
+                items(daySyncedPhoto.size) { index ->
+                    if (token != null) {
+                        ThumbnailOfPhotoFromServer(index = index, token = token, photoId = daySyncedPhoto[index].id, navHostController= navHostController)
+                    }
+                }
+            }
+        }
+
+        AnimatedVisibility(visible = selectedButton =="월") {
+            Text(text = "월")
+        }
+
+        AnimatedVisibility(visible = selectedButton =="년") {
+            Text(text = "년")
         }
 
         // gallery header and floating bar Section

@@ -45,7 +45,7 @@ suspend fun uploadPhoto(context : Context, sendPhotos : List<PhotoForSync>, phot
                 RequestBody.create("image/*".toMediaTypeOrNull(), it)
             }
             val imagePart = requestFile?.let {
-                MultipartBody.Part.createFormData("image", "image.jpg", it)
+                MultipartBody.Part.createFormData("image", "${photo.id}.jpg", it)
             }
 
             val response = withContext(Dispatchers.IO) {
@@ -57,13 +57,13 @@ suspend fun uploadPhoto(context : Context, sendPhotos : List<PhotoForSync>, phot
 
                 syncedPhotoRepository.insertSyncedPhoto(
                     SyncedPhoto(
-                        id = photo.id,
-                        date = photo.date,
+                        id = response.body()!!.local_id,
+                        date = response.body()!!.date,
                         area1 = response.body()!!.location.area1,
                         area2 = response.body()!!.location.area2,
                         area3 = response.body()!!.location.area3,
-                        latitude = photo.latitude,
-                        longitude = photo.longitude
+                        latitude = response.body()!!.latitude,
+                        longitude = response.body()!!.longitude
                     )
                 )
 

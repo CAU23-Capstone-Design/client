@@ -54,6 +54,12 @@ interface SyncedPhotoDao {
     @Delete
     fun delete(syncedPhoto: SyncedPhoto)
 
+    @Query("SELECT * FROM syncedPhotos ORDER BY date DESC")
+    fun getAllSyncedPhotosSortedByDate(): LiveData<List<SyncedPhoto>>
+
+    @Query("SELECT * FROM syncedPhotos WHERE date IN (SELECT MIN(date) FROM syncedPhotos GROUP BY substr(date, 1, 10)) ORDER BY date DESC")
+    fun getFirstPhotoForEachDay(): LiveData<List<SyncedPhoto>>
+
     @Query("SELECT * FROM syncedPhotos WHERE date = :targetDate")
     suspend fun getPhotosByDate(targetDate: String): List<SyncedPhoto>
 

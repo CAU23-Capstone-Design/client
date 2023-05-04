@@ -2,6 +2,7 @@ package com.lovestory.lovestory.module
 
 import android.content.Context
 import android.util.Log
+import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.NavHostController
 import com.google.gson.Gson
 import com.google.gson.JsonObject
@@ -86,6 +87,9 @@ fun checkLoginToken(context : Context, token : String, navHostController: NavHos
     val data = Gson().fromJson(payloadJSON, LoginPayload::class.java)
 
     if(data.couple != null){
+        CoroutineScope(Dispatchers.IO).launch {
+            checkExistNeedPhotoForSync(context)
+        }
         navHostController.navigate(route = Graph.MAIN){
             navHostController.popBackStack()
         }

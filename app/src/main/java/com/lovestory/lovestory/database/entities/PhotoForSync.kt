@@ -28,19 +28,6 @@ class PhotoForSync {
     }
 }
 
-
-//@Dao
-//interface PhotoForSyncDao {
-//    @Query("SELECT * FROM photoForSync")
-//    fun getAll(): List<PhotoForSync>
-//
-//    @Insert
-//    fun insert(photoForSync: PhotoForSync)
-//
-//    @Delete
-//    fun delete(photoForSync: PhotoForSync)
-//}
-
 @Dao
 interface PhotoForSyncDao {
     @Query("SELECT * FROM photoForSync")
@@ -49,26 +36,9 @@ interface PhotoForSyncDao {
     @Query("SELECT * FROM photoForSync WHERE photo_id = :id")
     suspend fun getPhotoById(id: String): PhotoForSync?
 
-//    @Query("SELECT * FROM photos WHERE date = :requestDate")
-//    fun getRequestDatePhotos(requestDate : String) : LiveData<List<PhotoForSync>?>
-
-//    @Query("SELECT * FROM photos WHERE isSynced = 0")
-//    fun getNotSyncedPhotos() : LiveData<List<PhotoForSync>>
-
-//    @Query("SELECT * FROM photos WHERE isSynced = 1")
-//    fun getSyncedPhotos() : LiveData<List<PhotoForSync>>
-
     @Insert
     fun insertPhoto(photo: PhotoForSync)
 
-//    @Update
-//    fun updatePhoto(photo: PhotoForSync)
-
     @Delete
     fun deletePhoto(photo: PhotoForSync)
-
-//    @Query("UPDATE photos SET isSynced = 1, area1 = :area1, area2 = :area2, area3 = :area3 WHERE photo_id = :id")
-//    suspend fun updatePhotoSyncStatusAndLocationById(id: String, area1: String, area2: String, area3: String)
-////    @Query("UPDATE photos SET isSynced = 1 WHERE photo_id = :id")
-////    suspend fun setPhotoSyncedById(id: String)
 }
