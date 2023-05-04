@@ -135,6 +135,12 @@ dependencies {
     // MD5
     implementation 'commons-codec:commons-codec:1.15'
 
+    // system ui controller
+    implementation "com.google.accompanist:accompanist-systemuicontroller:0.28.0"
+
+    //moshi
+    implementation "com.squareup.moshi:moshi:1.14.0"
+
     // pager
 //    implementation "androidx.paging:paging-compose:1.0.0-alpha14"
 //    implementation "androidx.paging:paging-runtime:3.1.0"

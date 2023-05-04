@@ -25,6 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.lovestory.lovestory.ui.components.DisplayImageFromUri
 import com.lovestory.lovestory.graphs.GalleryStack
 import com.lovestory.lovestory.graphs.MainScreens
@@ -35,10 +36,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import com.lovestory.lovestory.R
 import com.lovestory.lovestory.module.getToken
+import com.lovestory.lovestory.ui.components.GroupedGallery
 import com.lovestory.lovestory.ui.components.SelectMenuButtons
 import com.lovestory.lovestory.ui.components.ThumbnailOfPhotoFromServer
 import com.lovestory.lovestory.view.SyncedPhotoView
 import kotlinx.coroutines.withContext
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -46,7 +49,11 @@ import java.time.format.DateTimeFormatter
 fun GalleryScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhotoView) {
     val syncedPhotos by syncedPhotoView.listOfSyncPhotos.observeAsState(initial = listOf())
     val daySyncedPhoto by syncedPhotoView.dayListOfSyncedPhotos.observeAsState(initial = listOf())
-//    val downloadStatus by imageSyncView.downloadStatus.observeAsState("")
+
+    val systemUiController = rememberSystemUiController()
+
+    val syncedPhotosByDate = syncedPhotos.groupBy { it.date.substring(0, 10) }
+
     val context = LocalContext.current
 
     val listState = rememberLazyGridState()
@@ -64,6 +71,14 @@ fun GalleryScreen(navHostController: NavHostController, syncedPhotoView : Synced
     var offset  = 0
     var photoIndex = 0
 
+    val currentDate = LocalDate.now()
+
+    SideEffect {
+        systemUiController.setSystemBarsColor(
+            color = Color(0xFFF3F3F3),
+        )
+    }
+
     Box(
         modifier = Modifier
             .background(Color.White)
@@ -71,23 +86,7 @@ fun GalleryScreen(navHostController: NavHostController, syncedPhotoView : Synced
     ) {
         // Gallery List
         AnimatedVisibility(visible = selectedButton =="전체"){
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(3),
-                modifier = Modifier
-                    .padding(start = 2.dp, end = 2.dp, bottom = 70.dp)
-                    .fillMaxSize(),
-                contentPadding = PaddingValues(top=53.dp, bottom = 75.dp),
-//            reverseLayout = true,
-                state = listState,
-                userScrollEnabled = true,
-
-                ) {
-                items(syncedPhotos.size) { index ->
-                    if (token != null) {
-                        ThumbnailOfPhotoFromServer(index = index, token = token, photoId = syncedPhotos[index].id, navHostController= navHostController)
-                    }
-                }
-            }
+            GroupedGallery(syncedPhotosByDate = syncedPhotosByDate, token = token, navHostController = navHostController, currentDate = currentDate)
         }
 
         AnimatedVisibility(visible = selectedButton =="일") {
@@ -95,7 +94,7 @@ fun GalleryScreen(navHostController: NavHostController, syncedPhotoView : Synced
                 modifier = Modifier
                     .padding(start = 2.dp, end = 2.dp, bottom = 70.dp)
                     .fillMaxSize(),
-                contentPadding = PaddingValues(top=53.dp, bottom = 75.dp),
+                contentPadding = PaddingValues(top=65.dp, bottom = 75.dp),
                 userScrollEnabled = true,
 
                 ) {
@@ -129,7 +128,7 @@ fun GalleryScreen(navHostController: NavHostController, syncedPhotoView : Synced
                 modifier = Modifier
                     .background(Color(0xBBF3F3F3))
                     .fillMaxWidth()
-                    .height(48.dp)
+                    .height(60.dp)
                     .padding(horizontal = 20.dp)
             ) {
                 Text(

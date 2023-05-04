@@ -26,6 +26,8 @@ class SyncedPhotoRepository(private val syncedPhotoDao: SyncedPhotoDao) {
     suspend fun getSyncedPhotosByDate(targetDate : String): List<SyncedPhoto> {return withContext(Dispatchers.IO){syncedPhotoDao.getPhotosByDate(targetDate)} }
     suspend fun getSyncedPhotosByArea2(targetArea2 : String): List<SyncedPhoto> {return withContext(Dispatchers.IO){syncedPhotoDao.getPhotosByArea2(targetArea2)} }
     suspend fun getFirstSyncedPhotoByDate(targetDate : String): SyncedPhoto? {return withContext(Dispatchers.IO){syncedPhotoDao.getFirstPhotoByDate(targetDate)} }
-    suspend fun getSyncedPhotoById(id : String): Boolean {return withContext(Dispatchers.IO){ syncedPhotoDao.getPhotoById(id) != null } }
+    suspend fun isExistSyncedPhotoById(id : String): Boolean {return withContext(Dispatchers.IO){ syncedPhotoDao.getPhotoById(id) != null } }
+
+    suspend fun getSyncedPhotoById(id : String): SyncedPhoto? {return withContext(Dispatchers.IO){ syncedPhotoDao.getPhotoById(id) }}
 
 }

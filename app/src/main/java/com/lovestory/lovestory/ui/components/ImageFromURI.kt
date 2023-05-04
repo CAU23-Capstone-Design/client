@@ -27,12 +27,14 @@ import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.lovestory.lovestory.R
+import com.lovestory.lovestory.database.entities.SyncedPhoto
 import com.lovestory.lovestory.graphs.GalleryStack
 import com.lovestory.lovestory.graphs.MainScreens
 import com.lovestory.lovestory.module.loadBitmapFromDiskCache
 import com.lovestory.lovestory.module.photo.getThumbnailForPhoto
 import com.lovestory.lovestory.module.saveBitmapToDiskCache
 import com.lovestory.lovestory.network.getThumbnailById
+import com.squareup.moshi.Moshi
 
 @Composable
 fun Skeleton(modifier: Modifier = Modifier) {
@@ -44,7 +46,12 @@ fun Skeleton(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun ThumbnailOfPhotoFromServer(index: Int, token: String, photoId: String, navHostController: NavHostController) {
+fun ThumbnailOfPhotoFromServer(
+    index: Int,
+    token: String,
+    photoId: String,
+    navHostController: NavHostController
+) {
     val context = LocalContext.current
     val bitmap = remember { mutableStateOf<Bitmap?>(null) }
 //    val cacheKey = "lovestory_ca"+photoId
@@ -75,7 +82,8 @@ fun ThumbnailOfPhotoFromServer(index: Int, token: String, photoId: String, navHo
         DisplayImageFromBitmap(index, bitmap.value!!, navHostController=navHostController, photoId = photoId)
     } else {
         val screenWidth = LocalConfiguration.current.screenWidthDp.dp
-        val imageWidth = screenWidth / 3 - 10.dp
+        val imageWidth = (screenWidth / 3)
+//        Log.d("image width", "$imageWidth")
         Skeleton(modifier = Modifier
             .width(imageWidth)
             .aspectRatio(1f)
@@ -86,7 +94,7 @@ fun ThumbnailOfPhotoFromServer(index: Int, token: String, photoId: String, navHo
 @Composable
 fun DisplayImageFromBitmap(index: Int, bitmap: Bitmap, navHostController: NavHostController, photoId: String) {
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
-    val imageWidth = screenWidth / 3 - 10.dp
+    val imageWidth = screenWidth / 3
 
     Image(
         bitmap = bitmap.asImageBitmap(),

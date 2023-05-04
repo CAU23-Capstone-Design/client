@@ -70,6 +70,6 @@ interface SyncedPhotoDao {
     suspend fun getFirstPhotoByDate(targetDate: String): SyncedPhoto?
 
     @Query("SELECT * FROM syncedPhotos WHERE photo_id = :id")
-    suspend fun getPhotoById(id: String): PhotoForSync?
+    suspend fun getPhotoById(id: String): SyncedPhoto?
 
 }

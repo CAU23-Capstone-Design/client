@@ -2,6 +2,7 @@ package com.lovestory.lovestory.ui.screens
 
 import android.annotation.SuppressLint
 import android.graphics.Bitmap
+import android.provider.ContactsContract.Contacts.Photo
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -10,7 +11,10 @@ import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.rememberTransformableState
 import androidx.compose.foundation.gestures.transformable
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.DropdownMenu
+import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.Icon
+import androidx.compose.material.Text
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -28,13 +32,24 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.lovestory.lovestory.R
+import com.lovestory.lovestory.database.PhotoDatabase
+import com.lovestory.lovestory.database.entities.SyncedPhoto
+import com.lovestory.lovestory.database.entities.SyncedPhotoDao
+import com.lovestory.lovestory.database.repository.SyncedPhotoRepository
 import com.lovestory.lovestory.module.getToken
 import com.lovestory.lovestory.module.loadBitmapFromDiskCache
 import com.lovestory.lovestory.module.photo.getDetailPhoto
 import com.lovestory.lovestory.module.photo.getThumbnailForPhoto
 import com.lovestory.lovestory.module.saveBitmapToDiskCache
 import com.lovestory.lovestory.ui.components.DisplayImageFromBitmap
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.*
 
 @Composable
 fun PhotoDetailScreenFromDevice(navHostController: NavHostController, imageUri: String) {
@@ -57,7 +72,7 @@ fun PhotoDetailScreenFromDevice(navHostController: NavHostController, imageUri: 
                 modifier = Modifier
                     .background(Color(0x2A000000))
                     .fillMaxWidth()
-                    .height(48.dp)
+                    .height(60.dp)
                     .padding(horizontal = 20.dp)
             ){
                 Icon(
@@ -74,12 +89,22 @@ fun PhotoDetailScreenFromDevice(navHostController: NavHostController, imageUri: 
 
 @Composable
 fun PhotoDetailScreenFromServer(navHostController: NavHostController, photoId : String){
+    var isDropMenuForDetailPhoto by remember {mutableStateOf(false)}
+
     val context = LocalContext.current
+
+    val database = PhotoDatabase.getDatabase(context)
+    val syncedPhotoDao = database.syncedPhotoDao()
+
+    val syncedPhoto = remember { mutableStateOf<SyncedPhoto?>(null) }
+
     val bitmap = remember { mutableStateOf<Bitmap?>(null) }
 
-    val cacheKey = "detail_$photoId"
+    val cacheKey = "detail_${photoId}"
 
     val token = getToken(context)
+
+    val systemUiController = rememberSystemUiController()
 
     LaunchedEffect(photoId) {
         val cachedBitmap = loadBitmapFromDiskCache(context, cacheKey)
@@ -97,6 +122,15 @@ fun PhotoDetailScreenFromServer(navHostController: NavHostController, photoId : 
                 Log.d("COMPONENT-detail photo", "Error in transfer bitmap")
             }
         }
+
+        val photo = syncedPhotoDao.getPhotoById(photoId)
+        syncedPhoto.value = photo
+    }
+
+    SideEffect {
+        systemUiController.setSystemBarsColor(
+            color = Color.Black,
+        )
     }
 
     Box(
@@ -122,20 +156,56 @@ fun PhotoDetailScreenFromServer(navHostController: NavHostController, photoId : 
                 .fillMaxWidth()
         ){
             Row(
-                horizontalArrangement = Arrangement.Start,
+                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .background(Color(0x2A000000))
                     .fillMaxWidth()
-                    .height(48.dp)
+                    .height(60.dp)
                     .padding(horizontal = 20.dp)
             ){
-                Icon(
-                    painter = painterResource(id = R.drawable.baseline_arrow_back_24),
-                    contentDescription = null,
-                    modifier = Modifier.clickable {navHostController.popBackStack() },
-                    tint = Color.White
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ){
+                    Icon(
+                        painter = painterResource(id = R.drawable.baseline_arrow_back_24),
+                        contentDescription = null,
+                        modifier = Modifier.clickable {navHostController.popBackStack() },
+                        tint = Color.White
+                    )
+                    Spacer(modifier = Modifier.width(20.dp))
+                    Column() {
+                        syncedPhoto.value?.let {
+                            val photoDate = LocalDate.parse(it.date.substring(0, 10))
+                            val dateFormatter = DateTimeFormatter.ofPattern("yyyy년 M월 d일 (E)", Locale.getDefault())
+                            val formattedDate = photoDate.format(dateFormatter)
+
+                            Text(text = it.area1+" "+it.area2+" "+it.area3, color = Color.White)
+                            Text(text = formattedDate, color = Color.White)
+                        }
+                    }
+                }
+
+                Box(){
+                    Icon(
+                        painter = painterResource(id = R.drawable.baseline_more_vert_24),
+                        contentDescription = null,
+                        modifier = Modifier.clickable {isDropMenuForDetailPhoto = true},
+                        tint = Color.White
+                    )
+                    DropdownMenu(
+                        expanded = isDropMenuForDetailPhoto,
+                        onDismissRequest = { isDropMenuForDetailPhoto = false },
+                        modifier = Modifier.wrapContentSize()
+                    ) {
+                        DropdownMenuItem(onClick = {
+                            isDropMenuForDetailPhoto= false
+                        }) {
+                            Text(text = "원본 사진 다운로드")
+                        }
+                    }
+                }
+
             }
         }
     }
@@ -199,9 +269,9 @@ fun TransformableSample(imageUri: String) {
                     detectDragGestures { _, dragAmount ->
                         val newOffsetX = offset.x + dragAmount.x
                         val newOffsetY = offset.y + dragAmount.y
-                        val maxXOffset : Float =
+                        val maxXOffset: Float =
                             if (scale > 1) (screenWidth * scale - screenWidth) / 2.dp else 0F
-                        val maxYOffset : Float =
+                        val maxYOffset: Float =
                             if (scale > 1) (screenWidth * scale - screenWidth) / 2.dp else 0F
 
                         if (newOffsetX in -maxXOffset..maxXOffset) {

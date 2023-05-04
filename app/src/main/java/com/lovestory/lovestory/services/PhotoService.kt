@@ -93,8 +93,9 @@ class PhotoService : Service(){
                         try{
                             var isPending = 1
                             while(isPending == 1){
+                                Log.d("CONTENT-OBSERVER", "isPending==1")
                                 getUriCursor(uri)?.use{isPending = getIsPending(it)}
-                                delay(1000)
+                                delay(500)
                             }
                             Log.d("CONTENT-OBSERVER", "isPending==0 확인")
                             val inputStream = applicationContext.contentResolver.openInputStream(uri)

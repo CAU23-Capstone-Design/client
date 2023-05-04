@@ -5,10 +5,12 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.lovestory.lovestory.R
+import com.lovestory.lovestory.database.entities.SyncedPhoto
 import com.lovestory.lovestory.ui.screens.*
 import com.lovestory.lovestory.view.ImageSyncView
 import com.lovestory.lovestory.view.PhotoForSyncView
 import com.lovestory.lovestory.view.SyncedPhotoView
+import com.squareup.moshi.Moshi
 
 @Composable
 fun MainNavGraph(
@@ -41,8 +43,9 @@ fun MainNavGraph(
 //            val imageUrl = it.arguments?.getString("imageUrl")
             PhotoDetailScreenFromDevice(navHostController = navHostController, imageUri = "content://media/external/images/media/1000000435")
         }
-        composable(GalleryStack.DetailPhotoFromServer.route+"/{photo_id}"){
-            val photoId = it.arguments?.getString("photo_id")
+        composable(GalleryStack.DetailPhotoFromServer.route+"/{photoId}"){
+            val photoId = it.arguments?.getString("photoId")
+
             PhotoDetailScreenFromServer(navHostController = navHostController, photoId = photoId!!)
         }
     }

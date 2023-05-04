@@ -147,7 +147,7 @@ fun PhotoSyncScreen(navHostController: NavHostController, photoForSyncView: Phot
         LazyVerticalGrid(
             columns = GridCells.Fixed(3),
             modifier = Modifier
-                .padding(start = 4.dp, end = 4.dp, top = 54.dp, bottom = 10.dp)
+                .padding(start = 4.dp, end = 4.dp, top = 65.dp, bottom = 10.dp)
                 .fillMaxSize(),
         ) {
             items(notSyncedPhotos.size) { index ->
@@ -176,7 +176,7 @@ fun PhotoSyncScreen(navHostController: NavHostController, photoForSyncView: Phot
                 modifier = Modifier
                     .background(Color(0xFFF3F3F3))
                     .fillMaxWidth()
-                    .height(48.dp)
+                    .height(60.dp)
                     .padding(horizontal = 20.dp)
             ){
                 Row() {
