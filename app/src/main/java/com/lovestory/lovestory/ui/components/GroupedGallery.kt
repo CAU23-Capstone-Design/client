@@ -20,8 +20,8 @@ fun GroupedGallery(
     syncedPhotosByDate: Map<String, List<SyncedPhoto>>,
     token: String?,
     navHostController: NavHostController,
-    currentDate : LocalDate,
-    allPhotoListState : LazyListState
+    currentDate: LocalDate,
+    allPhotoListState: LazyListState
 ){
     LazyColumn(
         modifier = Modifier.padding(bottom = 70.dp),

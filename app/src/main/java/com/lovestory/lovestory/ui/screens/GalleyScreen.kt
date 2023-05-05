@@ -7,10 +7,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
@@ -32,31 +28,35 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.lovestory.lovestory.graphs.GalleryStack
 import com.lovestory.lovestory.graphs.MainScreens
 import com.lovestory.lovestory.module.checkExistNeedPhotoForSync
-import com.lovestory.lovestory.view.ImageSyncView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import com.lovestory.lovestory.R
-import com.lovestory.lovestory.database.entities.SyncedPhoto
 import com.lovestory.lovestory.module.getToken
 import com.lovestory.lovestory.ui.components.*
 import com.lovestory.lovestory.view.SyncedPhotoView
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 @Composable
 fun GalleryScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhotoView) {
-    val syncedPhotos by syncedPhotoView.listOfSyncPhotos.observeAsState(initial = listOf())
-    val daySyncedPhoto by syncedPhotoView.dayListOfSyncedPhotos.observeAsState(initial = listOf())
+//    val syncedPhotos by syncedPhotoView.listOfSyncPhotos.observeAsState(initial = listOf())
+//    val daySyncedPhoto by syncedPhotoView.dayListOfSyncedPhotos.observeAsState(initial = listOf())
+    val syncedPhotosByDate by syncedPhotoView.groupedSyncedPhotosByDate.observeAsState(initial = mapOf())
+    val daySyncedPhotosByDate by syncedPhotoView.daySyncedPhotosByDate.observeAsState(initial = mapOf())
+
+    val syncedPhotosByDateAndArea by syncedPhotoView.syncedPhotosByDateAndArea.observeAsState(initial = mapOf())
+
+    val sizesOfInnerElements by syncedPhotoView.sizesOfInnerElements.observeAsState(initial = listOf())
+    val cumOfSizeOfInnerElements by syncedPhotoView.cumOfSizeOfInnerElements.observeAsState(initial = syncedPhotoView.computeCumulativeSizes(sizesOfInnerElements))
 
     val systemUiController = rememberSystemUiController()
 
-    val syncedPhotosByDate = syncedPhotos.groupBy { it.date.substring(0, 10) }
-    val daySyncedPhotosByDate = daySyncedPhoto.groupBy { it.date.substring(0, 10) }
 
     val context = LocalContext.current
+    val currentDate = LocalDate.now()
+    val token = getToken(context)
 
     val allPhotoListState = rememberLazyListState()
 
@@ -66,16 +66,6 @@ fun GalleryScreen(navHostController: NavHostController, syncedPhotoView : Synced
     val items = listOf<String>(
         "년", "월", "일", "전체"
     )
-
-    val inputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
-    val outputFormatter = DateTimeFormatter.ofPattern("yyyy년 M월 d일")
-
-    val token = getToken(context)
-
-    var offset  = 0
-    var photoIndex = 0
-
-    val currentDate = LocalDate.now()
 
     SideEffect {
         systemUiController.setSystemBarsColor(
@@ -89,7 +79,9 @@ fun GalleryScreen(navHostController: NavHostController, syncedPhotoView : Synced
             .fillMaxSize()
     ) {
         // Gallery List
-        AnimatedVisibility(visible = selectedButton =="전체", enter = fadeIn(), exit = fadeOut()){
+        AnimatedVisibility(visible = selectedButton =="전체",
+//            enter = fadeIn(), exit = fadeOut()
+        ){
             GroupedGallery(
                 syncedPhotosByDate = syncedPhotosByDate,
                 token = token,
@@ -98,13 +90,16 @@ fun GalleryScreen(navHostController: NavHostController, syncedPhotoView : Synced
                 allPhotoListState = allPhotoListState)
         }
 
-        AnimatedVisibility(visible = selectedButton =="일", enter = fadeIn(), exit = fadeOut()) {
+        AnimatedVisibility(visible = selectedButton =="일",
+//            enter = fadeIn(), exit = fadeOut()
+        ) {
             DayGroupedGallery(
                 daySyncedPhotoByDate = daySyncedPhotosByDate,
                 token = token,
                 currentDate = currentDate,
                 allPhotoListState= allPhotoListState,
-                setSelectedButton = setSelectedButton
+                setSelectedButton = setSelectedButton,
+                cumOfSizeOfInnerElements = cumOfSizeOfInnerElements
             )
 
         }
