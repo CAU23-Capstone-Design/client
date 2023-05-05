@@ -92,12 +92,12 @@ suspend fun getThumbnailById(token: String, photo_id : String): Response<Respons
     }
 }
 
-suspend fun getDetailById(token: String, photo_id : String): Response<ResponseBody> {
+suspend fun getDetailById(token: String, photo_id : String, quality : Int): Response<ResponseBody> {
     val jwt : String = "Bearer $token"
     val apiService: PhotoService = createApiService()
 
     return try{
-        apiService.getPhotoDetailById(jwt, photo_id, 20)
+        apiService.getPhotoDetailById(jwt, photo_id, quality)
     }catch (e: HttpException){
         Log.e("NETWORK-GetThumbnailById", "$e")
         Response.error(e.code(), e.response()?.errorBody())

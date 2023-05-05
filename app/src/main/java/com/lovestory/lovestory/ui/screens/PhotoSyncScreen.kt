@@ -263,43 +263,6 @@ fun PhotoSyncScreen(navHostController: NavHostController, photoForSyncView: Phot
             }
         }
     }
-
-//    Column(
-//        modifier = Modifier
-//            .background(Color.White)
-//            .fillMaxSize()
-//            .padding(horizontal = 10.dp, vertical = 10.dp) ,
-//        verticalArrangement = Arrangement.SpaceBetween
-//    ){}
-
-
-
-//        AnimatedVisibility(visible = isUploadPhotos, enter = scaleIn(animationSpec = tween(durationMillis = 300), initialScale = 0.1f)){
-//
-//
-//        }
-//        if(isUploadPhotos){
-//            Dialog(
-//                onDismissRequest = onDismissRequest,
-//                properties = DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = false),
-//            ){
-//                Column(
-//                    modifier = Modifier
-//                        .width(360.dp)
-//                        .wrapContentHeight()
-//                        .clip(RoundedCornerShape(25.dp))
-//                        .background(color = Color.White),
-//                    verticalArrangement = Arrangement.Center,
-//                    horizontalAlignment = Alignment.CenterHorizontally,
-//                ){
-//                    Spacer(modifier = Modifier.height(20.dp))
-//                    Text(text = "사진 업로드 중 $currentUploadPhotos of $totalUploadPhotos")
-//                    LinearProgressIndicator(progress = currentUploadPhotos.toFloat()/totalUploadPhotos.toFloat())
-//                    Spacer(modifier = Modifier.height(20.dp))
-//                }
-//            }
-//        }
-
 }
 
 fun getListOfCheckedPhoto (allPhotos : List<PhotoForSync>, checkPhotoList : MutableState<MutableList<Boolean>>) : List<PhotoForSync>{

@@ -1,5 +1,6 @@
 package com.lovestory.lovestory.ui.components
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -9,26 +10,24 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
 import com.lovestory.lovestory.database.entities.SyncedPhoto
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.*
 
 @Composable
-fun GroupedGallery(
-    syncedPhotosByDate: Map<String, List<SyncedPhoto>>,
+fun DayGroupedGallery(
+    daySyncedPhotoByDate : Map<String, List<SyncedPhoto>>,
     token: String?,
-    navHostController: NavHostController,
     currentDate : LocalDate,
-    allPhotoListState : LazyListState
+    allPhotoListState : LazyListState,
+    setSelectedButton : (String)->Unit
 ){
     LazyColumn(
         modifier = Modifier.padding(bottom = 70.dp),
         contentPadding = PaddingValues(top=65.dp, bottom = 75.dp),
-        state = allPhotoListState
-    ){
-        syncedPhotosByDate.forEach{(date, photos)->
+        ){
+        daySyncedPhotoByDate.forEach {(date, daySyncedPhoto)->
             item {
                 val photoDate = LocalDate.parse(date)
                 val dateFormatter = if (currentDate.year == photoDate.year) {
@@ -47,26 +46,21 @@ fun GroupedGallery(
                         .padding(horizontal = 10.dp, vertical = 16.dp)
                 )
             }
-
-            items(photos.chunked(3).size) { index ->
+            items(daySyncedPhoto.size) { index ->
+                Log.d("GalleryScreen", "id : ${daySyncedPhoto[index].id} | date : ${daySyncedPhoto[index].date} | area1 : ${daySyncedPhoto[index].area1} | area2 : ${daySyncedPhoto[index].area2} | area3 : ${daySyncedPhoto[index].area3}")
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(),
                     horizontalArrangement = Arrangement.Start
-                ) {
-                    photos.chunked(3)[index].forEach { photo ->
-                        if (token != null) {
-                            Box(
-                                modifier = Modifier.fillMaxHeight()
-                            ) {
-                                ThumbnailOfPhotoFromServer(
-                                    index = photos.indexOf(photo),
-                                    token = token,
-                                    photoId = photo.id,
-                                    navHostController = navHostController
-                                )
-                            }
-                        }
+                ){
+                    if (token != null) {
+                        BigThumbnailFromServer(
+                            index = index,
+                            token = token,
+                            photoId = daySyncedPhoto[index].id,
+                            allPhotoListState = allPhotoListState,
+                            setSelectedButton = setSelectedButton
+                        )
                     }
                 }
             }

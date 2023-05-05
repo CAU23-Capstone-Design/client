@@ -1,7 +1,10 @@
 package com.lovestory.lovestory.ui.screens
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -26,7 +29,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
-import com.lovestory.lovestory.ui.components.DisplayImageFromUri
 import com.lovestory.lovestory.graphs.GalleryStack
 import com.lovestory.lovestory.graphs.MainScreens
 import com.lovestory.lovestory.module.checkExistNeedPhotoForSync
@@ -35,10 +37,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import com.lovestory.lovestory.R
+import com.lovestory.lovestory.database.entities.SyncedPhoto
 import com.lovestory.lovestory.module.getToken
-import com.lovestory.lovestory.ui.components.GroupedGallery
-import com.lovestory.lovestory.ui.components.SelectMenuButtons
-import com.lovestory.lovestory.ui.components.ThumbnailOfPhotoFromServer
+import com.lovestory.lovestory.ui.components.*
 import com.lovestory.lovestory.view.SyncedPhotoView
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
@@ -53,10 +54,13 @@ fun GalleryScreen(navHostController: NavHostController, syncedPhotoView : Synced
     val systemUiController = rememberSystemUiController()
 
     val syncedPhotosByDate = syncedPhotos.groupBy { it.date.substring(0, 10) }
+    val daySyncedPhotosByDate = daySyncedPhoto.groupBy { it.date.substring(0, 10) }
 
     val context = LocalContext.current
 
-    val listState = rememberLazyGridState()
+    val allPhotoListState = rememberLazyListState()
+
+    val listState = rememberLazyListState()
 
     val (selectedButton, setSelectedButton) = remember { mutableStateOf("전체") }
     val items = listOf<String>(
@@ -85,25 +89,24 @@ fun GalleryScreen(navHostController: NavHostController, syncedPhotoView : Synced
             .fillMaxSize()
     ) {
         // Gallery List
-        AnimatedVisibility(visible = selectedButton =="전체"){
-            GroupedGallery(syncedPhotosByDate = syncedPhotosByDate, token = token, navHostController = navHostController, currentDate = currentDate)
+        AnimatedVisibility(visible = selectedButton =="전체", enter = fadeIn(), exit = fadeOut()){
+            GroupedGallery(
+                syncedPhotosByDate = syncedPhotosByDate,
+                token = token,
+                navHostController = navHostController,
+                currentDate = currentDate,
+                allPhotoListState = allPhotoListState)
         }
 
-        AnimatedVisibility(visible = selectedButton =="일") {
-            LazyColumn(
-                modifier = Modifier
-                    .padding(start = 2.dp, end = 2.dp, bottom = 70.dp)
-                    .fillMaxSize(),
-                contentPadding = PaddingValues(top=65.dp, bottom = 75.dp),
-                userScrollEnabled = true,
+        AnimatedVisibility(visible = selectedButton =="일", enter = fadeIn(), exit = fadeOut()) {
+            DayGroupedGallery(
+                daySyncedPhotoByDate = daySyncedPhotosByDate,
+                token = token,
+                currentDate = currentDate,
+                allPhotoListState= allPhotoListState,
+                setSelectedButton = setSelectedButton
+            )
 
-                ) {
-                items(daySyncedPhoto.size) { index ->
-                    if (token != null) {
-                        ThumbnailOfPhotoFromServer(index = index, token = token, photoId = daySyncedPhoto[index].id, navHostController= navHostController)
-                    }
-                }
-            }
         }
 
         AnimatedVisibility(visible = selectedButton =="월") {

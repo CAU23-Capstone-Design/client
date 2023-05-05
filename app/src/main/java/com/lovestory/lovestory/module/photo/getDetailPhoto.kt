@@ -6,9 +6,9 @@ import com.lovestory.lovestory.network.getDetailById
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-suspend fun getDetailPhoto(token:String, photo_id : String): Bitmap?{
+suspend fun getDetailPhoto(token:String, photo_id : String, quality : Int): Bitmap?{
     return  withContext(Dispatchers.IO){
-        val response = getDetailById(token, photo_id)
+        val response = getDetailById(token, photo_id, quality = quality)
         if(response.isSuccessful){
             val responseBody = response.body()!!
             try{

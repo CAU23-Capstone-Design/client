@@ -2,7 +2,10 @@ package com.lovestory.lovestory.ui.components
 
 import android.graphics.Bitmap
 import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -59,18 +62,16 @@ fun ThumbnailOfPhotoFromServer(
     val cacheKey = "thumbnail_$photoId"
 
     LaunchedEffect(photoId) {
-//        val cachedBitmap = getBitmapFromCache(cacheKey)
-
         val cachedBitmap = loadBitmapFromDiskCache(context, cacheKey)
         if (cachedBitmap != null) {
-            Log.d("Thumbnail","cache에서 로드")
+//            Log.d("Thumbnail","cache에서 로드")
             bitmap.value = cachedBitmap
         } else {
             val getResult = getThumbnailForPhoto(token, photoId)
             if(getResult != null){
                 saveBitmapToDiskCache(context, getResult, cacheKey)
                 bitmap.value = getResult
-                Log.d("Thumbnail","서버에서 로드")
+//                Log.d("Thumbnail","서버에서 로드")
             }
             else{
                 Log.d("COMPONENT-ThumbnailOfPhotoFromServer", "Error in transfer bitmap")
@@ -78,9 +79,10 @@ fun ThumbnailOfPhotoFromServer(
         }
     }
 
-    if (bitmap.value != null) {
+    AnimatedVisibility (bitmap.value != null, enter = fadeIn(), exit = fadeOut()) {
         DisplayImageFromBitmap(index, bitmap.value!!, navHostController=navHostController, photoId = photoId)
-    } else {
+    }
+    AnimatedVisibility(bitmap.value== null, enter = fadeIn(), exit = fadeOut()) {
         val screenWidth = LocalConfiguration.current.screenWidthDp.dp
         val imageWidth = (screenWidth / 3)
 //        Log.d("image width", "$imageWidth")

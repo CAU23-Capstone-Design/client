@@ -13,7 +13,7 @@ class SyncedPhotoRepository(private val syncedPhotoDao: SyncedPhotoDao) {
 
     val getAllSyncedPhotos : LiveData<List<SyncedPhoto>> = syncedPhotoDao.getAllSyncedPhotosSortedByDate()
 
-    val getDaySyncedPhotos : LiveData<List<SyncedPhoto>> = syncedPhotoDao.getFirstPhotoForEachDay()
+    val getDaySyncedPhotos : LiveData<List<SyncedPhoto>> = syncedPhotoDao.getFirstPhotoForEachDayAndLocation()
 
 //    val listOfGetAllSyncedPhoto :List<SyncedPhoto> = withContext(Dispatchers.IO){syncedPhotoDao.listOfGetAll()}
     suspend fun listOfGetAllSyncedPhoto():List<SyncedPhoto>{return withContext(Dispatchers.IO){syncedPhotoDao.listOfGetAll()}}

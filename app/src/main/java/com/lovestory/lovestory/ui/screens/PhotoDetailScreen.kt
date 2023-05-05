@@ -112,7 +112,7 @@ fun PhotoDetailScreenFromServer(navHostController: NavHostController, photoId : 
             Log.d("detail","cache에서 로드")
             bitmap.value = cachedBitmap
         } else {
-            val getResult = getDetailPhoto(token!!, photoId)
+            val getResult = getDetailPhoto(token!!, photoId, 20)
             if(getResult != null){
                 saveBitmapToDiskCache(context, getResult, cacheKey)
                 bitmap.value = getResult
