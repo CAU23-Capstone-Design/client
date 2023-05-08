@@ -45,6 +45,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -52,6 +53,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
@@ -80,9 +82,9 @@ fun MapScreen(navHostController: NavHostController){
         }
         val items = remember{ mutableStateListOf<MyItem>() }
         //LaunchedEffect(true){
-            points1.forEach{ latLng ->
-                items.add(MyItem(latLng,"Marker","Snippet", CustomMarker(Uri.parse("file:///storage/emulated/0/DCIM/Camera/20230424_194354.jpg"))))
-            }
+        points1.forEach{ latLng ->
+            items.add(MyItem(latLng,"Marker","Snippet", CustomMarker(Uri.parse("file:///storage/emulated/0/DCIM/Camera/20230424_194354.jpg"))))
+        }
         //}
 
         GoogleMap(
@@ -107,33 +109,44 @@ fun MapScreen(navHostController: NavHostController){
                 },
                 // Optional: Custom rendering for clusters
                 clusterContent = { cluster ->
-                    val context = LocalContext.current
-
+                    Log.d("클러스터","${cluster.items.first().icon}")
                     val drawable = ContextCompat.getDrawable(context, R.drawable.img)
                     val bitmap = (drawable as BitmapDrawable).bitmap
-
-                    val bitmap1 = context.contentResolver.openFileDescriptor(Uri.parse("file:///storage/emulated/0/DCIM/Camera/20230424_194354.jpg"), "r")?.use { descriptor ->
-                        BitmapFactory.decodeFileDescriptor(descriptor.fileDescriptor)
-                    }
                     val size = 50.dp
                     val scaledBitmap = bitmap?.let {
                         val density = LocalDensity.current.density
                         val scaledSize = (size * density).toInt()
                         Bitmap.createScaledBitmap(it, scaledSize, scaledSize, false)
                     }!!.asImageBitmap()
-                    Image(
-                        bitmap = scaledBitmap,
-                        contentDescription = "Marker Image",
-                        modifier = Modifier.size(40.dp)
-                    )
-                    /*Surface(
-                        Modifier.size(40.dp),
-                        shape = CircleShape,
-                        color = Color.Blue,
+//
+//                    val icon = bitmapDescriptor(
+//                        context, R.drawable.img
+//                    )
+//                    val clusterPositionState = rememberMarkerState(position = cluster.position)
+//                    Marker(
+//                        state = clusterPositionState,
+//                        icon = icon
+//                    )
+//                    Image(
+//                        bitmap = scaledBitmap,
+//                        contentDescription = "Marker Image",
+//                        modifier = Modifier.size(40.dp)
+//                    )
+                    Surface(
+                        //Modifier.size(40.dp),
+                        //shape = RectangleShape,
+                        //color = Color.Blue,
+                        shape = RoundedCornerShape(percent = 10),
                         contentColor = Color.White,
-                        border = BorderStroke(1.dp, Color.White)
+                        border = BorderStroke(1.dp, Color.White),
+                        elevation = 10.dp
                     ) {
                         Box(contentAlignment = Alignment.Center) {
+                            Image(
+                                bitmap = scaledBitmap,
+                                contentDescription = null,
+                                modifier = Modifier.size(60.dp)
+                            )
                             Text(
                                 "%,d".format(cluster.size/2), //이 부분 왜 2배로 나오지..?
                                 fontSize = 16.sp,
@@ -141,10 +154,43 @@ fun MapScreen(navHostController: NavHostController){
                                 textAlign = TextAlign.Center
                             )
                         }
-                    }*/
+                    }
                 },
                 // Optional: Custom rendering for non-clustered items
-                clusterItemContent = null
+                clusterItemContent = { item ->
+                    val drawable = ContextCompat.getDrawable(context, R.drawable.img)
+                    val bitmap = (drawable as BitmapDrawable).bitmap
+                    val size = 50.dp
+                    val scaledBitmap = bitmap?.let {
+                        val density = LocalDensity.current.density
+                        val scaledSize = (size * density).toInt()
+                        Bitmap.createScaledBitmap(it, scaledSize, scaledSize, false)
+                    }!!.asImageBitmap()
+                    Surface(
+                        shape = RoundedCornerShape(percent = 10),
+                        contentColor = Color.White,
+                        border = BorderStroke(1.dp, Color.White),
+                        elevation = 10.dp
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Image(
+                                bitmap = scaledBitmap,
+                                contentDescription = null,
+                                modifier = Modifier.size(60.dp)
+                            )
+                        }
+                    }
+
+                } //{ //item ->
+//                    val icon = bitmapDescriptor(
+//                        context, R.drawable.img
+//                    )
+//                    val clusterPositionState = rememberMarkerState(position = item.position)
+////                    Marker(
+//                        state = clusterPositionState,
+//                        icon = icon
+//                    )
+//                }
             )
             /*
             var clusterManager by remember { mutableStateOf<ClusterManager<MyItem>?>(null) }
@@ -174,7 +220,7 @@ fun MapScreen(navHostController: NavHostController){
             //    state = markerPositionState,
             //    icon = CustomMarker(Uri.parse("file:///storage/emulated/0/DCIM/Camera/20230424_194354.jpg")),
             //    onClick = {
-                    //isClicked = true
+            //isClicked = true
             //        navHostController.popBackStack()
             //       true
             //    }
@@ -185,6 +231,26 @@ fun MapScreen(navHostController: NavHostController){
             //)
         }
     }
+}
+
+fun bitmapDescriptor(
+    context: Context,
+    vectorResId: Int
+): BitmapDescriptor? {
+
+    // retrieve the actual drawable
+    val drawable = ContextCompat.getDrawable(context, vectorResId) ?: return null
+    drawable.setBounds(0, 0, drawable.intrinsicWidth, drawable.intrinsicHeight)
+    val bm = Bitmap.createBitmap(
+        drawable.intrinsicWidth,
+        drawable.intrinsicHeight,
+        Bitmap.Config.ARGB_8888
+    )
+
+    // draw it onto the bitmap
+    val canvas = android.graphics.Canvas(bm)
+    drawable.draw(canvas)
+    return BitmapDescriptorFactory.fromBitmap(bm)
 }
 
 class MarkerClusterRender <T : ClusterItem>(

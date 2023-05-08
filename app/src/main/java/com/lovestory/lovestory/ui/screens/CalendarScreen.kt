@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.ContextCompat
+import androidx.core.os.bundleOf
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 //import com.google.android.gms.maps.model.CameraPosition
@@ -50,9 +51,6 @@ import com.lovestory.lovestory.module.saveComment
 import com.lovestory.lovestory.resource.vitro
 import com.lovestory.lovestory.ui.components.*
 import com.lovestory.lovestory.ui.theme.LoveStoryTheme
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import retrofit2.Response
 import java.time.LocalDate
 import java.time.YearMonth
@@ -70,7 +68,7 @@ import com.lovestory.lovestory.R
 import com.lovestory.lovestory.graphs.CalendarNavGraph
 import com.lovestory.lovestory.graphs.MainScreens
 import com.lovestory.lovestory.network.*
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.*
 import kotlinx.coroutines.selects.select
 import okhttp3.Dispatcher
 import java.time.DayOfWeek
@@ -104,10 +102,6 @@ fun CalendarScreen(navHostController: NavHostController) {
         isPopupVisible = true
     }
 
-    //var selection = rememberSaveable { mutableStateOf(CalendarDay(date = LocalDate.now(), position = DayPosition.MonthDate))}
-    //var isPopupVisible = rememberSaveable { mutableStateOf(false) }
-
-
     val onOpenDialogRequest : ()->Unit = {
         isPopupVisible = true
         //isPopupVisibleSave = true
@@ -124,18 +118,14 @@ fun CalendarScreen(navHostController: NavHostController) {
     val coroutineScope = rememberCoroutineScope()
     val visibleMonth = rememberFirstCompletelyVisibleMonth(state)
 
-    //var coupleMemoryList by remember { mutableStateOf(generateCoupleMemory()) }
-
     var coupleMemoryList by remember { mutableStateOf(emptyList<CoupleMemory>()) }
     val stringMemoryList = mutableListOf<StringMemory>()
 
-    //val lifecycleOwner = LocalLifecycleOwner.current
-    //val lifecycleScope = lifecycleOwner.lifecycleScope
+    var latLng by remember { mutableStateOf(emptyList<LatLng>()) }
+    val dataLoaded = remember { mutableStateOf(false) }
 
     val context = LocalContext.current
     val token = getToken(context)
-
-    //var editedcomment by remember { mutableStateOf("") }
 
     //해야 되는 게 코루틴 정리. 룸 db
     LaunchedEffect(key1 = true) {
@@ -160,16 +150,9 @@ fun CalendarScreen(navHostController: NavHostController) {
 
                 val newCoupleMemoryList = coupleMemoryList.plus(coupleMemory)
                 coupleMemoryList = newCoupleMemoryList
-
-                //val stringMemory = StringMemory(date.toString(), comment)
-                //stringMemoryList.add(stringMemory)
             }
 
             saveComment(context, coupleMemoryList)
-            //coupleMemoryList = convertToCoupleMemoryList(stringMemoryList)
-            //coupleMemoryList.forEach{CoupleMemory -> Log.d("서버2","$CoupleMemory") }
-
-
     }
 
 
@@ -246,7 +229,7 @@ fun CalendarScreen(navHostController: NavHostController) {
 
     if (isPopupVisible || isPopupVisibleSave) {
         //getComment 서버 통신
-        coroutineScope.launch {
+        LaunchedEffect(true){
             val getMemoryList: Response<List<GetMemory>> = getComment(token!!)
             val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
             for (getMemory in getMemoryList.body()!!) {
@@ -257,6 +240,22 @@ fun CalendarScreen(navHostController: NavHostController) {
             }
             coupleMemoryList = convertToCoupleMemoryList(stringMemoryList)
             coupleMemoryList.forEach { CoupleMemory -> Log.d("쉐어드3", "$CoupleMemory") }
+
+            //get GPS
+            val date = selection.date
+            val formatter1 = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+            val dateString = date.format(formatter1)
+            val gps = getGps(token!!, dateString)
+
+            latLng = if (gps.body() != null) {
+                getLatLng(gps.body()!!)
+            }else{
+                val position = mutableListOf<LatLng>()
+                position.add(LatLng(37.503735330931136, 126.95615523253305))
+                position
+            }
+            Log.d("코루틴","호출1, $latLng")
+            dataLoaded.value = true
         }
 
         var editedcomment by remember { mutableStateOf("") }
@@ -267,7 +266,6 @@ fun CalendarScreen(navHostController: NavHostController) {
 
         CalendarDialog(
             selection = selection,
-            //editedcomment = editedcomment,
             onDismissRequest = {
                 if(existingMemory != null) {
                     coupleMemoryList.find{ it.date == selection.date }?.comment = editedcomment
@@ -295,207 +293,175 @@ fun CalendarScreen(navHostController: NavHostController) {
                 }
                 isPopupVisible = false// Update coupleMemoryList when dialog is dismissed
                 isPopupVisibleSave = false
+                dataLoaded.value = false
             }, //onDismissRequest,
             properties = DialogProperties(dismissOnBackPress = true, dismissOnClickOutside = true)
         ) {
-            /*
-            Surface(
+            Column(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .pointerInput(Unit) {
-                        detectTapGestures(
-                            onTap = { onDismissRequest() }
-                        )
-                    },
-                    //.clickable(onClick = onDismissRequest, indication = null), // This makes the dialog dismiss on outside click
-                color = Color.Transparent, // This makes the background of the Surface transparent
+                    .width(360.dp)
+                    .wrapContentHeight()
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(color = Color.White),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-
-             */
-                //Box(
-                //    modifier = Modifier.wrapContentSize(),//.clickable(onClick = {onDismissRequest}),
-                //    contentAlignment = Alignment.Center
-                //) {
-                    Column(
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentHeight()
+                        .background(color = Color.Transparent)
+                        .padding(start = 25.dp, end = 25.dp, top = 15.dp, bottom = 10.dp),//vertical = 15.dp, horizontal = 25.dp),
+                    verticalAlignment = Alignment.Bottom
+                ){
+                    Text(
+                        text = selection.date.dayOfMonth.toString(),
+                        fontSize = 26.sp,
+                        color = Color.Black,
+                        fontWeight = FontWeight.ExtraBold,
+                    )
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text(
                         modifier = Modifier
-                            .width(360.dp)
-                            .wrapContentHeight()
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(color = Color.White),
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .wrapContentHeight()
-                                .background(color = Color.Transparent)
-                                .padding(start = 25.dp, end = 25.dp, top = 15.dp, bottom = 10.dp),//vertical = 15.dp, horizontal = 25.dp),
-                            verticalAlignment = Alignment.Bottom
-                            //horizontalArrangement = Arrangement.SpaceBetween,
-                            //verticalAlignment = Alignment.CenterVertically
-                        ){
-                            Text(
-                                text = selection.date.dayOfMonth.toString(),
-                                fontSize = 26.sp,
-                                color = Color.Black,
-                                fontWeight = FontWeight.ExtraBold,
-                            )
-                            Spacer(modifier = Modifier.width(10.dp))
-                            Text(
-                                modifier = Modifier
-                                    .padding(bottom = 3.dp)
-                                    .weight(1f),
-                                text = selection.date.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault())+"요일",
-                                fontSize = 16.sp,
-                                color = Color.Black,
-                            )
-                            //Spacer(Modifier.weight(1f))
-                            Button(
-                                colors = ButtonDefaults.buttonColors(backgroundColor = Color.Transparent),
-                                onClick = {
-                                    coroutineScope.launch {
-                                        val date = selection.date
-                                        coupleMemoryList = coupleMemoryList.filterNot { it.date == date }
+                            .padding(bottom = 3.dp)
+                            .weight(1f),
+                        text = selection.date.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault())+"요일",
+                        fontSize = 16.sp,
+                        color = Color.Black,
+                    )
+                    //Spacer(Modifier.weight(1f))
+                    Button(
+                        colors = ButtonDefaults.buttonColors(backgroundColor = Color.Transparent),
+                        onClick = {
+                            coroutineScope.launch {
+                                val date = selection.date
+                                coupleMemoryList = coupleMemoryList.filterNot { it.date == date }
 
+                                val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+                                val dateString = date.format(formatter)
+                                val delete: Any = deleteComment(token!!, dateString)
+                                Log.d("삭제", "$delete, $dateString")
+                            }
+                            saveComment(context, coupleMemoryList)
+                            isPopupVisible = false
+                            isPopupVisibleSave = false
+                            dataLoaded.value = false
+                        },
+                        elevation = null,
+                        contentPadding = PaddingValues(0.dp),
+                        modifier = Modifier
+                            .width(30.dp)
+                            .height(30.dp),
+                        //.padding(bottom = 5.dp),//wrapContentSize(),
+                        shape = CircleShape,
+                    ){
+                        Icon(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_delete),
+                            contentDescription = "Delete"
+                        )
+                    }
+
+                    Button(
+                        colors = ButtonDefaults.buttonColors(backgroundColor = Color.Transparent),
+                        onClick = {
+                            if(existingMemory != null) {
+                                coupleMemoryList.find{ it.date == selection.date }?.comment = editedcomment
+                                //sendComment
+                                coroutineScope.launch{
+                                    val date = selection.date
+                                    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+                                    val dateString = date.format(formatter)
+                                    val put : Response<Any> = putComment(token!!, dateString, editedcomment)
+                                    //Log.d("풑3","$put, $dateString, $editedcomment")
+                                    saveComment(context, coupleMemoryList)
+                                }
+                            } else {
+                                if ( editedcomment != ""){
+                                    val newMemory = CoupleMemory(date = selection.date, comment = editedcomment)
+                                    coupleMemoryList = coupleMemoryList.toMutableList().apply{add(newMemory)}
+                                    coroutineScope.launch{
+                                        val date = selection.date
                                         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
                                         val dateString = date.format(formatter)
-                                        val delete: Any = deleteComment(token!!, dateString)
-                                        Log.d("삭제", "$delete, $dateString")
+                                        val put : Response<Any> = putComment(token!!, dateString, editedcomment)
+                                        //Log.d("풑4","$put, $dateString, $editedcomment")
+                                        saveComment(context, coupleMemoryList)
                                     }
-                                    saveComment(context, coupleMemoryList)
-                                    isPopupVisible = false
-                                    isPopupVisibleSave = false
-                                },
-                                elevation = null,
-                                contentPadding = PaddingValues(0.dp),
-                                modifier = Modifier
-                                    .width(30.dp)
-                                    .height(30.dp),
-                                    //.padding(bottom = 5.dp),//wrapContentSize(),
-                                shape = CircleShape,
-                            ){
-                                Icon(
-                                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_delete),
-                                    contentDescription = "Delete"
-                                )
+                                }
                             }
-
-                            Button(
-                                colors = ButtonDefaults.buttonColors(backgroundColor = Color.Transparent),
-                                onClick = {
-                                    if(existingMemory != null) {
-                                        coupleMemoryList.find{ it.date == selection.date }?.comment = editedcomment
-                                        //sendComment
-                                        coroutineScope.launch{
-                                            val date = selection.date
-                                            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-                                            val dateString = date.format(formatter)
-                                            val put : Response<Any> = putComment(token!!, dateString, editedcomment)
-                                            //Log.d("풑3","$put, $dateString, $editedcomment")
-                                            saveComment(context, coupleMemoryList)
-                                        }
-                                    } else {
-                                        if ( editedcomment != ""){
-                                            val newMemory = CoupleMemory(date = selection.date, comment = editedcomment)
-                                            coupleMemoryList = coupleMemoryList.toMutableList().apply{add(newMemory)}
-                                            coroutineScope.launch{
-                                                val date = selection.date
-                                                val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-                                                val dateString = date.format(formatter)
-                                                val put : Response<Any> = putComment(token!!, dateString, editedcomment)
-                                                //Log.d("풑4","$put, $dateString, $editedcomment")
-                                                saveComment(context, coupleMemoryList)
-                                            }
-                                        }
-                                    }
-                                    isPopupVisible = false
-                                    isPopupVisibleSave = false
-                                },
-                                elevation = null,
-                                contentPadding = PaddingValues(0.dp),
-                                modifier = Modifier
-                                    .width(30.dp)
-                                    .height(30.dp)
-                                    .padding(bottom = 5.dp),//wrapContentSize(),
-                                shape = CircleShape,
-                            ){
-                                Text(
-                                    text = "X",
-                                    fontSize = 22.sp,
-                                    color = Color.Black,
-                                    fontWeight = FontWeight.ExtraBold
-                                )
-                            }
-                        }
-                        Divider(color = Color.Black, thickness = 1.dp, modifier = Modifier.padding(start = 20.dp, end = 20
-
-
-                            .dp))
-                        Spacer(modifier = Modifier.height(15.dp))
-                        EditableTextField(
-                            initialValue = editedcomment,
-                            onValueChanged = {editedcomment = it}
+                            isPopupVisible = false
+                            isPopupVisibleSave = false
+                        },
+                        elevation = null,
+                        contentPadding = PaddingValues(0.dp),
+                        modifier = Modifier
+                            .width(30.dp)
+                            .height(30.dp)
+                            .padding(bottom = 5.dp),//wrapContentSize(),
+                        shape = CircleShape,
+                    ){
+                        Text(
+                            text = "X",
+                            fontSize = 22.sp,
+                            color = Color.Black,
+                            fontWeight = FontWeight.ExtraBold
                         )
-                        //Text(text = "Current value: $editedcomment")
-                        Spacer(modifier = Modifier.height(20.dp))
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(start = 20.dp, end = 20.dp)
-                                .height(300.dp)
-                                .background(color = Color.Gray, RoundedCornerShape(12.dp))
-//                                .clickable {
-//                                    isPopupVisible = false
-//                                    isPopupVisibleSave = true
-//
-//                                }
-                        ){
-//                            coroutineScope.launch {
-//                                val date = selection.date
-//                                val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-//                                val dateString = date.format(formatter)
-//                                //val gps = getGps(token!!, dateString)
-//                                //Log.d("위치정보", "${gps.body()}")
-//                            }
-                            val viewposition = averageLatLng(points1)
-                            val cameraPositionState = rememberCameraPositionState {
-                                position = CameraPosition.fromLatLngZoom(viewposition!!, 15f)
-                            }
-                            selectionSave = selection
-                            //isPopupVisibleSave = isPopupVisible
+                    }
+                }
+                Divider(color = Color.Black, thickness = 1.dp, modifier = Modifier.padding(start = 20.dp, end = 20.dp))
+                Spacer(modifier = Modifier.height(15.dp))
+                EditableTextField(
+                    initialValue = editedcomment,
+                    onValueChanged = {editedcomment = it}
+                )
+                //Text(text = "Current value: $editedcomment")
+                Spacer(modifier = Modifier.height(20.dp))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 20.dp, end = 20.dp)
+                        .height(300.dp)
+                        .background(color = Color.LightGray, RoundedCornerShape(12.dp))
+                ){
+                    var viewposition = LatLng(37.503735330931136, 126.95615523253305)
+                    var cameraPositionState = rememberCameraPositionState {
+                        position = CameraPosition.fromLatLngZoom(viewposition, 15f)
+                    }
+                    selectionSave = selection
 
-
-                            GoogleMap(
-                                modifier = Modifier.fillMaxSize(),
-                                cameraPositionState = cameraPositionState,
-                                onMapClick = {
-                                    isPopupVisible = false
-                                    isPopupVisibleSave = true
-                                    navHostController.navigate(MainScreens.Map.route) {
-                                        launchSingleTop = true
-                                        Log.d("클릭","클릭")
-                                    }
-                                },
-                                uiSettings = uiSettings
-                            ) {
+                    if (!dataLoaded.value) {
+                        //스켈레톤 추가
+                        Box(modifier = Modifier.fillMaxSize().background(color = Color.Transparent))
+                    } else {
+                        viewposition = averageLatLng(latLng)
+                        cameraPositionState = CameraPositionState(position = CameraPosition.fromLatLngZoom(viewposition, 15f))
+                        Log.d("좌표","$viewposition, $latLng")
+                        GoogleMap(
+                            modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(12.dp)),
+                            cameraPositionState = cameraPositionState,
+                            onMapClick = {
+                                isPopupVisible = false
+                                isPopupVisibleSave = true
+                                navHostController.navigate(MainScreens.Map.route) {
+                                    launchSingleTop = true
+                                    Log.d("클릭","클릭")
+                                }
+                            },
+                            uiSettings = uiSettings
+                        ) {
+                            if(latLng.isNotEmpty()) {
                                 Polyline(
-                                    points = points1,
+                                    points = latLng,
                                     color = Color.Black
                                 )
                             }
                         }
-                        Spacer(modifier = Modifier.height(20.dp))
                     }
                 }
-            //}
-        //}
+                Spacer(modifier = Modifier.height(20.dp))
+            }
+        }
     }
-
-    //if(isMapVisible){
-    //    Log.d("셀렉션2", "${selection.date}")
-    //}
-
 }
 
 val uiSettings = MapUiSettings(

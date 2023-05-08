@@ -21,6 +21,6 @@ interface CalendarService{
     suspend fun putComment(@Header("Authorization") jwtToken: String, @Path("date") date: String, @Body requestBody: PutCommentRequest) : Any
 
     @Headers("Content-Type: application/json")
-    @GET("/gps") // 서버 endpoint
-    suspend fun getGps(@Header("Authorization") jwtToken: String, @Path("date") date : String) : Any
+    @GET("/gps/couples") // 서버 endpoint
+    suspend fun getGps(@Header("Authorization") jwtToken: String, @Query("date") date : String) : ClusterData
 }
