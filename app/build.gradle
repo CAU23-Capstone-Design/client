@@ -1,8 +1,13 @@
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
-    id 'com.google.devtools.ksp'
+    id 'kotlin-android'
+    id 'kotlin-kapt'
+    id 'com.google.devtools.ksp' version '1.8.0-1.0.8'
+    id 'com.google.android.libraries.mapsplatform.secrets-gradle-plugin'
+    id 'kotlin-parcelize'
 }
+
 
 android {
     namespace 'com.lovestory.lovestory'
@@ -19,6 +24,15 @@ android {
         vectorDrawables {
             useSupportLibrary true
         }
+
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments += [
+                        "room.schemaLocation":"$projectDir/schemas".toString(),
+                        "room.incremental":"true"
+                ]
+            }
+        }
     }
 
     buildTypes {
@@ -30,6 +44,9 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+
+        // Enable support for the new language APIs
+        coreLibraryDesugaringEnabled true
     }
     kotlinOptions {
         jvmTarget = '1.8'
@@ -54,6 +71,7 @@ android {
 
 
 dependencies {
+    implementation 'com.google.android.gms:play-services-maps:18.1.0'
     def nav_version = "2.5.3"
     def sheet_version = "1.1.1"
     def room_version = "2.5.0"
@@ -117,6 +135,10 @@ dependencies {
     // material icon
     implementation 'com.google.android.material:compose-theme-adapter:1.0.0-alpha01'
     implementation 'com.google.accompanist:accompanist-navigation-material:0.17.0'
+    
+    // The compose calendar library
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.0.2'
+    implementation 'com.kizitonwose.calendar:compose:2.2.0'
 
     // location
     implementation 'com.google.android.gms:play-services-location:21.0.1'
@@ -144,4 +166,27 @@ dependencies {
     // pager
 //    implementation "androidx.paging:paging-compose:1.0.0-alpha14"
 //    implementation "androidx.paging:paging-runtime:3.1.0"
+
+    // Google map api
+    implementation 'com.google.maps.android:maps-compose:2.8.0'
+    implementation 'com.google.android.gms:play-services-maps:18.1.0'
+
+    //shared preference convert gson
+    implementation 'com.google.code.gson:gson:2.8.7'
+
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:<version>"
+
+    //google map utilities (marker clustering)
+    implementation 'com.google.maps.android:android-maps-utils:2.2.0'
+
+    implementation 'com.google.maps.android:maps-compose:2.11.2'
+
+    // Make sure to also include the latest version of the Maps SDK for Android
+    implementation 'com.google.android.gms:play-services-maps:18.0.2'
+
+    // Optionally, you can include the Compose utils library for Clustering, etc.
+    implementation 'com.google.maps.android:maps-compose-utils:2.11.2'
+
+    // Optionally, you can include the widgets library for ScaleBar, etc.
+    implementation 'com.google.maps.android:maps-compose-widgets:2.11.2'
 }

@@ -3,6 +3,7 @@ package com.lovestory.lovestory
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.Window
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -16,7 +17,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.lovestory.lovestory.graphs.RootNavigationGraph
 import com.lovestory.lovestory.services.LocationService
+import com.lovestory.lovestory.ui.screens.CalendarScreen
 import com.lovestory.lovestory.ui.theme.LoveStoryTheme
+import com.kakao.sdk.common.util.Utility
 import com.lovestory.lovestory.ui.theme.LoveStoryThemeForMD3
 
 class MainActivity : ComponentActivity() {
@@ -25,6 +28,11 @@ class MainActivity : ComponentActivity() {
         requestWindowFeature(Window.FEATURE_NO_TITLE)
 
         setContent {
+
+            val navController = rememberNavController()
+            //var keyHash = Utility.getKeyHash(this)
+            //Log.d("hash","$keyHash")
+
             val systemUiController = rememberSystemUiController()
             val useDarkIcons = MaterialTheme.colors.isLight
 
@@ -50,6 +58,10 @@ class MainActivity : ComponentActivity() {
                     RootNavigationGraph()
                 }
             }
+
+
+
+            //CalendarScreen(navHostController = navController)
         }
     }
 }
@@ -74,7 +86,3 @@ fun DefaultPreview() {
         RootNavigationGraph()
     }
 }
-
-
-
-
