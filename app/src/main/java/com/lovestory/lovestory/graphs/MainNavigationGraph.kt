@@ -18,35 +18,47 @@ fun MainNavGraph(
     photoForSyncView: PhotoForSyncView,
     syncedPhotoView : SyncedPhotoView,
     imageSyncView : ImageSyncView
-){
+) {
 //    val allPhotos by photoForSyncView.listOfPhotoForSync.observeAsState(initial = listOf())
 
-    NavHost(navController = navHostController, startDestination =MainScreens.DashBoard.route, route = Graph.MAIN){
-        composable(MainScreens.DashBoard.route){
+    NavHost(
+        navController = navHostController,
+        startDestination = MainScreens.DashBoard.route,
+        route = Graph.MAIN
+    ) {
+        composable(MainScreens.DashBoard.route) {
             DashBoardScreen(navHostController = navHostController)
         }
-        composable(MainScreens.Gallery.route){
+        composable(MainScreens.Gallery.route) {
             GalleryScreen(
                 navHostController = navHostController,
-                syncedPhotoView = syncedPhotoView)
+                syncedPhotoView = syncedPhotoView
+            )
         }
-        composable(MainScreens.Calendar.route){
+        composable(MainScreens.Calendar.route) {
             CalendarScreen(navHostController = navHostController)
         }
-        composable(MainScreens.Profile.route){
+        composable(MainScreens.Profile.route) {
             ProfileScreen(navHostController = navHostController)
         }
-        composable(GalleryStack.PhotoSync.route){
-            PhotoSyncScreen(navHostController = navHostController, photoForSyncView = photoForSyncView)
+        composable(GalleryStack.PhotoSync.route) {
+            PhotoSyncScreen(
+                navHostController = navHostController,
+                photoForSyncView = photoForSyncView
+            )
         }
-        composable(GalleryStack.DetailPhotoFromDevice.route){
+        composable(GalleryStack.DetailPhotoFromDevice.route) {
 //            val imageUrl = it.arguments?.getString("imageUrl")
-            PhotoDetailScreenFromDevice(navHostController = navHostController, imageUri = "content://media/external/images/media/1000000435")
+            PhotoDetailScreenFromDevice(
+                navHostController = navHostController,
+                imageUri = "content://media/external/images/media/1000000435"
+            )
         }
-        composable(GalleryStack.DetailPhotoFromServer.route+"/{photoId}"){
+        composable(GalleryStack.DetailPhotoFromServer.route + "/{photoId}") {
             val photoId = it.arguments?.getString("photoId")
 
             PhotoDetailScreenFromServer(navHostController = navHostController, photoId = photoId!!)
+        }
         composable(MainScreens.Map.route) {
             MapScreen(navHostController = navHostController)
         }
