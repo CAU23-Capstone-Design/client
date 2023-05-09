@@ -12,8 +12,9 @@ class SyncedPhotoRepository(private val syncedPhotoDao: SyncedPhotoDao) {
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
 
     val getAllSyncedPhotos : LiveData<List<SyncedPhoto>> = syncedPhotoDao.getAllSyncedPhotosSortedByDate()
-
     val getDaySyncedPhotos : LiveData<List<SyncedPhoto>> = syncedPhotoDao.getFirstPhotoForEachDayAndLocation()
+    val getMonthSyncedPhotos : LiveData<List<SyncedPhoto>> = syncedPhotoDao.getFirstPhotoForEachMonth()
+    val getYearSyncedPhotos : LiveData<List<SyncedPhoto>> = syncedPhotoDao.getFirstPhotoForEachYear()
 
 //    val listOfGetAllSyncedPhoto :List<SyncedPhoto> = withContext(Dispatchers.IO){syncedPhotoDao.listOfGetAll()}
     suspend fun listOfGetAllSyncedPhoto():List<SyncedPhoto>{return withContext(Dispatchers.IO){syncedPhotoDao.listOfGetAll()}}

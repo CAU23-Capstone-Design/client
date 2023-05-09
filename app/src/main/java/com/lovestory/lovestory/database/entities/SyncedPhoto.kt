@@ -69,6 +69,28 @@ interface SyncedPhotoDao {
     """)
     fun getFirstPhotoForEachDayAndLocation(): LiveData<List<SyncedPhoto>>
 
+    @Query("""
+        SELECT * FROM syncedPhotos
+        WHERE date IN (
+            SELECT MIN(date)
+            FROM syncedPhotos
+            GROUP BY substr(date, 1, 7)
+        )
+        ORDER BY date DESC
+    """)
+    fun getFirstPhotoForEachMonth(): LiveData<List<SyncedPhoto>>
+
+    @Query("""
+        SELECT * FROM syncedPhotos
+        WHERE date IN (
+            SELECT MIN(date)
+            FROM syncedPhotos
+            GROUP BY substr(date, 1, 4)
+        )
+        ORDER BY date DESC
+    """)
+    fun getFirstPhotoForEachYear(): LiveData<List<SyncedPhoto>>
+
     @Query("SELECT * FROM syncedPhotos WHERE date = :targetDate")
     suspend fun getPhotosByDate(targetDate: String): List<SyncedPhoto>
 

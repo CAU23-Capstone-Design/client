@@ -11,8 +11,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -33,20 +31,13 @@ import androidx.compose.ui.unit.sp
 import com.lovestory.lovestory.module.loadBitmapFromDiskCache
 import com.lovestory.lovestory.module.photo.getDetailPhoto
 import com.lovestory.lovestory.module.saveBitmapToDiskCache
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlin.properties.Delegates
 
 @Composable
-fun BigThumbnailFromServer(
+fun BigThumbnailFromServerForTest(
     index: Int,
     token: String,
     photoId: String,
     location : String,
-    allPhotoListState : LazyListState,
-    setSelectedButton : (String)->Unit,
-    curIndex : Int
 ){
     val context = LocalContext.current
     val bitmap = remember { mutableStateOf<Bitmap?>(null) }
@@ -71,14 +62,11 @@ fun BigThumbnailFromServer(
     }
 
     AnimatedVisibility (bitmap.value!= null,enter = fadeIn(), exit = fadeOut()){
-        BigThumbnail(
+        BigThumbnailForTest(
             index= index,
             bitmap = bitmap.value!!,
             photoId = photoId,
             location = location,
-            allPhotoListState= allPhotoListState,
-            setSelectedButton = setSelectedButton,
-            curIndex = curIndex
         )
     }
     AnimatedVisibility (bitmap.value== null, enter = fadeIn(), exit = fadeOut()){
@@ -95,14 +83,11 @@ fun BigThumbnailFromServer(
 }
 
 @Composable
-fun BigThumbnail(
+fun BigThumbnailForTest(
     index: Int,
     bitmap: Bitmap,
     photoId: String,
     location: String,
-    allPhotoListState: LazyListState,
-    setSelectedButton : (String)->Unit,
-    curIndex : Int
 ) {
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
 //    val imageWidth = screenWidth - 5.dp
@@ -128,10 +113,10 @@ fun BigThumbnail(
                 .height(screenWidth / 2)
                 .clip(RoundedCornerShape(10.dp))
                 .clickable {
-                    setSelectedButton("전체")
-                    CoroutineScope(Dispatchers.Main).launch {
-                        allPhotoListState.scrollToItem(index = curIndex)
-                    }
+//                    setSelectedButton("전체")
+//                    CoroutineScope(Dispatchers.Main).launch {
+//                        allPhotoListState.scrollToItem(index = curIndex)
+//                    }
                 }
             ,
             contentScale = ContentScale.Crop,

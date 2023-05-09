@@ -20,7 +20,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.apache.commons.codec.digest.DigestUtils
+import java.math.BigInteger
+import java.security.MessageDigest
 
 class PhotoService : Service(){
     private lateinit var contentObserver: ContentObserver
@@ -159,7 +160,7 @@ class PhotoService : Service(){
     }
 
     private fun getUriCursor(uri: Uri): Cursor? {
-        val projection = arrayOf(MediaStore.Images.Media.IS_PENDING,)
+        val projection = arrayOf(MediaStore.Images.Media.IS_PENDING)
         return contentResolver.query(uri, projection, null, null, null)
     }
 
@@ -170,10 +171,15 @@ class PhotoService : Service(){
     }
 
     private fun getUriMD5Hash(uri: Uri): String? {
+        val md5Hash = MessageDigest.getInstance("MD5")
+
         return try {
             val uriString = uri.toString()
-            val md5Hash = DigestUtils.md5Hex(uriString)
-            md5Hash
+//            val md5Hash = DigestUtils.md5Hex(uriString)
+            md5Hash.update(uriString!!.toByteArray())
+            val result = BigInteger(1, md5Hash.digest()).toString(16)
+
+            result
         } catch (e: Exception) {
             e.printStackTrace()
             null

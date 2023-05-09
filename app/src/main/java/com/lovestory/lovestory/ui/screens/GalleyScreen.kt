@@ -45,8 +45,10 @@ fun GalleryScreen(navHostController: NavHostController, syncedPhotoView : Synced
 //    val daySyncedPhoto by syncedPhotoView.dayListOfSyncedPhotos.observeAsState(initial = listOf())
     val syncedPhotosByDate by syncedPhotoView.groupedSyncedPhotosByDate.observeAsState(initial = mapOf())
     val daySyncedPhotosByDate by syncedPhotoView.daySyncedPhotosByDate.observeAsState(initial = mapOf())
+    val monthSyncedPhotosByDate by syncedPhotoView.monthListOfSyncedPhotos.observeAsState(initial = listOf())
+    val yearSyncedPhotosByDate by syncedPhotoView.yearListOfSyncedPhotos.observeAsState(initial = listOf())
 
-    val syncedPhotosByDateAndArea by syncedPhotoView.syncedPhotosByDateAndArea.observeAsState(initial = mapOf())
+//    val syncedPhotosByDateAndArea by syncedPhotoView.syncedPhotosByDateAndArea.observeAsState(initial = mapOf())
 
     val sizesOfInnerElements by syncedPhotoView.sizesOfInnerElements.observeAsState(initial = listOf())
     val cumOfSizeOfInnerElements by syncedPhotoView.cumOfSizeOfInnerElements.observeAsState(initial = syncedPhotoView.computeCumulativeSizes(sizesOfInnerElements))
@@ -60,7 +62,7 @@ fun GalleryScreen(navHostController: NavHostController, syncedPhotoView : Synced
 
     val allPhotoListState = rememberLazyListState()
 
-    val listState = rememberLazyListState()
+//    val listState = rememberLazyListState()
 
     val (selectedButton, setSelectedButton) = remember { mutableStateOf("전체") }
     val items = listOf<String>(
@@ -105,11 +107,19 @@ fun GalleryScreen(navHostController: NavHostController, syncedPhotoView : Synced
         }
 
         AnimatedVisibility(visible = selectedButton =="월") {
-            Text(text = "월")
+            RepresentPeriodGallery(
+                periodGallery = monthSyncedPhotosByDate,
+                token = token,
+                currentDate = currentDate
+            )
         }
 
         AnimatedVisibility(visible = selectedButton =="년") {
-            Text(text = "년")
+            RepresentPeriodGallery(
+                periodGallery = yearSyncedPhotosByDate,
+                token = token,
+                currentDate = currentDate
+            )
         }
 
         // gallery header and floating bar Section

@@ -15,6 +15,8 @@ class SyncedPhotoView(application:Application): ViewModel() {
 
     lateinit var listOfSyncPhotos : LiveData<List<SyncedPhoto>>
     lateinit var dayListOfSyncedPhotos :LiveData<List<SyncedPhoto>>
+    lateinit var monthListOfSyncedPhotos : LiveData<List<SyncedPhoto>>
+    lateinit var yearListOfSyncedPhotos : LiveData<List<SyncedPhoto>>
 
     lateinit var groupedSyncedPhotosByDate: LiveData<Map<String, List<SyncedPhoto>>>
     lateinit var syncedPhotosByDateAndArea : LiveData<Map<String, Map<Pair<String, String>, List<SyncedPhoto>>>>
@@ -30,6 +32,8 @@ class SyncedPhotoView(application:Application): ViewModel() {
 
         listOfSyncPhotos = syncedPhotoRepository.getAllSyncedPhotos
         dayListOfSyncedPhotos = syncedPhotoRepository.getDaySyncedPhotos
+        monthListOfSyncedPhotos = syncedPhotoRepository.getMonthSyncedPhotos
+        yearListOfSyncedPhotos = syncedPhotoRepository.getYearSyncedPhotos
 
         groupedSyncedPhotosByDate = Transformations.map(listOfSyncPhotos) { syncedPhotos ->
             syncedPhotos.groupBy { it.date.substring(0, 10) }
