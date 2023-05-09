@@ -65,7 +65,9 @@ import com.google.android.gms.maps.model.Polyline
 import com.google.android.gms.maps.model.PolylineOptions
 import com.google.maps.android.compose.*
 import com.lovestory.lovestory.R
-import com.lovestory.lovestory.graphs.CalendarNavGraph
+import com.lovestory.lovestory.database.PhotoDatabase
+import com.lovestory.lovestory.database.repository.SyncedPhotoRepository
+import com.lovestory.lovestory.graphs.CalendarStack
 import com.lovestory.lovestory.graphs.MainScreens
 import com.lovestory.lovestory.network.*
 import kotlinx.coroutines.*
@@ -126,6 +128,9 @@ fun CalendarScreen(navHostController: NavHostController) {
 
     val context = LocalContext.current
     val token = getToken(context)
+
+    lateinit var repository : SyncedPhotoRepository
+    var photoInfo: List<Triple<String, Double, Double>>
 
     //해야 되는 게 코루틴 정리. 룸 db
     LaunchedEffect(key1 = true) {
@@ -254,7 +259,22 @@ fun CalendarScreen(navHostController: NavHostController) {
                 position.add(LatLng(37.503735330931136, 126.95615523253305))
                 position
             }
-            Log.d("코루틴","호출1, $latLng")
+
+            val response = getPhotoTable(token!!)
+
+            if(response.isSuccessful) {
+                val photoDatabase = PhotoDatabase.getDatabase(context)
+                val photoDao = photoDatabase.syncedPhotoDao()
+                repository = SyncedPhotoRepository(photoDao)
+
+                val syncedPhoto = repository.getSyncedPhotosByDate(dateString)
+
+                photoInfo = syncedPhoto.map { it ->
+                    Triple(it.date, it.latitude, it.longitude)
+                }
+                Log.d("데이터베이스","$photoInfo")
+            }
+
             dataLoaded.value = true
         }
 
@@ -428,6 +448,9 @@ fun CalendarScreen(navHostController: NavHostController) {
                         position = CameraPosition.fromLatLngZoom(viewposition, 15f)
                     }
                     selectionSave = selection
+                    val date = selection.date
+                    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+                    val dateString = date.format(formatter)
 
                     if (!dataLoaded.value) {
                         //스켈레톤 추가
@@ -435,14 +458,17 @@ fun CalendarScreen(navHostController: NavHostController) {
                     } else {
                         viewposition = averageLatLng(latLng)
                         cameraPositionState = CameraPositionState(position = CameraPosition.fromLatLngZoom(viewposition, 15f))
-                        Log.d("좌표","$viewposition, $latLng")
+
+                        val zoomLevel = getZoomLevelForDistance(getMaxDistanceBetweenLatLng(viewposition, latLng)) - 1
+                        cameraPositionState = remember { CameraPositionState(position = CameraPosition.fromLatLngZoom(viewposition, zoomLevel)) }
+
                         GoogleMap(
                             modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(12.dp)),
                             cameraPositionState = cameraPositionState,
                             onMapClick = {
                                 isPopupVisible = false
                                 isPopupVisibleSave = true
-                                navHostController.navigate(MainScreens.Map.route) {
+                                navHostController.navigate(CalendarStack.Map.route+"/$dateString") {
                                     launchSingleTop = true
                                     Log.d("클릭","클릭")
                                 }

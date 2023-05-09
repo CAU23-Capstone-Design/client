@@ -59,27 +59,15 @@ fun MainNavGraph(
 
             PhotoDetailScreenFromServer(navHostController = navHostController, photoId = photoId!!)
         }
-        composable(MainScreens.Map.route) {
-            MapScreen(navHostController = navHostController)
+        composable(CalendarStack.Map.route + "/{date}") {
+            val date = it.arguments?.getString("date")
+            MapScreen(navHostController = navHostController, date = date!!)
         }
     }
 }
 
-@Composable
-fun CalendarNavGraph(navController: NavHostController) {
-    NavHost(navController = navController, startDestination = CalendarScreens.Calendar.route, route = "CALENDAR_NAV") {
-        composable(CalendarScreens.Calendar.route) {
-            CalendarScreen(navHostController = navController)
-        }
-        composable(CalendarScreens.Map.route) {
-            MapScreen(navHostController = navController)
-        }
-    }
-}
-
-sealed class CalendarScreens(val route: String, val title: String) {
-    object Calendar : CalendarScreens("CALENDAR", "CALENDAR")
-    object Map : CalendarScreens("MAP", "MAP")
+sealed class CalendarStack(val route: String) {
+    object Map : CalendarStack(route = "Map")
 }
 
 sealed class MainScreens(val route : String, val title : String, val icon : Int){
@@ -87,7 +75,7 @@ sealed class MainScreens(val route : String, val title : String, val icon : Int)
     object Gallery : MainScreens(route = "GALLERY", title = "갤러리", icon = R.drawable.ic_gallery)
     object Calendar : MainScreens(route = "CALENDAR", title = "캘린더", icon = R.drawable.ic_calendar)
     object Profile : MainScreens(route = "PROFILE", title= "프로필", icon = R.drawable.ic_setting)
-    object Map : MainScreens(route = "MAP", title = "MAP", icon = R.drawable.ic_option)
+    //object Map : MainScreens(route = "MAP", title = "MAP", icon = R.drawable.ic_option)
 }
 
 sealed class GalleryStack(val route : String){

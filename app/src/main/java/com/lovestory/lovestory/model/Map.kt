@@ -1,11 +1,13 @@
 package com.lovestory.lovestory.model
 
+import android.location.Location
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.PolylineOptions
+import kotlin.math.log2
 
 val points1 = listOf(
     LatLng(37.503735330931136, 126.95615523253305),
@@ -30,6 +32,30 @@ fun getLatLng(clusterData: ClusterData): MutableList<LatLng> {
         latLng.add(LatLng(latitude, longitude))
     }
     return latLng
+}
+
+fun getZoomLevelForDistance(distance: Float): Float {
+    val zoomLevel = 16f - log2(distance / 500) // Adjust the division factor as needed
+    return zoomLevel.coerceIn(0f, 25f) // Ensure the zoom level is within the valid range
+}
+
+fun getMaxDistanceBetweenLatLng(average: LatLng, latLngList: List<LatLng>):Float{
+    val results = FloatArray(1)
+    var maxDistance = 0f
+
+    for (latLng in latLngList) {
+        Location.distanceBetween(
+            average.latitude,
+            average.longitude,
+            latLng.latitude,
+            latLng.longitude,
+            results
+        )
+        if (results[0] > maxDistance) {
+            maxDistance = results[0]
+        }
+    }
+    return maxDistance
 }
 
 data class ClusterData(

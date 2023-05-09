@@ -20,6 +20,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.apache.commons.codec.binary.Hex
 import org.apache.commons.codec.digest.DigestUtils
 
 class PhotoService : Service(){
@@ -31,7 +32,6 @@ class PhotoService : Service(){
     private lateinit var photoDatabase: PhotoDatabase
 
     private val ioScope = CoroutineScope(Dispatchers.IO)
-
 
     override fun onBind(intent: Intent?): IBinder? {return null}
 
@@ -172,7 +172,8 @@ class PhotoService : Service(){
     private fun getUriMD5Hash(uri: Uri): String? {
         return try {
             val uriString = uri.toString()
-            val md5Hash = DigestUtils.md5Hex(uriString)
+//            val md5Hash = DigestUtils.md5Hex(uriString)
+            val md5Hash = String(Hex.encodeHex(DigestUtils.md5(uriString)))
             md5Hash
         } catch (e: Exception) {
             e.printStackTrace()
@@ -186,4 +187,5 @@ class PhotoService : Service(){
     }
 
 }
+
 
