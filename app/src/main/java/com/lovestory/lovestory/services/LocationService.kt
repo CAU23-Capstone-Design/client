@@ -1,6 +1,7 @@
 package com.lovestory.lovestory.services
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Service
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -23,13 +24,23 @@ import com.lovestory.lovestory.module.saveLocation
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.util.Objects
 
 class LocationService : Service() {
+    private val locationLogName = "[SERVICE] LOCATION"
+    val context = this
+    private var isPhotoServiceRunning = false
+    private var currentInterval: Long = 1 * 60 * 1000
+
+//    private lateinit var token : String
+
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var backgroundHandler: Handler
     private lateinit var handlerThread: HandlerThread
 
-    private var isPhotoServiceRunning = false
+    private lateinit var locationRequest : LocationRequest
+    private lateinit var locationCallback: LocationCallback
+
 
     override fun onBind(intent: Intent): IBinder? {
         return null
@@ -41,8 +52,8 @@ class LocationService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        val context = this
-        Log.d("Locate - Service", "포그라운드 서비스 시작")
+
+        Log.d(locationLogName, "onStartCommand : start location foreground service")
         createNotificationChannel()
 
         val notification: Notification = createNotificationForLocationService()
@@ -56,49 +67,81 @@ class LocationService : Service() {
                 && ContextCompat.checkSelfPermission(this, permission[1]) != PackageManager.PERMISSION_GRANTED
 
         if (!permissionResult) {
-            fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
-                location?.let {
+            startLocationUpdates(currentInterval)
+        }else{
+//            getLocationPermission()
+        }
+        return START_STICKY
+    }
 
-                    Log.d("Location", "${location.longitude} ${location.latitude}")
-                }
+
+    @SuppressLint("MissingPermission")
+    private fun startLocationUpdates(interval : Long) {
+        Log.e(locationLogName, "startLocationUpdates : start location updates")
+
+        handlerThread = HandlerThread("LocationServiceBackground")
+        handlerThread.start()
+        backgroundHandler = Handler(handlerThread.looper)
+
+        fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
+            if(location != null){
+                Log.d(locationLogName, "${location.longitude} ${location.latitude}")
+
             }
+            else{Log.e(locationLogName, "startLocationUpdates : get location error (value is null)")
 
-            val locationRequest = com.google.android.gms.location.LocationRequest
-                .Builder(Priority.PRIORITY_BALANCED_POWER_ACCURACY, 60 * 1000)
-                .build()
+            }
+        }
 
-            val locationCallbackForMyApp = object : LocationCallback(){
-                override fun onLocationResult(locationResult: LocationResult) {
+        locationRequest = LocationRequest.Builder(Priority.PRIORITY_BALANCED_POWER_ACCURACY, interval).build()
+        locationCallback = object : LocationCallback() {
+            override fun onLocationResult(locationResult: LocationResult) {
+                val token = getToken(context)
+                for (location in locationResult.locations) {
+                    location.latitude
+                    location.longitude
 
-                    for (location in locationResult.locations){
-                        location.latitude
-                        location.longitude
-                        val token = getToken(context)
-                        saveLocation(token, location.latitude, location.longitude)
-                        CoroutineScope(Dispatchers.IO).launch {
-                            val isNearby = checkNearby(token)
-                            if (isNearby) {
+                    saveLocation(token, location.latitude, location.longitude)
+
+                    CoroutineScope(Dispatchers.IO).launch {
+                        val nearbyResponse = checkNearby(token)
+                        if (nearbyResponse != null) {
+                            updateLocationRequestInterval( (nearbyResponse.distance.toLong()/500 +1L) * 60 * 1000)
+                            if(nearbyResponse.isNearby){
                                 sendBroadcastToSecondService(ACTION_START_PHOTO_PICKER_SERVICE)
-                            } else {
+                            }else{
                                 sendBroadcastToSecondService(ACTION_STOP_PHOTO_PICKER_SERVICE)
                             }
                         }
                     }
                 }
             }
-            handlerThread = HandlerThread("LocationServiceBackground")
-            handlerThread.start()
-            backgroundHandler = Handler(handlerThread.looper)
+        }
+
+        fusedLocationClient.requestLocationUpdates(
+            locationRequest,
+            locationCallback,
+            backgroundHandler.looper
+        )
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun updateLocationRequestInterval(newInterval: Long) {
+        Log.d(locationLogName, "updateLocationRequestInterval : currentInterval : $currentInterval / newInterval : $newInterval")
+        if (newInterval != currentInterval){
+            Log.d(locationLogName, "updateLocationRequestInterval : change interval update location")
+            currentInterval = newInterval
+
+            fusedLocationClient.removeLocationUpdates(locationCallback)
+
+            locationRequest = LocationRequest.Builder(Priority.PRIORITY_BALANCED_POWER_ACCURACY, newInterval).build()
 
             fusedLocationClient.requestLocationUpdates(
                 locationRequest,
-                locationCallbackForMyApp,
+                locationCallback,
                 backgroundHandler.looper
             )
-        }else{
-//            getLocationPermission()
         }
-        return START_STICKY
     }
 
     private fun sendBroadcastToSecondService(action: String) {
@@ -143,6 +186,42 @@ class LocationService : Service() {
     }
 }
 
+
+
+//    private var locationRequest = object : LocationCallback() {
+//        override fun onLocationResult(locationResult: LocationResult) {
+//            for (location in locationResult.locations) {
+//                location.latitude
+//                location.longitude
+//                val token = getToken(context)
+//                saveLocation(token, location.latitude, location.longitude)
+//                CoroutineScope(Dispatchers.IO).launch {
+//                    val nearbyResponse = checkNearby(token)
+//                    if (nearbyResponse != null) {
+//                        updateLocationRequestInterval( (nearbyResponse.distance.toLong()/500 +1L) * 1000)
+//                        if(nearbyResponse.isNearby){
+//                            sendBroadcastToSecondService(ACTION_START_PHOTO_PICKER_SERVICE)
+//                        }else{
+//                            sendBroadcastToSecondService(ACTION_STOP_PHOTO_PICKER_SERVICE)
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
+
+
+//    private fun updateLocationRequestInterval(newInterval: Long, context: Context) {
+//        Log.d("LOCATION-SERVICE", "interval : $newInterval")
+//        if (newInterval != updateInterval) {
+//            updateInterval = newInterval
+//            // 업데이트 주기를 변경하려면 먼저 현재 위치 업데이트를 중지해야 합니다.
+//            stopLocationUpdates()
+//
+//            // 새로운 업데이트 주기를 설정하고 위치 업데이트를 다시 시작합니다.
+//            startLocationUpdates(context = context, newInterval)
+//        }
+//    }
 
 
 

@@ -2,6 +2,7 @@ package com.lovestory.lovestory.module
 
 import android.content.Context
 import android.util.Log
+import android.widget.Toast
 import com.lovestory.lovestory.database.PhotoDatabase
 import com.lovestory.lovestory.database.entities.SyncedPhoto
 import com.lovestory.lovestory.database.entities.SyncedPhotoDao
@@ -13,6 +14,7 @@ import com.lovestory.lovestory.view.ImageSyncView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 suspend fun checkExistNeedPhotoForSync(context : Context){
     lateinit var repository : SyncedPhotoRepository

@@ -32,7 +32,11 @@ suspend fun uploadPhoto(context : Context, sendPhotos : List<PhotoForSync>, phot
 
     val token = getToken(context)
 
-    for(photo in sendPhotos){
+    withContext(Dispatchers.Main) {
+        Toast.makeText(context, "사진 업로드를 실행합니다", Toast.LENGTH_SHORT).show()
+    }
+
+    sendPhotos.onEachIndexed{ index, photo ->
         Log.d("MODULE-uploadPhoto", "Uri : ${photo.imageUrl}")
         val uri = Uri.parse(photo.imageUrl)
         Log.d("MODULE-uploadPhoto", "Uri : $uri")
@@ -74,6 +78,13 @@ suspend fun uploadPhoto(context : Context, sendPhotos : List<PhotoForSync>, phot
             }
         }
         photoForSyncView.addCurrentUploadPhotos()
+        withContext(Dispatchers.Main) {
+            Toast.makeText(context, "사진 업로드 (${index+1} / ${sendPhotos.size})", Toast.LENGTH_SHORT).show()
+        }
     }
+    withContext(Dispatchers.Main) {
+        Toast.makeText(context, "사진 업로드를 완료했습니다.", Toast.LENGTH_SHORT).show()
+    }
+
     photoForSyncView.setFinishedUploadPhotos()
 }
