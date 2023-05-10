@@ -24,6 +24,7 @@ fun DayGroupedGallery(
     token: String?,
     currentDate : LocalDate,
     allPhotoListState : LazyListState,
+    dayPhotoListState : LazyListState,
     setSelectedButton : (String)->Unit,
     cumOfSizeOfInnerElements : List<List<Int>>
 ){
@@ -31,6 +32,7 @@ fun DayGroupedGallery(
     LazyColumn(
         modifier = Modifier.padding(bottom = 70.dp),
         contentPadding = PaddingValues(top=65.dp, bottom = 75.dp),
+        state = dayPhotoListState
         ){
         daySyncedPhotoByDate.onEachIndexed { index, (date, daySyncedPhoto) ->
 

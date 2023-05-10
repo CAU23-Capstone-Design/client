@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavHostController
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.lovestory.lovestory.R
 import com.lovestory.lovestory.database.PhotoDatabase
 import com.lovestory.lovestory.database.entities.PhotoForSync
@@ -36,16 +37,16 @@ import com.lovestory.lovestory.database.entities.PhotoForSyncDao
 import com.lovestory.lovestory.database.repository.PhotoForSyncRepository
 import com.lovestory.lovestory.module.uploadPhoto
 import com.lovestory.lovestory.ui.components.CheckableDisplayImageFromUri
+import com.lovestory.lovestory.ui.components.DeletPhotoDialog
+import com.lovestory.lovestory.ui.components.DropDownIcon
 import com.lovestory.lovestory.view.PhotoForSyncView
 import kotlinx.coroutines.*
 
 @Composable
 fun PhotoSyncScreen(navHostController: NavHostController, photoForSyncView: PhotoForSyncView){
-    var isDropMenuForRemovePhoto by remember {mutableStateOf(false)}
+    var isDropMenuForRemovePhoto = remember {mutableStateOf(false)}
     val showDeletePhotoDialog = remember { mutableStateOf(false) }
-
-    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
-    val paddingWidth = ((screenWidth-(screenWidth / 3 - 10.dp)*3) - 11.dp)/2.dp
+    val showUploadPhotoDialog = remember { mutableStateOf(false) }
 
     val notSyncedPhotos by photoForSyncView.listOfPhotoForSync.observeAsState(initial = listOf())
 //    var isUploadPhotos by remember {
@@ -56,9 +57,9 @@ fun PhotoSyncScreen(navHostController: NavHostController, photoForSyncView: Phot
     var currentUploadPhotos = photoForSyncView.currentUploadPhotos
     var totalUploadPhotos = photoForSyncView.totalUploadPhotos
 
-//    Log.d("SCREEN-PhotoSyncScreen", "$isUploadPhotos, $currentUploadPhotos, $totalUploadPhotos")
-
     val context = LocalContext.current
+
+    val systemUiController = rememberSystemUiController()
 
     var checkPhotoList = remember {
         mutableStateOf(MutableList<Boolean>(notSyncedPhotos.size) { true })
@@ -88,21 +89,18 @@ fun PhotoSyncScreen(navHostController: NavHostController, photoForSyncView: Phot
         isUploadPhotos = photoForSyncView.isUploadPhotos
     }
 
+    SideEffect {
+        systemUiController.setSystemBarsColor(
+            color = Color(0xFFF3F3F3),
+        )
+    }
+
     val onChangeChecked: (Int) -> Unit = { index ->
         checkPhotoList.value = checkPhotoList.value.toMutableList().also {
             it[index] = !it[index]
         }
     }
 
-    var itemList by remember { mutableStateOf(listOf("Item 1", "Item 2", "Item 3")) }
-
-    val onItemChanged: (Int, String) -> Unit = { index, newValue ->
-        itemList = itemList.toMutableList().also {
-            it[index] = newValue
-        }
-    }
-
-    val interactionSource = remember { MutableInteractionSource() }
 
     Box(
         modifier = Modifier
@@ -110,37 +108,12 @@ fun PhotoSyncScreen(navHostController: NavHostController, photoForSyncView: Phot
             .fillMaxSize(),
     ){
         if (showDeletePhotoDialog.value) {
-            AlertDialog(
-                onDismissRequest = { showDeletePhotoDialog.value = false },
-                title = {
-                    Row(modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 10.dp)){
-                        Text(text="사진을 삭제하시겠습니까?",  color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 20.sp)
-                    }},
-                text = { Text(text="사진 업로드 리스트에서 제외됩니다. 기기에 저장된 사진은 삭제되지 않습니다.",  color = Color.Black,  fontSize = 14.sp) },
-                buttons = {
-                          Row(modifier = Modifier
-                              .fillMaxWidth()
-                              .padding(bottom = 5.dp), horizontalArrangement = Arrangement.SpaceEvenly
-                          ){
-                              TextButton(onClick = {
-                                  showDeletePhotoDialog.value = false
-                                  val deleteFromLoveStory =  getListOfNotCheckedPhoto(notSyncedPhotos, checkPhotoList)
-                                  for(item in deleteFromLoveStory){
-                                      photoForSyncRepository.deletePhotoForSync(item)
-                                  }
-                                  Toast.makeText(context, "${deleteFromLoveStory.size}개의 사진을 삭제했습니다.", Toast.LENGTH_SHORT).show()
-                              }) {
-                                  Text(text="확인",color = Color.Red, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                              }
-                              TextButton(onClick = { showDeletePhotoDialog.value = false }) {
-                                  Text("취소", color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                              }
-                          }
-                },
-                shape = RoundedCornerShape(15.dp),
-
+            DeletPhotoDialog(
+                showDeletePhotoDialog = showDeletePhotoDialog,
+                notSyncedPhotos = notSyncedPhotos,
+                checkPhotoList = checkPhotoList,
+                photoForSyncRepository = photoForSyncRepository,
+                context = context,
             )
         }
 
@@ -155,7 +128,7 @@ fun PhotoSyncScreen(navHostController: NavHostController, photoForSyncView: Phot
                     CheckableDisplayImageFromUri(
                         index = index,
                         checked = checkPhotoList.value[index],
-                        imageUri = notSyncedPhotos[index].imageUrl.toString(),
+                        imageInfo = notSyncedPhotos[index],
                         onChangeChecked = onChangeChecked,
                         navHostController = navHostController
                     )
@@ -193,33 +166,13 @@ fun PhotoSyncScreen(navHostController: NavHostController, photoForSyncView: Phot
                     )
                 }
 
-                Box() {
-                    Icon(
-                        painter = painterResource(id = R.drawable.baseline_more_vert_24),
-                        contentDescription = null,
-                        modifier = Modifier.clickable {isDropMenuForRemovePhoto = true},
-                        tint = Color.Black
-                    )
-                    DropdownMenu(
-                        expanded = isDropMenuForRemovePhoto,
-                        onDismissRequest = { isDropMenuForRemovePhoto= false },
-                        modifier = Modifier.wrapContentSize()
-                    ) {
-                        DropdownMenuItem(
-                            onClick = {
-                                val deleteFromLoveStory =  getListOfNotCheckedPhoto(notSyncedPhotos, checkPhotoList)
-                                if(deleteFromLoveStory.isNotEmpty()){
-                                    showDeletePhotoDialog.value = true
-                                }else{
-                                    Toast.makeText(context, "삭제할 사진이 없습니다.", Toast.LENGTH_SHORT).show()
-                                }
-                                isDropMenuForRemovePhoto= false
-                            }
-                        ) {
-                            Text(text = "선택 안한 사진 삭제")
-                        }
-                    }
-                }
+                DropDownIcon(
+                    isDropMenuForRemovePhoto = isDropMenuForRemovePhoto,
+                    showDeletePhotoDialog = showDeletePhotoDialog,
+                    notSyncedPhotos = notSyncedPhotos,
+                    checkPhotoList = checkPhotoList,
+                    context = context
+                )
             }
 
             Spacer(modifier = Modifier.weight(1f))

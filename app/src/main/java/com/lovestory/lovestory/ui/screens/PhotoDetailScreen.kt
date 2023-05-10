@@ -2,8 +2,10 @@ package com.lovestory.lovestory.ui.screens
 
 import android.annotation.SuppressLint
 import android.graphics.Bitmap
-import android.provider.ContactsContract.Contacts.Photo
 import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -35,31 +37,48 @@ import coil.request.ImageRequest
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.lovestory.lovestory.R
 import com.lovestory.lovestory.database.PhotoDatabase
+import com.lovestory.lovestory.database.entities.PhotoForSync
 import com.lovestory.lovestory.database.entities.SyncedPhoto
-import com.lovestory.lovestory.database.entities.SyncedPhotoDao
+import com.lovestory.lovestory.database.repository.PhotoForSyncRepository
 import com.lovestory.lovestory.database.repository.SyncedPhotoRepository
 import com.lovestory.lovestory.module.getToken
 import com.lovestory.lovestory.module.loadBitmapFromDiskCache
 import com.lovestory.lovestory.module.photo.getDetailPhoto
-import com.lovestory.lovestory.module.photo.getThumbnailForPhoto
 import com.lovestory.lovestory.module.saveBitmapToDiskCache
-import com.lovestory.lovestory.ui.components.DisplayImageFromBitmap
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.*
 
 @Composable
-fun PhotoDetailScreenFromDevice(navHostController: NavHostController, imageUri: String) {
+fun PhotoDetailScreenFromDevice(navHostController: NavHostController, photoId: String) {
+    val systemUiController = rememberSystemUiController()
+
+    val context = LocalContext.current
+
+    val database = PhotoDatabase.getDatabase(context)
+    val photoForSyncDao = database.photoForSyncDao()
+    val repository = PhotoForSyncRepository(photoForSyncDao)
+
+    val photoInfo = remember { mutableStateOf<PhotoForSync?>(null) }
+
+    LaunchedEffect(photoId){
+        photoInfo.value = repository.getPhotoForSyncById(photoId)!!
+    }
+
+    SideEffect {
+        systemUiController.setSystemBarsColor(
+            color = Color.Black,
+        )
+    }
+
     Box(
         modifier = Modifier
             .background(Color.Black)
             .fillMaxSize(),
     ) {
-        TransformableSample(imageUri = imageUri)
-
+        AnimatedVisibility(photoInfo.value != null, enter = fadeIn(), exit = fadeOut()){
+            TransformableSample(imageUri = photoInfo.value!!.imageUrl!!)
+        }
         Column(
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.Start,
@@ -81,6 +100,19 @@ fun PhotoDetailScreenFromDevice(navHostController: NavHostController, imageUri: 
                     modifier = Modifier.clickable {navHostController.popBackStack() },
                     tint = Color.White
                 )
+                Spacer(modifier = Modifier.width(20.dp))
+                AnimatedVisibility(photoInfo.value != null, enter = fadeIn(), exit = fadeOut()){
+                    Column() {
+                        val input = photoInfo.value!!.date
+                        val formatter = DateTimeFormatter.ofPattern("yyyy:MM:dd HH:mm:ss")
+                        val parsedDate = LocalDate.parse(input, formatter)
+
+                        val outputFormatter = DateTimeFormatter.ofPattern("yyyy년 M월 d일 (E)")
+                        val output = parsedDate.format(outputFormatter)
+
+                        Text(text = output, color = Color.White)
+                    }
+                }
             }
         }
 
@@ -95,6 +127,7 @@ fun PhotoDetailScreenFromServer(navHostController: NavHostController, photoId : 
 
     val database = PhotoDatabase.getDatabase(context)
     val syncedPhotoDao = database.syncedPhotoDao()
+    val repository = SyncedPhotoRepository(syncedPhotoDao)
 
     val syncedPhoto = remember { mutableStateOf<SyncedPhoto?>(null) }
 
@@ -123,8 +156,8 @@ fun PhotoDetailScreenFromServer(navHostController: NavHostController, photoId : 
             }
         }
 
-        val photo = syncedPhotoDao.getPhotoById(photoId)
-        syncedPhoto.value = photo
+        val photoInfo = repository.getSyncedPhotoById(photoId)
+        syncedPhoto.value = photoInfo
     }
 
     SideEffect {
@@ -138,7 +171,7 @@ fun PhotoDetailScreenFromServer(navHostController: NavHostController, photoId : 
             .background(Color.Black)
             .fillMaxSize(),
     ){
-        if (bitmap.value != null) {
+        AnimatedVisibility (bitmap.value != null,enter = fadeIn(), exit = fadeOut()) {
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
@@ -174,16 +207,17 @@ fun PhotoDetailScreenFromServer(navHostController: NavHostController, photoId : 
                         tint = Color.White
                     )
                     Spacer(modifier = Modifier.width(20.dp))
-                    Column() {
-                        syncedPhoto.value?.let {
-                            val photoDate = LocalDate.parse(it.date.substring(0, 10))
+                    AnimatedVisibility(syncedPhoto.value != null, enter = fadeIn(), exit = fadeOut()){
+                        Column() {
+                            val photoDate = LocalDate.parse(syncedPhoto.value!!.date.substring(0, 10))
                             val dateFormatter = DateTimeFormatter.ofPattern("yyyy년 M월 d일 (E)", Locale.getDefault())
                             val formattedDate = photoDate.format(dateFormatter)
 
-                            Text(text = it.area1+" "+it.area2+" "+it.area3, color = Color.White)
+                            Text(text = syncedPhoto.value!!.area1+" "+syncedPhoto.value!!.area2+" "+syncedPhoto.value!!.area3, color = Color.White)
                             Text(text = formattedDate, color = Color.White)
                         }
                     }
+
                 }
 
                 Box(){

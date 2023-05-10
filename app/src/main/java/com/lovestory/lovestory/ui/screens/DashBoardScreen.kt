@@ -1,9 +1,12 @@
 package com.lovestory.lovestory.ui.screens
 
+import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
 import android.util.Log
+import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.browser.customtabs.CustomTabsClient.getPackageName
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -17,8 +20,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -31,11 +33,32 @@ import androidx.core.content.ContextCompat.startActivity
 import androidx.navigation.NavHostController
 import com.lovestory.lovestory.R
 import com.lovestory.lovestory.resource.vitro
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlin.system.exitProcess
 
 
 @Composable
 fun DashBoardScreen(navHostController: NavHostController) {
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+
+    val doubleBackToExitPressedOnce = remember { mutableStateOf(false) }
+
+    BackHandler(enabled = true) {
+        if(doubleBackToExitPressedOnce.value){
+            (context as Activity).finish()
+        }else{
+            doubleBackToExitPressedOnce.value = true
+            Toast.makeText(context, "한 번 더 뒤로 가기 누르면 종료 됩니다.", Toast.LENGTH_SHORT).show()
+
+            coroutineScope.launch {
+                delay(2000)
+                doubleBackToExitPressedOnce.value = false
+            }
+        }
+    }
 
     Column(
         verticalArrangement = Arrangement.Top,

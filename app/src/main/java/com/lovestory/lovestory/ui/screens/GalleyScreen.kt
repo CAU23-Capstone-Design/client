@@ -55,12 +55,14 @@ fun GalleryScreen(navHostController: NavHostController, syncedPhotoView : Synced
 
     val systemUiController = rememberSystemUiController()
 
-
     val context = LocalContext.current
     val currentDate = LocalDate.now()
     val token = getToken(context)
 
     val allPhotoListState = rememberLazyListState()
+    val dayPhotoListState = rememberLazyListState()
+    val monthPhotoListState = rememberLazyListState()
+    val yearPhotoListState = rememberLazyListState()
 
 //    val listState = rememberLazyListState()
 
@@ -100,6 +102,7 @@ fun GalleryScreen(navHostController: NavHostController, syncedPhotoView : Synced
                 token = token,
                 currentDate = currentDate,
                 allPhotoListState= allPhotoListState,
+                dayPhotoListState = dayPhotoListState,
                 setSelectedButton = setSelectedButton,
                 cumOfSizeOfInnerElements = cumOfSizeOfInnerElements
             )

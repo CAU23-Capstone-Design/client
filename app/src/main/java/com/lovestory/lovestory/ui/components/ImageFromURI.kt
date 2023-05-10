@@ -30,6 +30,7 @@ import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.lovestory.lovestory.R
+import com.lovestory.lovestory.database.entities.PhotoForSync
 import com.lovestory.lovestory.database.entities.SyncedPhoto
 import com.lovestory.lovestory.graphs.GalleryStack
 import com.lovestory.lovestory.graphs.MainScreens
@@ -115,7 +116,7 @@ fun DisplayImageFromBitmap(index: Int, bitmap: Bitmap, navHostController: NavHos
 }
 
 @Composable
-fun CheckableDisplayImageFromUri(navHostController :NavHostController,index : Int, checked : Boolean, imageUri: String, onChangeChecked : (Int)->Unit) {
+fun CheckableDisplayImageFromUri(navHostController :NavHostController,index : Int, checked : Boolean, imageInfo: PhotoForSync, onChangeChecked : (Int)->Unit) {
     val borderColor = if (checked) Color(0xFFEEC9C9) else Color.Transparent
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
     val imageWidth = screenWidth / 3 - 4.dp
@@ -125,7 +126,7 @@ fun CheckableDisplayImageFromUri(navHostController :NavHostController,index : In
             painter = rememberAsyncImagePainter(
                 ImageRequest
                     .Builder(LocalContext.current)
-                    .data(data = imageUri)
+                    .data(data = imageInfo.imageUrl)
                     .build()
             ),
             contentDescription = null,
@@ -135,7 +136,7 @@ fun CheckableDisplayImageFromUri(navHostController :NavHostController,index : In
                 .padding(2.dp)
 //                .border(width = 2.dp, color = borderColor)
                 .clickable {
-                    navHostController.navigate(GalleryStack.DetailPhotoFromDevice.route) {
+                    navHostController.navigate(GalleryStack.DetailPhotoFromDevice.route+"/${imageInfo.id}") {
                         popUpTo(GalleryStack.PhotoSync.route)
                     } },
             contentScale = ContentScale.Crop

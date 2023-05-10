@@ -39,13 +39,12 @@ fun MainNavGraph(
         composable(GalleryStack.PhotoSync.route){
             PhotoSyncScreen(navHostController = navHostController, photoForSyncView = photoForSyncView)
         }
-        composable(GalleryStack.DetailPhotoFromDevice.route){
-//            val imageUrl = it.arguments?.getString("imageUrl")
-            PhotoDetailScreenFromDevice(navHostController = navHostController, imageUri = "content://media/external/images/media/1000000435")
+        composable(GalleryStack.DetailPhotoFromDevice.route+"/{photoId}"){
+            val photoId = it.arguments?.getString("photoId")
+            PhotoDetailScreenFromDevice(navHostController = navHostController, photoId = photoId!!)
         }
         composable(GalleryStack.DetailPhotoFromServer.route+"/{photoId}"){
             val photoId = it.arguments?.getString("photoId")
-
             PhotoDetailScreenFromServer(navHostController = navHostController, photoId = photoId!!)
         }
     }
