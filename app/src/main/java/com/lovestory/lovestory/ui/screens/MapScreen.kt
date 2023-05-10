@@ -61,6 +61,7 @@ fun MapScreen(navHostController: NavHostController, date: String){
     val dataLoaded = remember { mutableStateOf(false) }
     var latLng by remember { mutableStateOf(emptyList<LatLng>()) }
     val items = remember{ mutableStateListOf<MyItem>() }
+    val items_google = remember{ mutableStateListOf<MyItem>() }
     var viewPosition = LatLng(37.503735330931136, 126.95615523253305)
     var cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(viewPosition!!, 18f)
@@ -120,10 +121,10 @@ fun MapScreen(navHostController: NavHostController, date: String){
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        if (!dataLoaded.value) {
-            //스켈레톤 추가
-            Box(modifier = Modifier.fillMaxSize().background(color = Color.Transparent))
-        } else {
+//        if (!dataLoaded.value) {
+//            //스켈레톤 추가
+//            Box(modifier = Modifier.fillMaxSize().background(color = Color.Transparent))
+//        } else {
             viewPosition = averageLatLng(latLng)
             cameraPositionState = CameraPositionState(position = CameraPosition.fromLatLngZoom(viewPosition, 15f))
 
@@ -213,7 +214,7 @@ fun MapScreen(navHostController: NavHostController, date: String){
                     }
                 )
             }
-        }
+//        }
     }
 }
 

@@ -2,37 +2,47 @@ package com.lovestory.lovestory.ui.screens
 
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
+import androidx.lifecycle.LiveData
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 //import com.google.android.gms.maps.model.CameraPosition
@@ -66,19 +76,23 @@ import com.google.android.gms.maps.model.PolylineOptions
 import com.google.maps.android.compose.*
 import com.lovestory.lovestory.R
 import com.lovestory.lovestory.database.PhotoDatabase
+import com.lovestory.lovestory.database.entities.SyncedPhoto
 import com.lovestory.lovestory.database.repository.SyncedPhotoRepository
 import com.lovestory.lovestory.graphs.CalendarStack
 import com.lovestory.lovestory.graphs.MainScreens
+import com.lovestory.lovestory.module.photo.getThumbnailForPhoto
 import com.lovestory.lovestory.network.*
+import com.lovestory.lovestory.view.SyncedPhotoView
 import kotlinx.coroutines.*
 import kotlinx.coroutines.selects.select
 import okhttp3.Dispatcher
 import java.time.DayOfWeek
 
 
+@OptIn(MapsComposeExperimentalApi::class)
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
-fun CalendarScreen(navHostController: NavHostController) {
+fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhotoView) {
 
     val currentMonth = remember { YearMonth.now() }
     val startMonth = remember { currentMonth.minusMonths(100) } // Adjust as needed
@@ -130,7 +144,11 @@ fun CalendarScreen(navHostController: NavHostController) {
     val token = getToken(context)
 
     lateinit var repository : SyncedPhotoRepository
-    var photoInfo: List<Triple<String, Double, Double>>
+    val items = remember{ mutableStateListOf<MyItem>() }
+
+    val syncedPhotosByDate by syncedPhotoView.groupedSyncedPhotosByDate.observeAsState(initial = mapOf())
+    val allPhotoListState = rememberLazyListState()
+
 
     //해야 되는 게 코루틴 정리. 룸 db
     LaunchedEffect(key1 = true) {
@@ -184,6 +202,8 @@ fun CalendarScreen(navHostController: NavHostController) {
         }
     }
  */
+
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -250,17 +270,13 @@ fun CalendarScreen(navHostController: NavHostController) {
             val date = selection.date
             val formatter1 = DateTimeFormatter.ofPattern("yyyy-MM-dd")
             val dateString = date.format(formatter1)
-            val gps = getGps(token!!, dateString)
+            val gps = getGps(token, dateString)
 
-            latLng = if (gps.body() != null) {
-                getLatLng(gps.body()!!)
-            }else{
-                val position = mutableListOf<LatLng>()
-                position.add(LatLng(37.503735330931136, 126.95615523253305))
-                position
+            if (gps.body() != null) {
+                latLng = getLatLng(gps.body()!!)
             }
 
-            val response = getPhotoTable(token!!)
+            val response = getPhotoTable(token)
 
             if(response.isSuccessful) {
                 val photoDatabase = PhotoDatabase.getDatabase(context)
@@ -269,12 +285,13 @@ fun CalendarScreen(navHostController: NavHostController) {
 
                 val syncedPhoto = repository.getSyncedPhotosByDate(dateString)
 
-                photoInfo = syncedPhoto.map { it ->
-                    Triple(it.date, it.latitude, it.longitude)
+                syncedPhoto.forEach{
+                    items.add(MyItem(LatLng(it.latitude, it.longitude), "Marker", "사진", getThumbnailForPhoto(token, it.id)!!))
                 }
-                Log.d("데이터베이스","$photoInfo")
             }
-
+            items.forEach{
+                Log.d("맵 데이터", "${it}")
+            }
             dataLoaded.value = true
         }
 
@@ -314,6 +331,8 @@ fun CalendarScreen(navHostController: NavHostController) {
                 isPopupVisible = false// Update coupleMemoryList when dialog is dismissed
                 isPopupVisibleSave = false
                 dataLoaded.value = false
+                items.clear()
+                latLng = emptyList()
             }, //onDismissRequest,
             properties = DialogProperties(dismissOnBackPress = true, dismissOnClickOutside = true)
         ) {
@@ -411,6 +430,8 @@ fun CalendarScreen(navHostController: NavHostController) {
                             }
                             isPopupVisible = false
                             isPopupVisibleSave = false
+                            items.clear()
+                            latLng = emptyList()
                         },
                         elevation = null,
                         contentPadding = PaddingValues(0.dp),
@@ -436,55 +457,183 @@ fun CalendarScreen(navHostController: NavHostController) {
                 )
                 //Text(text = "Current value: $editedcomment")
                 Spacer(modifier = Modifier.height(20.dp))
+                Log.d("좌표","${latLng.size}")
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 20.dp, end = 20.dp)
+                            .height(150.dp)
+                            .background(color = Color.LightGray, RoundedCornerShape(12.dp))
+                    ) {
+                        var viewposition = LatLng(37.503735330931136, 126.95615523253305)
+                        var cameraPositionState = rememberCameraPositionState {
+                            position = CameraPosition.fromLatLngZoom(viewposition, 15f)
+                        }
+                        selectionSave = selection
+                        val date = selection.date
+                        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+                        val dateString = date.format(formatter)
+
+                        if (!dataLoaded.value) {
+                            //스켈레톤 추가
+                            Box(
+                                modifier = Modifier.fillMaxSize()
+                                    .background(color = Color.Transparent)
+                            )
+                        } else {
+                            viewposition = averageLatLng(latLng)
+                            cameraPositionState = CameraPositionState(
+                                position = CameraPosition.fromLatLngZoom(
+                                    viewposition,
+                                    15f
+                                )
+                            )
+
+                            val zoomLevel = getZoomLevelForDistance(
+                                getMaxDistanceBetweenLatLng(
+                                    viewposition,
+                                    latLng
+                                )
+                            ) - 1
+
+                            cameraPositionState = remember {
+                                CameraPositionState(
+                                    position = CameraPosition.fromLatLngZoom(
+                                        viewposition,
+                                        zoomLevel
+                                    )
+                                )
+                            }
+
+                            GoogleMap(
+                                modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(12.dp)),
+                                cameraPositionState = cameraPositionState,
+                                onMapClick = {
+                                    isPopupVisible = false
+                                    isPopupVisibleSave = true
+                                    navHostController.navigate(CalendarStack.Map.route + "/$dateString") {
+                                        launchSingleTop = true
+                                        Log.d("클릭", "클릭")
+                                    }
+                                },
+                                uiSettings = uiSettings
+                            ) {
+                                Clustering(
+                                    items = items,
+                                    // Optional: Handle clicks on clusters, cluster items, and cluster item info windows
+                                    onClusterClick = {
+                                        Log.d("TAG", "Cluster clicked! $it") // 클러스터 클릭했을 때
+                                        false
+                                    },
+                                    onClusterItemClick = {
+                                        Log.d(
+                                            "TAG",
+                                            "Cluster item clicked! $it"
+                                        ) // 클러스팅 되지 않은 마커 클릭했을 때
+                                        false
+                                    },
+                                    onClusterItemInfoWindowClick = {
+                                        Log.d(
+                                            "TAG",
+                                            "Cluster item info window clicked! $it"
+                                        ) // 클러스팅 되지 않은 마커의 정보창을 클릭했을 때
+                                    },
+                                    // Optional: Custom rendering for clusters
+                                    clusterContent = { cluster ->
+                                        Log.d("클러스터","에러")
+                                        val size = 50.dp
+                                        val scaledBitmap = cluster.items.first().icon.let {
+                                            val density = LocalDensity.current.density
+                                            val scaledSize = (size * density).toInt()
+                                            Bitmap.createScaledBitmap(
+                                                it,
+                                                scaledSize,
+                                                scaledSize,
+                                                false
+                                            )
+                                        }!!.asImageBitmap()
+                                        Surface(
+                                            shape = RoundedCornerShape(percent = 10),
+                                            contentColor = Color.White,
+                                            border = BorderStroke(1.dp, Color.White),
+                                            elevation = 10.dp
+                                        ) {
+                                            Box(contentAlignment = Alignment.Center) {
+                                                Image(
+                                                    bitmap = scaledBitmap,
+                                                    contentDescription = null,
+                                                    modifier = Modifier.size(60.dp)
+                                                )
+                                                Text(
+                                                    "%,d".format(cluster.size), //이 부분 왜 2배로 나오지..?
+                                                    fontSize = 16.sp,
+                                                    fontWeight = FontWeight.Black,
+                                                    textAlign = TextAlign.Center
+                                                )
+                                            }
+                                        }
+                                        Log.d("클러스터","에러아님")
+                                    },
+                                    // Optional: Custom rendering for non-clustered items
+                                    clusterItemContent = { item ->
+                                        Log.d("마커","에러")
+                                        val size = 50.dp
+                                        val scaledBitmap = item.icon.let {
+                                            val density = LocalDensity.current.density
+                                            val scaledSize = (size * density).toInt()
+                                            Bitmap.createScaledBitmap(
+                                                it,
+                                                scaledSize,
+                                                scaledSize,
+                                                false
+                                            )
+                                        }!!.asImageBitmap()
+                                        Surface(
+                                            shape = RoundedCornerShape(percent = 10),
+                                            contentColor = Color.White,
+                                            border = BorderStroke(1.dp, Color.White),
+                                            elevation = 10.dp
+                                        ) {
+                                            Box(contentAlignment = Alignment.Center) {
+                                                Image(
+                                                    bitmap = scaledBitmap,
+                                                    contentDescription = null,
+                                                    modifier = Modifier.size(60.dp)
+                                                )
+                                            }
+                                        }
+                                        Log.d("마커","에러아님")
+                                    }
+                                )
+
+                            }
+                        }
+                    }
+
+
+                Spacer(modifier = Modifier.height(20.dp))
+                //Log.d("아이템 개수", "${items.size}")
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(start = 20.dp, end = 20.dp)
                         .height(300.dp)
                         .background(color = Color.LightGray, RoundedCornerShape(12.dp))
-                ){
-                    var viewposition = LatLng(37.503735330931136, 126.95615523253305)
-                    var cameraPositionState = rememberCameraPositionState {
-                        position = CameraPosition.fromLatLngZoom(viewposition, 15f)
+                ) {
+                    val filteredSyncedPhotosByDate = syncedPhotosByDate.filterKeys { key ->
+                        key == dateToString(selection.date)
                     }
-                    selectionSave = selection
-                    val date = selection.date
-                    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-                    val dateString = date.format(formatter)
-
-                    if (!dataLoaded.value) {
-                        //스켈레톤 추가
-                        Box(modifier = Modifier.fillMaxSize().background(color = Color.Transparent))
-                    } else {
-                        viewposition = averageLatLng(latLng)
-                        cameraPositionState = CameraPositionState(position = CameraPosition.fromLatLngZoom(viewposition, 15f))
-
-                        val zoomLevel = getZoomLevelForDistance(getMaxDistanceBetweenLatLng(viewposition, latLng)) - 1
-                        cameraPositionState = remember { CameraPositionState(position = CameraPosition.fromLatLngZoom(viewposition, zoomLevel)) }
-
-                        GoogleMap(
-                            modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(12.dp)),
-                            cameraPositionState = cameraPositionState,
-                            onMapClick = {
-                                isPopupVisible = false
-                                isPopupVisibleSave = true
-                                navHostController.navigate(CalendarStack.Map.route+"/$dateString") {
-                                    launchSingleTop = true
-                                    Log.d("클릭","클릭")
-                                }
-                            },
-                            uiSettings = uiSettings
-                        ) {
-                            if(latLng.isNotEmpty()) {
-                                Polyline(
-                                    points = latLng,
-                                    color = Color.Black
-                                )
-                            }
-                        }
-                    }
+                    Log.d("싱크된 포토", "$filteredSyncedPhotosByDate")
+                    PhotoForCalendar(
+                        syncedPhotosByDate = filteredSyncedPhotosByDate,
+                        token = token,
+                        navHostController = navHostController,
+                        allPhotoListState = allPhotoListState
+                    )
                 }
                 Spacer(modifier = Modifier.height(20.dp))
+
             }
         }
     }

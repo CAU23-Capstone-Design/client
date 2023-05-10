@@ -36,7 +36,7 @@ fun MainNavGraph(
             )
         }
         composable(MainScreens.Calendar.route) {
-            CalendarScreen(navHostController = navHostController)
+            CalendarScreen(navHostController = navHostController, syncedPhotoView = syncedPhotoView)
         }
         composable(MainScreens.Profile.route) {
             ProfileScreen(navHostController = navHostController)
