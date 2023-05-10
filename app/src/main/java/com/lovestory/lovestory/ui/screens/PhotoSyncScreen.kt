@@ -2,6 +2,9 @@ package com.lovestory.lovestory.ui.screens
 
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -44,49 +47,39 @@ import kotlinx.coroutines.*
 
 @Composable
 fun PhotoSyncScreen(navHostController: NavHostController, photoForSyncView: PhotoForSyncView){
+    val notSyncedPhotos by photoForSyncView.listOfPhotoForSync.observeAsState(initial = listOf())
+//    lateinit var checkPhotoList : List<Boolean>
+
     var isDropMenuForRemovePhoto = remember {mutableStateOf(false)}
     val showDeletePhotoDialog = remember { mutableStateOf(false) }
+
+    val numOfCurrentUploadedPhoto = remember { mutableStateOf(0) }
+    val numOfTotalUploadPhoto = remember { mutableStateOf(0) }
     val showUploadPhotoDialog = remember { mutableStateOf(false) }
-
-    val notSyncedPhotos by photoForSyncView.listOfPhotoForSync.observeAsState(initial = listOf())
-//    var isUploadPhotos by remember {
-//        mutableStateOfgalleryView.isUploadPhotos)
-//    }
-
-    var isUploadPhotos = photoForSyncView.isUploadPhotos
-    var currentUploadPhotos = photoForSyncView.currentUploadPhotos
-    var totalUploadPhotos = photoForSyncView.totalUploadPhotos
+    val onDismissRequest : () -> Unit = {showUploadPhotoDialog.value = false}
 
     val context = LocalContext.current
 
     val systemUiController = rememberSystemUiController()
 
-    var checkPhotoList = remember {
-        mutableStateOf(MutableList<Boolean>(notSyncedPhotos.size) { true })
-    }
-
-    val onDismissRequest : () -> Unit = {isUploadPhotos = false}
-
     val photoDatabase: PhotoDatabase = PhotoDatabase.getDatabase(context)
     val photoForSyncDao : PhotoForSyncDao = photoDatabase.photoForSyncDao()
     val photoForSyncRepository = PhotoForSyncRepository(photoForSyncDao)
 
-    LaunchedEffect(key1 = notSyncedPhotos.size) {
-        if (notSyncedPhotos.size > checkPhotoList.value.size) {
+    LaunchedEffect(key1 = notSyncedPhotos) {
+        photoForSyncView.checkPhotoList.value = MutableList<Boolean>(notSyncedPhotos.size) { true }
+
+        if (notSyncedPhotos.size > photoForSyncView.checkPhotoList.value.size) {
             val newSize = notSyncedPhotos.size
-            val oldSize = checkPhotoList.value.size
-            val newCheckPhotoList = checkPhotoList.value.toMutableList()
+            val oldSize = photoForSyncView.checkPhotoList.value.size
+            val newCheckPhotoList = photoForSyncView.checkPhotoList.value.toMutableList()
 
             for (i in oldSize until newSize) {
                 newCheckPhotoList.add(true)
             }
 
-            checkPhotoList.value = newCheckPhotoList
+            photoForSyncView.checkPhotoList.value = newCheckPhotoList
         }
-    }
-
-    LaunchedEffect(key1 = photoForSyncView.isUploadPhotos){
-        isUploadPhotos = photoForSyncView.isUploadPhotos
     }
 
     SideEffect {
@@ -96,7 +89,7 @@ fun PhotoSyncScreen(navHostController: NavHostController, photoForSyncView: Phot
     }
 
     val onChangeChecked: (Int) -> Unit = { index ->
-        checkPhotoList.value = checkPhotoList.value.toMutableList().also {
+        photoForSyncView.checkPhotoList.value = photoForSyncView.checkPhotoList.value.toMutableList().also {
             it[index] = !it[index]
         }
     }
@@ -107,15 +100,47 @@ fun PhotoSyncScreen(navHostController: NavHostController, photoForSyncView: Phot
             .background(Color.White)
             .fillMaxSize(),
     ){
-        if (showDeletePhotoDialog.value) {
+        AnimatedVisibility (visible = showDeletePhotoDialog.value, enter = fadeIn(), exit = fadeOut()) {
             DeletPhotoDialog(
                 showDeletePhotoDialog = showDeletePhotoDialog,
                 notSyncedPhotos = notSyncedPhotos,
-                checkPhotoList = checkPhotoList,
+                checkPhotoList = photoForSyncView.checkPhotoList.value,
                 photoForSyncRepository = photoForSyncRepository,
+                navHostController = navHostController,
                 context = context,
             )
         }
+        AnimatedVisibility(visible = showUploadPhotoDialog.value, enter = fadeIn(), exit = fadeOut()){
+            Dialog(onDismissRequest = onDismissRequest, properties = DialogProperties(dismissOnBackPress = false, dismissOnClickOutside=false)) {
+                Column(
+                    modifier = Modifier
+                        .width(320.dp)
+                        .wrapContentHeight()
+                        .clip(RoundedCornerShape(15.dp))
+                        .background(color = Color.White)
+                        .padding(vertical = 20.dp, horizontal = 10.dp),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+
+                    ){
+                    LinearProgressIndicator(
+                        progress = numOfCurrentUploadedPhoto.value.toFloat()/numOfTotalUploadPhoto.value.toFloat(),
+                        color = Color(0xFFFCC5C5),
+                        backgroundColor = Color(0xBBF3F3F3),
+                        modifier = Modifier
+                            .padding(vertical = 10.dp)
+                            .height(5.dp)
+                    )
+                    Text(
+                        text = "사진 업로드 중 (${numOfCurrentUploadedPhoto.value} / ${numOfTotalUploadPhoto.value})",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Normal,
+                        modifier = Modifier.padding(vertical = 10.dp)
+                    )
+                }
+            }
+        }
+
 
         LazyVerticalGrid(
             columns = GridCells.Fixed(3),
@@ -124,10 +149,10 @@ fun PhotoSyncScreen(navHostController: NavHostController, photoForSyncView: Phot
                 .fillMaxSize(),
         ) {
             items(notSyncedPhotos.size) { index ->
-                if (index < notSyncedPhotos.size && index < checkPhotoList.value.size){
+                if (index < notSyncedPhotos.size && index < photoForSyncView.checkPhotoList.value.size){
                     CheckableDisplayImageFromUri(
                         index = index,
-                        checked = checkPhotoList.value[index],
+                        checked = photoForSyncView.checkPhotoList.value[index],
                         imageInfo = notSyncedPhotos[index],
                         onChangeChecked = onChangeChecked,
                         navHostController = navHostController
@@ -170,7 +195,7 @@ fun PhotoSyncScreen(navHostController: NavHostController, photoForSyncView: Phot
                     isDropMenuForRemovePhoto = isDropMenuForRemovePhoto,
                     showDeletePhotoDialog = showDeletePhotoDialog,
                     notSyncedPhotos = notSyncedPhotos,
-                    checkPhotoList = checkPhotoList,
+                    checkPhotoList = photoForSyncView.checkPhotoList.value,
                     context = context
                 )
             }
@@ -191,12 +216,23 @@ fun PhotoSyncScreen(navHostController: NavHostController, photoForSyncView: Phot
                         .background(Color.Transparent)
                         .padding(10.dp),
                     onClick = {
-                        val sendPhotos = getListOfCheckedPhoto(notSyncedPhotos, checkPhotoList)
+                        val sendPhotos = getListOfCheckedPhoto(notSyncedPhotos, photoForSyncView.checkPhotoList.value)
                         if (sendPhotos.isNotEmpty()) {
+                            numOfTotalUploadPhoto.value = sendPhotos.size
+                            showUploadPhotoDialog.value = true
                             CoroutineScope(Dispatchers.IO).launch {
-                                uploadPhoto(context, sendPhotos, photoForSyncView)
+                                uploadPhoto(
+                                    context = context,
+                                    sendPhotos = sendPhotos,
+                                    numOfCurrentUploadedPhoto =  numOfCurrentUploadedPhoto,
+                                )
                                 withContext(Dispatchers.Main){
+                                    showUploadPhotoDialog.value = false
                                     Toast.makeText(context, "${sendPhotos.size}개의 사진을 업로드 했습니다.", Toast.LENGTH_SHORT).show()
+                                    Log.d("PhotoSyncScreen", "notSyncedPhotos.value) :  ${notSyncedPhotos.size}")
+                                    if(notSyncedPhotos.size == 1){
+                                        navHostController.popBackStack()
+                                    }
                                 }
                             }
                         } else {
@@ -218,22 +254,22 @@ fun PhotoSyncScreen(navHostController: NavHostController, photoForSyncView: Phot
     }
 }
 
-fun getListOfCheckedPhoto (allPhotos : List<PhotoForSync>, checkPhotoList : MutableState<MutableList<Boolean>>) : List<PhotoForSync>{
+fun getListOfCheckedPhoto (allPhotos : List<PhotoForSync>, checkPhotoList : List<Boolean>) : List<PhotoForSync>{
     var listOfCheck =  mutableListOf<PhotoForSync>()
 
     for(current in allPhotos.indices){
-        if(checkPhotoList.value[current]){
+        if(checkPhotoList[current]){
             listOfCheck.add(allPhotos[current])
         }
     }
     return listOfCheck
 }
 
-fun getListOfNotCheckedPhoto (allPhotos : List<PhotoForSync>, checkPhotoList : MutableState<MutableList<Boolean>>):List<PhotoForSync>{
+fun getListOfNotCheckedPhoto (allPhotos : List<PhotoForSync>, checkPhotoList : List<Boolean>):List<PhotoForSync>{
     var listOfCheck =  mutableListOf<PhotoForSync>()
 
     for(current in allPhotos.indices){
-        if(!checkPhotoList.value[current]){
+        if(!checkPhotoList[current]){
             listOfCheck.add(allPhotos[current])
         }
     }

@@ -107,7 +107,7 @@ fun DisplayImageFromBitmap(index: Int, bitmap: Bitmap, navHostController: NavHos
             .aspectRatio(1f)
             .padding(2.dp)
             .clickable {
-                navHostController.navigate(GalleryStack.DetailPhotoFromServer.route+"/$photoId") {
+                navHostController.navigate(GalleryStack.DetailPhotoFromServer.route + "/$photoId") {
                     popUpTo(GalleryStack.PhotoSync.route)
                 }
             },
@@ -136,13 +136,14 @@ fun CheckableDisplayImageFromUri(navHostController :NavHostController,index : In
                 .padding(2.dp)
 //                .border(width = 2.dp, color = borderColor)
                 .clickable {
-                    navHostController.navigate(GalleryStack.DetailPhotoFromDevice.route+"/${imageInfo.id}") {
+                    navHostController.navigate(GalleryStack.DetailPhotoFromDevice.route + "/${imageInfo.id}") {
                         popUpTo(GalleryStack.PhotoSync.route)
-                    } },
+                    }
+                },
             contentScale = ContentScale.Crop
         )
 
-        if(checked){
+        AnimatedVisibility(checked, enter = fadeIn(), exit = fadeOut()){
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
@@ -153,26 +154,42 @@ fun CheckableDisplayImageFromUri(navHostController :NavHostController,index : In
                     .padding(2.dp),
 //                .border(width = 2.dp, color = borderColor)
             ){}
-            Icon(
-                painter = painterResource(id = R.drawable.baseline_check_circle_24),
-                contentDescription = null,
-                tint = Color(0xFFF8B0B0),
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(end = 14.dp, top = 10.dp)
-                    .clickable { onChangeChecked(index) },
-            )
         }
-        else{
-            Icon(
-                painter = painterResource(id = R.drawable.baseline_check_circle_outline_24),
-                contentDescription = null,
-                tint = Color(0xFF6B6B6B),
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(end = 14.dp, top = 10.dp)
-                    .clickable { onChangeChecked(index) }
-            )
+        AnimatedVisibility(checked, enter = fadeIn(), exit = fadeOut(),
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(end = 5.dp, top = 5.dp))
+        {
+            Box(modifier = Modifier
+                .width(35.dp).height(35.dp)
+                .clickable { onChangeChecked(index) },
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.baseline_check_circle_24),
+                    contentDescription = null,
+                    tint = Color(0xFFF8B0B0),
+                )
+            }
+        }
+        AnimatedVisibility(!checked, enter = fadeIn(), exit = fadeOut(),
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(end = 5.dp, top = 5.dp))
+        {
+            Box(modifier = Modifier
+                .width(35.dp).height(35.dp)
+                .clickable { onChangeChecked(index) },
+                contentAlignment = Alignment.Center
+            ){
+                Icon(
+                    painter = painterResource(id = R.drawable.baseline_check_circle_outline_24),
+                    contentDescription = null,
+                    tint = Color(0xFF6B6B6B),
+                    modifier = Modifier
+                )
+            }
+
         }
     }
 }

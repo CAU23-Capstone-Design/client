@@ -2,6 +2,9 @@ package com.lovestory.lovestory.ui.components
 
 import android.content.Context
 import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.wrapContentSize
@@ -23,7 +26,7 @@ fun DropDownIcon(
     isDropMenuForRemovePhoto : MutableState<Boolean>,
     showDeletePhotoDialog : MutableState<Boolean>,
     notSyncedPhotos : List<PhotoForSync>,
-    checkPhotoList : MutableState<MutableList<Boolean>>,
+    checkPhotoList : List<Boolean>,
     context : Context
     ){
     Box() {

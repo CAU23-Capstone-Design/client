@@ -4,6 +4,10 @@ import android.content.Context
 import android.net.Uri
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.navigation.NavHostController
 import com.lovestory.lovestory.database.PhotoDatabase
 import com.lovestory.lovestory.database.entities.PhotoForSync
 import com.lovestory.lovestory.database.entities.PhotoForSyncDao
@@ -19,9 +23,11 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 
-suspend fun uploadPhoto(context : Context, sendPhotos : List<PhotoForSync>, photoForSyncView : PhotoForSyncView){
-    photoForSyncView.setUploadPhotos(sendPhotos.size)
-
+suspend fun uploadPhoto(
+    context : Context,
+    sendPhotos : List<PhotoForSync>,
+    numOfCurrentUploadedPhoto : MutableState<Int>,
+){
     val photoDatabase: PhotoDatabase = PhotoDatabase.getDatabase(context)
 
     val photoForSyncDao : PhotoForSyncDao = photoDatabase.photoForSyncDao()
@@ -31,10 +37,6 @@ suspend fun uploadPhoto(context : Context, sendPhotos : List<PhotoForSync>, phot
     val syncedPhotoRepository = SyncedPhotoRepository(syncedPhotoDao)
 
     val token = getToken(context)
-
-    withContext(Dispatchers.Main) {
-        Toast.makeText(context, "사진 업로드를 실행합니다", Toast.LENGTH_SHORT).show()
-    }
 
     sendPhotos.onEachIndexed{ index, photo ->
         Log.d("MODULE-uploadPhoto", "Uri : ${photo.imageUrl}")
@@ -72,19 +74,11 @@ suspend fun uploadPhoto(context : Context, sendPhotos : List<PhotoForSync>, phot
                 )
 
                 photoForSyncRepository.deletePhotoForSync(photo)
+                numOfCurrentUploadedPhoto.value+=1
 
             }else{
                 Log.e("MODULE-uploadPhoto" , "${response.errorBody()}")
             }
         }
-        photoForSyncView.addCurrentUploadPhotos()
-        withContext(Dispatchers.Main) {
-            Toast.makeText(context, "사진 업로드 (${index+1} / ${sendPhotos.size})", Toast.LENGTH_SHORT).show()
-        }
     }
-    withContext(Dispatchers.Main) {
-        Toast.makeText(context, "사진 업로드를 완료했습니다.", Toast.LENGTH_SHORT).show()
-    }
-
-    photoForSyncView.setFinishedUploadPhotos()
 }

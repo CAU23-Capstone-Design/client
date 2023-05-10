@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import com.lovestory.lovestory.database.entities.PhotoForSync
 import com.lovestory.lovestory.database.repository.PhotoForSyncRepository
 import com.lovestory.lovestory.ui.screens.getListOfNotCheckedPhoto
@@ -25,8 +26,9 @@ import com.lovestory.lovestory.ui.screens.getListOfNotCheckedPhoto
 fun DeletPhotoDialog(
     showDeletePhotoDialog : MutableState<Boolean>,
     notSyncedPhotos : List<PhotoForSync>,
-    checkPhotoList : MutableState<MutableList<Boolean>>,
+    checkPhotoList : List<Boolean>,
     photoForSyncRepository : PhotoForSyncRepository,
+    navHostController : NavHostController,
     context : Context
 ){
     AlertDialog(
@@ -51,6 +53,9 @@ fun DeletPhotoDialog(
                         photoForSyncRepository.deletePhotoForSync(item)
                     }
                     Toast.makeText(context, "${deleteFromLoveStory.size}개의 사진을 삭제했습니다.", Toast.LENGTH_SHORT).show()
+                    if(notSyncedPhotos.size == 1){
+                        navHostController.popBackStack()
+                    }
                 }) {
                     Text(text="확인",color = Color.Red, fontWeight = FontWeight.Bold, fontSize = 16.sp)
                 }

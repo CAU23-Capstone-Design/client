@@ -70,3 +70,17 @@ fun CoupleSyncDialog(
 
     }
 }
+
+@Composable
+fun ProgressBarDialog(
+    onDismissRequest : ()-> Unit,
+    properties: DialogProperties = DialogProperties(),
+    content : @Composable () -> Unit
+){
+    Dialog(
+        onDismissRequest = onDismissRequest,
+        properties = properties,
+    ) {
+        content()
+    }
+}
