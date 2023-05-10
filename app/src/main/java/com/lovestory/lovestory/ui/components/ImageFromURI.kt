@@ -12,10 +12,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Icon
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,6 +35,7 @@ import com.lovestory.lovestory.module.loadBitmapFromDiskCache
 import com.lovestory.lovestory.module.photo.getThumbnailForPhoto
 import com.lovestory.lovestory.module.saveBitmapToDiskCache
 import com.lovestory.lovestory.network.getThumbnailById
+import com.lovestory.lovestory.view.SyncedPhotoView
 import com.squareup.moshi.Moshi
 
 @Composable
@@ -53,22 +51,25 @@ fun Skeleton(modifier: Modifier = Modifier) {
 fun ThumbnailOfPhotoFromServer(
     index: Int,
     token: String,
-    photoId: String,
-    navHostController: NavHostController
+    photo: SyncedPhoto,
+    navHostController: NavHostController,
+    syncedPhotoView : SyncedPhotoView
 ) {
     val context = LocalContext.current
     val bitmap = remember { mutableStateOf<Bitmap?>(null) }
+    val indexForDetail = remember { mutableStateOf(0) }
 //    val cacheKey = "lovestory_ca"+photoId
 //    lateinit var bitmapOfThumbnail : Bitmap
-    val cacheKey = "thumbnail_$photoId"
+    val cacheKey = "thumbnail_${photo.id}"
 
-    LaunchedEffect(photoId) {
+    LaunchedEffect(photo) {
+        indexForDetail.value = syncedPhotoView.getAllSyncedPhotoIndex(photo)
         val cachedBitmap = loadBitmapFromDiskCache(context, cacheKey)
         if (cachedBitmap != null) {
 //            Log.d("Thumbnail","cache에서 로드")
             bitmap.value = cachedBitmap
         } else {
-            val getResult = getThumbnailForPhoto(token, photoId)
+            val getResult = getThumbnailForPhoto(token, photo.id)
             if(getResult != null){
                 saveBitmapToDiskCache(context, getResult, cacheKey)
                 bitmap.value = getResult
@@ -81,7 +82,7 @@ fun ThumbnailOfPhotoFromServer(
     }
 
     AnimatedVisibility (bitmap.value != null, enter = fadeIn(), exit = fadeOut()) {
-        DisplayImageFromBitmap(index, bitmap.value!!, navHostController=navHostController, photoId = photoId)
+        DisplayImageFromBitmap(index, bitmap.value!!, navHostController=navHostController, photoId = photo.id, photoIndex = indexForDetail)
     }
     AnimatedVisibility(bitmap.value== null, enter = fadeIn(), exit = fadeOut()) {
         val screenWidth = LocalConfiguration.current.screenWidthDp.dp
@@ -95,7 +96,7 @@ fun ThumbnailOfPhotoFromServer(
 }
 
 @Composable
-fun DisplayImageFromBitmap(index: Int, bitmap: Bitmap, navHostController: NavHostController, photoId: String) {
+fun DisplayImageFromBitmap(index: Int, bitmap: Bitmap, navHostController: NavHostController, photoId: String, photoIndex : MutableState<Int>) {
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
     val imageWidth = screenWidth / 3
 
@@ -107,7 +108,7 @@ fun DisplayImageFromBitmap(index: Int, bitmap: Bitmap, navHostController: NavHos
             .aspectRatio(1f)
             .padding(2.dp)
             .clickable {
-                navHostController.navigate(GalleryStack.DetailPhotoFromServer.route + "/$photoId") {
+                navHostController.navigate(GalleryStack.DetailPhotoFromServer.route + "/${photoIndex.value}") {
                     popUpTo(GalleryStack.PhotoSync.route)
                 }
             },
@@ -161,7 +162,8 @@ fun CheckableDisplayImageFromUri(navHostController :NavHostController,index : In
                 .padding(end = 5.dp, top = 5.dp))
         {
             Box(modifier = Modifier
-                .width(35.dp).height(35.dp)
+                .width(35.dp)
+                .height(35.dp)
                 .clickable { onChangeChecked(index) },
                 contentAlignment = Alignment.Center
             ) {
@@ -178,7 +180,8 @@ fun CheckableDisplayImageFromUri(navHostController :NavHostController,index : In
                 .padding(end = 5.dp, top = 5.dp))
         {
             Box(modifier = Modifier
-                .width(35.dp).height(35.dp)
+                .width(35.dp)
+                .height(35.dp)
                 .clickable { onChangeChecked(index) },
                 contentAlignment = Alignment.Center
             ){

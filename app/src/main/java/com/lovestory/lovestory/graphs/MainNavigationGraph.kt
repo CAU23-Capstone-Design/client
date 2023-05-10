@@ -1,5 +1,6 @@
 package com.lovestory.lovestory.graphs
 
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -43,9 +44,16 @@ fun MainNavGraph(
             val photoId = it.arguments?.getString("photoId")
             PhotoDetailScreenFromDevice(navHostController = navHostController, photoId = photoId!!)
         }
-        composable(GalleryStack.DetailPhotoFromServer.route+"/{photoId}"){
-            val photoId = it.arguments?.getString("photoId")
-            PhotoDetailScreenFromServer(navHostController = navHostController, photoId = photoId!!)
+        composable(GalleryStack.DetailPhotoFromServer.route+"/{photoIndex}"){
+//            val photoId = it.arguments?.getString("photoId")
+            val photoIndex = it.arguments?.getString("photoIndex")!!.toInt()
+//            Log.d("naviagetion", "index : $indexForDetail")
+            PhotoDetailScreenFromServer(
+                navHostController = navHostController,
+//                photoId = photoId!!,
+                syncedPhotoView= syncedPhotoView,
+                photoIndex = photoIndex
+            )
         }
     }
 }

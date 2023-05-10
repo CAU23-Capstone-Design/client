@@ -91,7 +91,9 @@ fun GalleryScreen(navHostController: NavHostController, syncedPhotoView : Synced
                 token = token,
                 navHostController = navHostController,
                 currentDate = currentDate,
-                allPhotoListState = allPhotoListState)
+                allPhotoListState = allPhotoListState,
+                syncedPhotoView = syncedPhotoView,
+            )
         }
 
         AnimatedVisibility(visible = selectedButton =="일",

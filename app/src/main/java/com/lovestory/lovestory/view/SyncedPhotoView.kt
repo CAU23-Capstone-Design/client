@@ -9,6 +9,8 @@ import androidx.lifecycle.ViewModel
 import com.lovestory.lovestory.database.PhotoDatabase
 import com.lovestory.lovestory.database.entities.SyncedPhoto
 import com.lovestory.lovestory.database.repository.SyncedPhotoRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class SyncedPhotoView(application:Application): ViewModel() {
     private lateinit var syncedPhotoRepository: SyncedPhotoRepository
@@ -24,6 +26,9 @@ class SyncedPhotoView(application:Application): ViewModel() {
     lateinit var cumOfSizeOfInnerElements : LiveData<List<List<Int>>>
 
     lateinit var daySyncedPhotosByDate : LiveData<Map<String, List<SyncedPhoto>>>
+
+    private val _syncedPhoto = MutableLiveData<SyncedPhoto?>()
+    val syncedPhoto: LiveData<SyncedPhoto?> = _syncedPhoto
 
     init {
         val photoDatabase = PhotoDatabase.getDatabase(application)
@@ -76,5 +81,13 @@ class SyncedPhotoView(application:Application): ViewModel() {
             cumValue += 2
         }
         return cumulativeList
+    }
+
+    fun updateSyncedPhoto(newPhoto: SyncedPhoto) {
+        _syncedPhoto.value = newPhoto
+    }
+
+    fun getAllSyncedPhotoIndex(photo: SyncedPhoto):Int{
+        return listOfSyncPhotos.value!!.indexOf(photo)
     }
 }

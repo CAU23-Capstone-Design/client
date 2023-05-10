@@ -11,6 +11,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.lovestory.lovestory.database.entities.SyncedPhoto
+import com.lovestory.lovestory.view.SyncedPhotoView
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.*
@@ -21,7 +22,8 @@ fun GroupedGallery(
     token: String?,
     navHostController: NavHostController,
     currentDate: LocalDate,
-    allPhotoListState: LazyListState
+    allPhotoListState: LazyListState,
+    syncedPhotoView : SyncedPhotoView
 ){
     LazyColumn(
         modifier = Modifier.padding(bottom = 70.dp),
@@ -62,8 +64,9 @@ fun GroupedGallery(
                                 ThumbnailOfPhotoFromServer(
                                     index = photos.indexOf(photo),
                                     token = token,
-                                    photoId = photo.id,
-                                    navHostController = navHostController
+                                    photo = photo,
+                                    navHostController = navHostController,
+                                    syncedPhotoView = syncedPhotoView
                                 )
                             }
                         }
