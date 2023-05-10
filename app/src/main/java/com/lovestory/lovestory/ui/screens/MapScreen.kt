@@ -100,14 +100,14 @@ fun MapScreen(navHostController: NavHostController, date: String){
             }
 
             syncedPhoto.forEach{
-                items.add(MyItem(LatLng(it.latitude, it.longitude), "Marker", "Snippet",
+                items.add(MyItem(LatLng(it.latitude, it.longitude), "Marker1", "사진",
                     getThumbnailForPhoto(token!!, it.id)!!))
             }
         }
 
         //사진 좌표와 비트맵
         latLng.forEach{
-            items.add(MyItem(it,"Marker","Snippet", bitmap1))
+            items.add(MyItem(it,"Marker2","마커", bitmap1))
         }
         items.forEach{
             Log.d("아이템 정보","$it")
@@ -156,10 +156,10 @@ fun MapScreen(navHostController: NavHostController, date: String){
                     clusterContent = { cluster ->
                         Log.d("클러스터","${cluster.size}")
                         //Log.d("클러스터","${cluster.items.first().icon}")
-                        val drawable = ContextCompat.getDrawable(context, R.drawable.img)
-                        val bitmap = (drawable as BitmapDrawable).bitmap
+//                        val drawable = ContextCompat.getDrawable(context, R.drawable.img)
+//                        val bitmap = (drawable as BitmapDrawable).bitmap
                         val size = 50.dp
-                        val scaledBitmap = bitmap?.let {
+                        val scaledBitmap = cluster.items.first().icon.let {
                             val density = LocalDensity.current.density
                             val scaledSize = (size * density).toInt()
                             Bitmap.createScaledBitmap(it, scaledSize, scaledSize, false)
@@ -191,7 +191,7 @@ fun MapScreen(navHostController: NavHostController, date: String){
                         val drawable = ContextCompat.getDrawable(context, R.drawable.img)
                         val bitmap = (drawable as BitmapDrawable).bitmap
                         val size = 50.dp
-                        val scaledBitmap = bitmap?.let {
+                        val scaledBitmap = item.icon.let {
                             val density = LocalDensity.current.density
                             val scaledSize = (size * density).toInt()
                             Bitmap.createScaledBitmap(it, scaledSize, scaledSize, false)
