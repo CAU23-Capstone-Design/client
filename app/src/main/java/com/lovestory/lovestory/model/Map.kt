@@ -36,7 +36,7 @@ fun getLatLng(clusterData: ClusterData): MutableList<LatLng> {
 
 fun getZoomLevelForDistance(distance: Float): Float {
     val zoomLevel = 16f - log2(distance / 500) // Adjust the division factor as needed
-    return zoomLevel.coerceIn(0f, 25f) // Ensure the zoom level is within the valid range
+    return zoomLevel.coerceIn(8f, 18f) // Ensure the zoom level is within the valid range
 }
 
 fun getMaxDistanceBetweenLatLng(average: LatLng, latLngList: List<LatLng>):Float{

@@ -43,9 +43,13 @@ import androidx.core.content.ContextCompat
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.lovestory.lovestory.R
+import com.lovestory.lovestory.database.PhotoDatabase
+import com.lovestory.lovestory.database.repository.SyncedPhotoRepository
 import com.lovestory.lovestory.model.*
 import com.lovestory.lovestory.module.getToken
+import com.lovestory.lovestory.module.photo.getThumbnailForPhoto
 import com.lovestory.lovestory.network.getGps
+import com.lovestory.lovestory.network.getPhotoTable
 import com.lovestory.lovestory.ui.components.toInt
 
 
@@ -61,6 +65,10 @@ fun MapScreen(navHostController: NavHostController, date: String){
     var cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(viewPosition!!, 18f)
     }
+    lateinit var repository : SyncedPhotoRepository
+    var photoDate by remember { mutableStateOf(emptyList<String>()) }
+    var photoPosition by remember { mutableStateOf(emptyList<LatLng>()) }
+
     val drawable1 = ContextCompat.getDrawable(context, R.drawable.img)
     val bitmap1 = (drawable1 as BitmapDrawable).bitmap
 
@@ -74,14 +82,38 @@ fun MapScreen(navHostController: NavHostController, date: String){
             position.add(LatLng(37.503735330931136, 126.95615523253305))
             position
         }
-        dataLoaded.value = true
+
+        val response = getPhotoTable(token!!)
+
+        if(response.isSuccessful) {
+            val photoDatabase = PhotoDatabase.getDatabase(context)
+            val photoDao = photoDatabase.syncedPhotoDao()
+            repository = SyncedPhotoRepository(photoDao)
+
+            val syncedPhoto = repository.getSyncedPhotosByDate(date)
+
+            photoDate = syncedPhoto.map{
+                it.date
+            }
+            photoPosition = syncedPhoto.map { it ->
+                LatLng(it.latitude, it.longitude)
+            }
+
+            syncedPhoto.forEach{
+                items.add(MyItem(LatLng(it.latitude, it.longitude), "Marker", "Snippet",
+                    getThumbnailForPhoto(token!!, it.id)!!))
+            }
+        }
 
         //사진 좌표와 비트맵
-        points1.forEach{
+        latLng.forEach{
             items.add(MyItem(it,"Marker","Snippet", bitmap1))
-            //latLng = latLng + it
-            Log.d("위치좌표","$latLng")
         }
+        items.forEach{
+            Log.d("아이템 정보","$it")
+        }
+
+        dataLoaded.value = true
     }
     Column(
         modifier = Modifier.fillMaxSize(),
