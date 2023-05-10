@@ -20,13 +20,13 @@ import java.util.*
 
 @Composable
 fun DayGroupedGallery(
-    daySyncedPhotoByDate : Map<String, List<SyncedPhoto>>,
+    daySyncedPhotoByDate: Map<String, List<SyncedPhoto>>,
     token: String?,
-    currentDate : LocalDate,
-    allPhotoListState : LazyListState,
-    dayPhotoListState : LazyListState,
-    setSelectedButton : (String)->Unit,
-    cumOfSizeOfInnerElements : List<List<Int>>
+    currentDate: LocalDate,
+    allPhotoListState: LazyListState,
+    dayPhotoListState: LazyListState,
+    setSelectedButton: (String)->Unit,
+    cumOfSizeOfInnerElements: List<List<Int>>
 ){
 
     LazyColumn(

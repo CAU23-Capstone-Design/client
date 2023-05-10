@@ -5,6 +5,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -23,8 +26,11 @@ fun GroupedGallery(
     navHostController: NavHostController,
     currentDate: LocalDate,
     allPhotoListState: LazyListState,
-    syncedPhotoView : SyncedPhotoView
+    syncedPhotoView : SyncedPhotoView,
+    isPressedPhotoMode : MutableState<Boolean>
 ){
+    val checkedSyncedPhotosList by syncedPhotoView.checkedSyncedPhotosList.observeAsState(initial = mapOf())
+
     LazyColumn(
         modifier = Modifier.padding(bottom = 70.dp),
         contentPadding = PaddingValues(top=65.dp, bottom = 75.dp),
@@ -66,7 +72,8 @@ fun GroupedGallery(
                                     token = token,
                                     photo = photo,
                                     navHostController = navHostController,
-                                    syncedPhotoView = syncedPhotoView
+                                    syncedPhotoView = syncedPhotoView,
+                                    isPressedPhotoMode = isPressedPhotoMode,
                                 )
                             }
                         }

@@ -1,13 +1,9 @@
-package com.lovestory.lovestory.module
+package com.lovestory.lovestory.module.photo
 
 import android.content.Context
 import android.net.Uri
 import android.util.Log
-import android.widget.Toast
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
-import androidx.navigation.NavHostController
 import com.lovestory.lovestory.database.PhotoDatabase
 import com.lovestory.lovestory.database.entities.PhotoForSync
 import com.lovestory.lovestory.database.entities.PhotoForSyncDao
@@ -15,8 +11,8 @@ import com.lovestory.lovestory.database.entities.SyncedPhoto
 import com.lovestory.lovestory.database.entities.SyncedPhotoDao
 import com.lovestory.lovestory.database.repository.PhotoForSyncRepository
 import com.lovestory.lovestory.database.repository.SyncedPhotoRepository
+import com.lovestory.lovestory.module.getToken
 import com.lovestory.lovestory.network.uploadPhotoToServer
-import com.lovestory.lovestory.view.PhotoForSyncView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull

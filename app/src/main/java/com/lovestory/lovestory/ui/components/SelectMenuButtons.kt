@@ -7,6 +7,7 @@ import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -15,7 +16,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun SelectMenuButtons(items : List<String>, selectedButton : String, setSelectedButton : (String)->Unit){
+fun SelectMenuButtons(items : List<String>, selectedButton : String, onClick : (String)->Unit){
     Row(
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
@@ -24,7 +25,8 @@ fun SelectMenuButtons(items : List<String>, selectedButton : String, setSelected
             .padding(horizontal = 8.dp, vertical = 5.dp)
     ){
         items.forEach { item->
-            SelectMenuButton(onClick = {setSelectedButton(item as String)}, buttonText = item, isSelected = item == selectedButton)
+            SelectMenuButton(onClick = {
+                onClick(item as String)}, buttonText = item, isSelected = item == selectedButton)
         }
     }
 }

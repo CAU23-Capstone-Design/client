@@ -38,7 +38,7 @@ import com.lovestory.lovestory.database.PhotoDatabase
 import com.lovestory.lovestory.database.entities.PhotoForSync
 import com.lovestory.lovestory.database.entities.PhotoForSyncDao
 import com.lovestory.lovestory.database.repository.PhotoForSyncRepository
-import com.lovestory.lovestory.module.uploadPhoto
+import com.lovestory.lovestory.module.photo.uploadPhoto
 import com.lovestory.lovestory.ui.components.CheckableDisplayImageFromUri
 import com.lovestory.lovestory.ui.components.DeletPhotoDialog
 import com.lovestory.lovestory.ui.components.DropDownIcon

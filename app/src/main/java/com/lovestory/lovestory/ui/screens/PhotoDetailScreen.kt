@@ -46,11 +46,15 @@ import com.lovestory.lovestory.database.entities.PhotoForSync
 import com.lovestory.lovestory.database.entities.SyncedPhoto
 import com.lovestory.lovestory.database.repository.PhotoForSyncRepository
 import com.lovestory.lovestory.database.repository.SyncedPhotoRepository
+import com.lovestory.lovestory.module.getImageById
 import com.lovestory.lovestory.module.getToken
 import com.lovestory.lovestory.module.loadBitmapFromDiskCache
 import com.lovestory.lovestory.module.photo.getDetailPhoto
 import com.lovestory.lovestory.module.saveBitmapToDiskCache
 import com.lovestory.lovestory.view.SyncedPhotoView
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.*
@@ -277,6 +281,12 @@ fun PhotoDetailScreenFromServer(
                     ) {
                         DropdownMenuItem(onClick = {
                             isDropMenuForDetailPhoto= false
+                            CoroutineScope(Dispatchers.IO).launch {
+                                if (token != null) {
+                                    getImageById(context = context, token = token, photo_id = syncedPhotos[pagerState.currentPage]!!.id)
+                                }
+                            }
+
                         }) {
                             Text(text = "원본 사진 다운로드")
                         }

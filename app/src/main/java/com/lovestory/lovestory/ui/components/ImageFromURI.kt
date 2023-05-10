@@ -10,6 +10,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Icon
 import androidx.compose.runtime.*
@@ -18,9 +19,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.hapticfeedback.HapticFeedback
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
@@ -53,7 +58,8 @@ fun ThumbnailOfPhotoFromServer(
     token: String,
     photo: SyncedPhoto,
     navHostController: NavHostController,
-    syncedPhotoView : SyncedPhotoView
+    syncedPhotoView : SyncedPhotoView,
+    isPressedPhotoMode : MutableState<Boolean>
 ) {
     val context = LocalContext.current
     val bitmap = remember { mutableStateOf<Bitmap?>(null) }
@@ -82,7 +88,7 @@ fun ThumbnailOfPhotoFromServer(
     }
 
     AnimatedVisibility (bitmap.value != null, enter = fadeIn(), exit = fadeOut()) {
-        DisplayImageFromBitmap(index, bitmap.value!!, navHostController=navHostController, photoId = photo.id, photoIndex = indexForDetail)
+        DisplayImageFromBitmap(index, bitmap.value!!, navHostController=navHostController, photoId = photo.id, photoIndex = indexForDetail, isPressedPhotoMode = isPressedPhotoMode)
     }
     AnimatedVisibility(bitmap.value== null, enter = fadeIn(), exit = fadeOut()) {
         val screenWidth = LocalConfiguration.current.screenWidthDp.dp
@@ -96,24 +102,90 @@ fun ThumbnailOfPhotoFromServer(
 }
 
 @Composable
-fun DisplayImageFromBitmap(index: Int, bitmap: Bitmap, navHostController: NavHostController, photoId: String, photoIndex : MutableState<Int>) {
+fun DisplayImageFromBitmap(index: Int, bitmap: Bitmap, navHostController: NavHostController, photoId: String, photoIndex : MutableState<Int>, isPressedPhotoMode : MutableState<Boolean>) {
+    val checked = remember {
+        mutableStateOf(false)
+    }
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
     val imageWidth = screenWidth / 3
 
-    Image(
-        bitmap = bitmap.asImageBitmap(),
-        contentDescription = null,
-        modifier = Modifier
-            .width(imageWidth)
-            .aspectRatio(1f)
-            .padding(2.dp)
-            .clickable {
-                navHostController.navigate(GalleryStack.DetailPhotoFromServer.route + "/${photoIndex.value}") {
-                    popUpTo(GalleryStack.PhotoSync.route)
+    val haptic = LocalHapticFeedback.current
+
+    Box{
+        Image(
+            bitmap = bitmap.asImageBitmap(),
+            contentDescription = null,
+            modifier = Modifier
+                .width(imageWidth)
+                .aspectRatio(1f)
+                .padding(2.dp)
+                .clickable {
+                    navHostController.navigate(GalleryStack.DetailPhotoFromServer.route + "/${photoIndex.value}") {
+                        popUpTo(GalleryStack.PhotoSync.route)
+                    }
                 }
-            },
-        contentScale = ContentScale.Crop,
-    )
+                .pointerInput(Unit) {
+                    detectTapGestures(onLongPress = {
+                        isPressedPhotoMode.value = true
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    })
+                },
+            contentScale = ContentScale.Crop,
+        )
+        AnimatedVisibility(visible = isPressedPhotoMode.value, enter = fadeIn(), exit = fadeOut()) {
+            AnimatedVisibility(checked.value, enter = fadeIn(), exit = fadeOut()){
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .background(Color(0x88DFA8A8))
+                        .width(imageWidth)
+                        .aspectRatio(1f)
+                        .padding(2.dp),
+//                .border(width = 2.dp, color = borderColor)
+                ){}
+            }
+            AnimatedVisibility(checked.value, enter = fadeIn(), exit = fadeOut(),
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(end = 5.dp, top = 5.dp))
+            {
+                Box(modifier = Modifier
+                    .width(35.dp)
+                    .height(35.dp)
+                    .clickable {checked.value = false },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.baseline_check_circle_24),
+                        contentDescription = null,
+                        tint = Color(0xFFF8B0B0),
+                    )
+                }
+            }
+            AnimatedVisibility(!checked.value, enter = fadeIn(), exit = fadeOut(),
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(end = 5.dp, top = 5.dp))
+            {
+                Box(modifier = Modifier
+                    .width(35.dp)
+                    .height(35.dp)
+                    .clickable { checked.value = true },
+                    contentAlignment = Alignment.Center
+                ){
+                    Icon(
+                        painter = painterResource(id = R.drawable.baseline_check_circle_outline_24),
+                        contentDescription = null,
+                        tint = Color(0xFF6B6B6B),
+                        modifier = Modifier
+                    )
+                }
+
+            }
+        }
+
+    }
 }
 
 @Composable
@@ -192,7 +264,6 @@ fun CheckableDisplayImageFromUri(navHostController :NavHostController,index : In
                     modifier = Modifier
                 )
             }
-
         }
     }
 }

@@ -27,6 +27,8 @@ class SyncedPhotoView(application:Application): ViewModel() {
 
     lateinit var daySyncedPhotosByDate : LiveData<Map<String, List<SyncedPhoto>>>
 
+    lateinit var checkedSyncedPhotosList : LiveData<Map<String, List<Boolean>>>
+
     private val _syncedPhoto = MutableLiveData<SyncedPhoto?>()
     val syncedPhoto: LiveData<SyncedPhoto?> = _syncedPhoto
 
@@ -42,6 +44,10 @@ class SyncedPhotoView(application:Application): ViewModel() {
 
         groupedSyncedPhotosByDate = Transformations.map(listOfSyncPhotos) { syncedPhotos ->
             syncedPhotos.groupBy { it.date.substring(0, 10) }
+        }
+
+        checkedSyncedPhotosList = Transformations.map(listOfSyncPhotos){syncedPhotos ->
+            syncedPhotos.groupBy { it.date.substring(0, 10) }.mapValues { entry ->  entry.value.map{false}}
         }
 
         syncedPhotosByDateAndArea = Transformations.map(listOfSyncPhotos){syncedPhotos->
