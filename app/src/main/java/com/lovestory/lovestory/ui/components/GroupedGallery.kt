@@ -27,7 +27,8 @@ fun GroupedGallery(
     allPhotoListState: LazyListState,
     syncedPhotoView : SyncedPhotoView,
     isPressedPhotoMode : MutableState<Boolean>,
-    listOfSelectedPhoto : MutableSet<String>
+    listOfSelectedPhoto :  MutableState<MutableSet<String>>
+
 ){
 
     LazyColumn(

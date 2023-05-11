@@ -28,8 +28,10 @@ suspend fun checkExistNeedPhotoForSync(context : Context){
             repository = SyncedPhotoRepository(photoDao)
 
             val syncedPhotos = repository.listOfGetAllSyncedPhoto()
+            Log.d("MODULE-checkExistNeedPhotoForSync", "$syncedPhotos")
 
             val serverPhotosIdList = response.body()!!.map{it.local_id}
+            Log.d("MODULE-checkExistNeedPhotoForSync", "$serverPhotosIdList")
 
             deleteNotExistingIdsInServerList(syncedPhotos = syncedPhotos, repository=repository, serverIdList = serverPhotosIdList)
 
@@ -46,7 +48,7 @@ suspend fun checkExistNeedPhotoForSync(context : Context){
 suspend fun deleteNotExistingIdsInServerList(syncedPhotos: List<SyncedPhoto>,repository: SyncedPhotoRepository ,serverIdList: List<String>) {
 
     val notExistingIdsInServer = syncedPhotos.filter { syncedPhoto -> syncedPhoto.id !in serverIdList }
-
+    Log.d("MODULE-checkExistNeedPhotoForSync", "$notExistingIdsInServer")
     for (syncedPhoto in notExistingIdsInServer) {
         repository.deleteSyncedPhoto(syncedPhoto)
     }
@@ -55,7 +57,7 @@ suspend fun deleteNotExistingIdsInServerList(syncedPhotos: List<SyncedPhoto>,rep
 suspend fun syncLocalDatabaseWithServer(serverSyncedPhotos : List<PhotoInfo>, repository: SyncedPhotoRepository, localPhotosIdList : List<String>) {
 
     val newSyncedPhotosFromServer = serverSyncedPhotos.filter { serverSyncedPhoto -> serverSyncedPhoto.local_id !in localPhotosIdList }
-
+    Log.d("MODULE-checkExistNeedPhotoForSync", "$newSyncedPhotosFromServer")
     val newLocalSyncedPhotos = newSyncedPhotosFromServer.map { serverSyncedPhoto ->
         SyncedPhoto(
             id = serverSyncedPhoto.local_id,

@@ -1,6 +1,5 @@
 package com.lovestory.lovestory.ui.screens
 
-import android.os.Vibrator
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -39,24 +38,15 @@ import java.time.LocalDate
 
 @Composable
 fun GalleryScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhotoView) {
-//    val syncedPhotos by syncedPhotoView.listOfSyncPhotos.observeAsState(initial = listOf())
-//    val daySyncedPhoto by syncedPhotoView.dayListOfSyncedPhotos.observeAsState(initial = listOf())
     val syncedPhotosByDate by syncedPhotoView.groupedSyncedPhotosByDate.observeAsState(initial = mapOf())
     val daySyncedPhotosByDate by syncedPhotoView.daySyncedPhotosByDate.observeAsState(initial = mapOf())
     val monthSyncedPhotosByDate by syncedPhotoView.monthListOfSyncedPhotos.observeAsState(initial = listOf())
     val yearSyncedPhotosByDate by syncedPhotoView.yearListOfSyncedPhotos.observeAsState(initial = listOf())
-
-//    val syncedPhotosByDateAndArea by syncedPhotoView.syncedPhotosByDateAndArea.observeAsState(initial = mapOf())
-
     val sizesOfInnerElements by syncedPhotoView.sizesOfInnerElements.observeAsState(initial = listOf())
-
     val cumOfSizeOfInnerElements by syncedPhotoView.cumOfSizeOfInnerElements.observeAsState(initial = syncedPhotoView.computeCumulativeSizes(sizesOfInnerElements))
 
-//    val listOfSelectedPhoto : MutableSet<String> = remember {
-//        mutableSetOf()
-//    }
-
-    val listOfSelectedPhoto = remember{ mutableStateOf<MutableSet<String>>(mutableSetOf()) }
+//    val selectedPhotosSet by syncedPhotoView.selectedPhotosSet
+//    val listOfSelectedPhoto = remember{ mutableStateOf<MutableSet<String>>(mutableSetOf()) }
 
     val systemUiController = rememberSystemUiController()
 
@@ -78,6 +68,10 @@ fun GalleryScreen(navHostController: NavHostController, syncedPhotoView : Synced
     val items = listOf<String>(
         "년", "월", "일", "전체"
     )
+
+    LaunchedEffect(null){
+        syncedPhotoView.selectedPhotosSet.value = mutableSetOf()
+    }
 
     SideEffect {
         systemUiController.setSystemBarsColor(
@@ -102,13 +96,11 @@ fun GalleryScreen(navHostController: NavHostController, syncedPhotoView : Synced
                 allPhotoListState = allPhotoListState,
                 syncedPhotoView = syncedPhotoView,
                 isPressedPhotoMode = isPressedPhotoMode,
-                listOfSelectedPhoto = listOfSelectedPhoto.value
+                listOfSelectedPhoto = syncedPhotoView.selectedPhotosSet
             )
         }
 
-        AnimatedVisibility(visible = selectedButton =="일",
-//            enter = fadeIn(), exit = fadeOut()
-        ) {
+        AnimatedVisibility(visible = selectedButton =="일") {
             DayGroupedGallery(
                 daySyncedPhotoByDate = daySyncedPhotosByDate,
                 token = token,
@@ -232,23 +224,22 @@ fun GalleryScreen(navHostController: NavHostController, syncedPhotoView : Synced
                                 fontSize = 18.sp,
                                 fontWeight = FontWeight.Bold,
                                 modifier = Modifier.clickable {
-                                    listOfSelectedPhoto.value.clear()
+                                    syncedPhotoView.clearSelectedPhotosSet()
                                     isPressedPhotoMode.value = false
                                 }
                             )
                         }
                         Box() {
-                            val countSelected = listOfSelectedPhoto.value.size
                             Text(
-                                text = "${countSelected}장 삭제",
+                                text = "${syncedPhotoView.selectedPhotosSet.value.size}장 삭제",
                                 fontSize = 18.sp,
                                 color = Color.Red,
                                 fontWeight = FontWeight.Bold,
                                 modifier = Modifier.clickable {
                                     CoroutineScope(Dispatchers.IO).launch{
-                                        deletePhotosByIds(context, listOfSelectedPhoto.value)
+                                        deletePhotosByIds(context, syncedPhotoView)
+                                        isPressedPhotoMode.value = false
                                         withContext(Dispatchers.Main) {
-                                            isPressedPhotoMode.value = false
                                             Toast.makeText(context, "사진 삭제 되었습니다.", Toast.LENGTH_SHORT).show()
                                         }
                                     }

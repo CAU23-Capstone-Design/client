@@ -60,7 +60,7 @@ fun ThumbnailOfPhotoFromServer(
     navHostController: NavHostController,
     syncedPhotoView : SyncedPhotoView,
     isPressedPhotoMode : MutableState<Boolean>,
-    listOfSelectedPhoto : MutableSet<String>
+    listOfSelectedPhoto :  MutableState<MutableSet<String>>
 ) {
     val context = LocalContext.current
     val bitmap = remember { mutableStateOf<Bitmap?>(null) }
@@ -95,6 +95,7 @@ fun ThumbnailOfPhotoFromServer(
             bitmap.value!!,
             navHostController=navHostController,
             photo = photo,
+            syncedPhotoView = syncedPhotoView,
             photoIndex = indexForDetail,
             isPressedPhotoMode = isPressedPhotoMode,
             listOfSelectedPhoto = listOfSelectedPhoto
@@ -118,9 +119,10 @@ fun DisplayImageFromBitmap(
     navHostController:
     NavHostController,
     photo: SyncedPhoto,
+    syncedPhotoView : SyncedPhotoView,
     photoIndex : MutableState<Int>,
     isPressedPhotoMode : MutableState<Boolean>,
-    listOfSelectedPhoto : MutableSet<String>
+    listOfSelectedPhoto :  MutableState<MutableSet<String>>
 ) {
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
     val imageWidth = screenWidth / 3
@@ -128,11 +130,11 @@ fun DisplayImageFromBitmap(
     val haptic = LocalHapticFeedback.current
 
     val checked = remember {
-        mutableStateOf(listOfSelectedPhoto.contains(photo.id))
+        mutableStateOf(listOfSelectedPhoto.value.contains(photo.id))
     }
 
     LaunchedEffect(key1 = listOfSelectedPhoto){
-        checked.value = listOfSelectedPhoto.contains(photo.id)
+        checked.value = listOfSelectedPhoto.value.contains(photo.id)
     }
 
     LaunchedEffect(key1 = isPressedPhotoMode.value){
@@ -165,22 +167,34 @@ fun DisplayImageFromBitmap(
                             } else {
                                 Log.d(
                                     "[COMPONENT] ImageFromBitmap",
-                                    "contain in set  : ${listOfSelectedPhoto.contains(photo.id)}"
+                                    "contain in set  : ${listOfSelectedPhoto.value.contains(photo.id)}"
                                 )
-                                if (listOfSelectedPhoto.contains(photo.id)) {
+                                Log.d(
+                                    "[COMPONENT] ImageFromBitmap",
+                                    "contain in set  : ${photo.id}"
+                                )
+                                if (listOfSelectedPhoto.value.contains(photo.id)) {
                                     Log.d(
                                         "[COMPONENT] ImageFromBitmap",
                                         "checked $checked"
                                     )
                                     checked.value = false
-                                    listOfSelectedPhoto.remove(photo.id)
+                                    syncedPhotoView.removeSelectedPhotosSet(photo.id)
+//                                    listOfSelectedPhoto.value.remove(photo.id)
+                                    for (id in listOfSelectedPhoto.value) {
+                                        Log.d("[COMPONENT] ImageFromBitmap", "[$id]")
+                                    }
                                 } else {
                                     Log.d(
                                         "[COMPONENT] ImageFromBitmap",
                                         "checked  $checked"
                                     )
                                     checked.value = true
-                                    listOfSelectedPhoto.add(photo.id)
+//                                    listOfSelectedPhoto.value.add(photo.id)
+                                    syncedPhotoView.addSelectedPhotosSet(photo.id)
+                                    for (id in listOfSelectedPhoto.value) {
+                                        Log.d("[COMPONENT] ImageFromBitmap", "$id")
+                                    }
                                 }
                             }
                         }
@@ -244,16 +258,19 @@ fun DisplayImageFromBitmap(
 fun CheckableDisplayImageFromUri(navHostController :NavHostController,index : Int, checked : Boolean, imageInfo: PhotoForSync, onChangeChecked : (Int)->Unit) {
     val borderColor = if (checked) Color(0xFFEEC9C9) else Color.Transparent
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
-    val imageWidth = screenWidth / 3 - 4.dp
+    val imageWidth = screenWidth / 3
+
+    val painter = rememberAsyncImagePainter(
+    ImageRequest
+        .Builder(LocalContext.current)
+        .data(data = imageInfo.imageUrl)
+        .build()
+    )
+
 
     Box{
         Image(
-            painter = rememberAsyncImagePainter(
-                ImageRequest
-                    .Builder(LocalContext.current)
-                    .data(data = imageInfo.imageUrl)
-                    .build()
-            ),
+            painter = painter,
             contentDescription = null,
             modifier = Modifier
                 .width(imageWidth)
@@ -318,28 +335,4 @@ fun CheckableDisplayImageFromUri(navHostController :NavHostController,index : In
             }
         }
     }
-}
-
-@Composable
-fun DisplayImageFromUri(index : Int, imageUri: String) {
-    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
-    val imageWidth = screenWidth / 3 - 10.dp
-
-    Image(
-        painter = rememberAsyncImagePainter(
-            ImageRequest
-                .Builder(LocalContext.current)
-                .data(data = imageUri)
-                .build()
-        ),
-        contentDescription = null,
-        modifier = Modifier
-//            .height(imageWidth)
-            .width(imageWidth)
-            .aspectRatio(1f)
-            .padding(2.dp)
-//            .clip(RoundedCornerShape(10.dp))
-        ,
-        contentScale = ContentScale.Crop
-    )
 }

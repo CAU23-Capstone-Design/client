@@ -42,5 +42,5 @@ interface PhotoService{
 
     @Headers("Content-Type: application/json")
     @DELETE("/images/{local_id}")
-    suspend fun deletePhotoById(@Header("Authorization") jwtToken : String, @Path("local_id") localId: String) : Response<ResponseBody>
+    suspend fun deletePhotoById(@Header("Authorization") jwtToken: String, @Path("local_id") localId: String) : Response<ResponseBody>
 }

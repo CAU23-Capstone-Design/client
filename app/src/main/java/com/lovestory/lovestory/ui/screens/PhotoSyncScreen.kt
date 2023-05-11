@@ -145,8 +145,8 @@ fun PhotoSyncScreen(navHostController: NavHostController, photoForSyncView: Phot
         LazyVerticalGrid(
             columns = GridCells.Fixed(3),
             modifier = Modifier
-                .padding(start = 4.dp, end = 4.dp, top = 65.dp, bottom = 10.dp)
                 .fillMaxSize(),
+            contentPadding = PaddingValues(top = 65.dp, bottom = 65.dp)
         ) {
             items(notSyncedPhotos.size) { index ->
                 if (index < notSyncedPhotos.size && index < photoForSyncView.checkPhotoList.value.size){
@@ -230,6 +230,7 @@ fun PhotoSyncScreen(navHostController: NavHostController, photoForSyncView: Phot
                                     showUploadPhotoDialog.value = false
                                     Toast.makeText(context, "${sendPhotos.size}개의 사진을 업로드 했습니다.", Toast.LENGTH_SHORT).show()
                                     Log.d("PhotoSyncScreen", "notSyncedPhotos.value) :  ${notSyncedPhotos.size}")
+                                    numOfCurrentUploadedPhoto.value = 0
                                     if(notSyncedPhotos.size == 1){
                                         navHostController.popBackStack()
                                     }

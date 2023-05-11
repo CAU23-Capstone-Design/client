@@ -110,9 +110,12 @@ suspend fun getDetailById(token: String, photo_id : String, quality : Int): Resp
 suspend fun deletePhotoById(token: String, photo_id : String):Response<ResponseBody>{
     val jwt : String = "Bearer $token"
     val apiService: PhotoService = createApiService()
+    Log.d("[MODULE] deletePhotoById", "$photo_id will deleted")
 
     return try{
-        apiService.deletePhotoById(jwt, photo_id)
+        val result = apiService.deletePhotoById(jwt, photo_id)
+        Log.d("[MODULE] deletePhotoById", "$result")
+        result
     }catch (e: HttpException){
         Log.e("NETWORK-deletePhotoById", "$e")
         Response.error(e.code(), e.response()?.errorBody())

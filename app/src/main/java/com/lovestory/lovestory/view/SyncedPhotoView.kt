@@ -2,6 +2,7 @@ package com.lovestory.lovestory.view
 
 import android.app.Application
 import android.util.Log
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
@@ -34,6 +35,8 @@ class SyncedPhotoView(application:Application): ViewModel() {
 
 //    var listOfSelectedPhotos = MutableLiveData<Set<String>>(setOf())
 //    val listOfSelectedPhoto : LiveData<Set<String>> = _listOfSelectedPhotos
+
+    var selectedPhotosSet = mutableStateOf( mutableSetOf<String>())
 
     init {
         val photoDatabase = PhotoDatabase.getDatabase(application)
@@ -100,18 +103,19 @@ class SyncedPhotoView(application:Application): ViewModel() {
         return listOfSyncPhotos.value!!.indexOf(photo)
     }
 
-//    fun addListOfSelectedPhotos(id : String){
-//        Log.d("[VIEW] SyncedPhotoView", "id : $id added")
-//        listOfSelectedPhotos.value?.toMutableSet()?.apply { add(id) }
-//        Log.d("[VIEW] SyncedPhotoView", "${listOfSelectedPhotos.value}")
-//    }
-//    fun removeListOfSelectedPhotos(id : String){
-//        Log.d("[VIEW] SyncedPhotoView", "id : $id removed")
-//        listOfSelectedPhotos.value?.toMutableSet()?.apply { remove(id) }
-//        Log.d("[VIEW] SyncedPhotoView", "${listOfSelectedPhotos.value}")
-//    }
-//
-//    fun checkListOfSelectedPhotos(id : String): Boolean? {
-//        return listOfSelectedPhotos.value?.contains(id)
-//    }
+    fun addSelectedPhotosSet(id : String){
+        selectedPhotosSet.value.add(id)
+    }
+
+    fun removeSelectedPhotosSet(id : String){
+        selectedPhotosSet.value.remove(id)
+    }
+
+    fun isExistSelectedPhotosSetById(id :String):Boolean{
+        return selectedPhotosSet.value.contains(id)
+    }
+
+    fun clearSelectedPhotosSet(){
+        selectedPhotosSet.value.clear()
+    }
 }
