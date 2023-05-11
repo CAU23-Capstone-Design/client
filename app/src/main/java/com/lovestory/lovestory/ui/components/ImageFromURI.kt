@@ -11,6 +11,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -25,6 +26,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
@@ -44,6 +46,15 @@ fun Skeleton(modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
             .background(Color.LightGray)
+            .animateContentSize()
+    )
+}
+
+@Composable
+fun SkeletonPopup(modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .background(Color.LightGray, RoundedCornerShape(12.dp))
             .animateContentSize()
     )
 }
@@ -86,7 +97,7 @@ fun ThumbnailOfPhotoFromServer(
         val screenWidth = LocalConfiguration.current.screenWidthDp.dp
         val imageWidth = (screenWidth / 3)
 //        Log.d("image width", "$imageWidth")
-        Skeleton(modifier = Modifier
+        SkeletonPopup(modifier = Modifier
             .width(imageWidth)
             .aspectRatio(1f)
             .padding(2.dp))
@@ -115,6 +126,73 @@ fun DisplayImageFromBitmap(index: Int, bitmap: Bitmap, navHostController: NavHos
 }
 
 @Composable
+fun ThumbnailOfPhotoFromServerPopup(
+    index: Int,
+    token: String,
+    photoId: String,
+    navHostController: NavHostController,
+    widthDp: Dp
+) {
+    val context = LocalContext.current
+    val bitmap = remember { mutableStateOf<Bitmap?>(null) }
+    val cacheKey = "thumbnail_$photoId"
+
+    LaunchedEffect(photoId) {
+        val cachedBitmap = loadBitmapFromDiskCache(context, cacheKey)
+        if (cachedBitmap != null) {
+//            Log.d("Thumbnail","cache에서 로드")
+            bitmap.value = cachedBitmap
+        } else {
+            val getResult = getThumbnailForPhoto(token, photoId)
+            if(getResult != null){
+                saveBitmapToDiskCache(context, getResult, cacheKey)
+                bitmap.value = getResult
+//                Log.d("Thumbnail","서버에서 로드")
+            }
+            else{
+                Log.d("COMPONENT-ThumbnailOfPhotoFromServer", "Error in transfer bitmap")
+            }
+        }
+    }
+
+    AnimatedVisibility (bitmap.value != null, enter = fadeIn(), exit = fadeOut()) {
+        DisplayImageFromBitmapPopup(index, bitmap.value!!, navHostController=navHostController, photoId = photoId, widthDp = widthDp)
+    }
+    AnimatedVisibility(bitmap.value== null, enter = fadeIn(), exit = fadeOut()) {
+        val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+        val imageWidth = (320.dp) / 3
+//        Log.d("image width", "$imageWidth")
+        SkeletonPopup(modifier = Modifier
+            .width(imageWidth)
+            .aspectRatio(1f)
+            .padding(2.dp))
+    }
+}
+
+@Composable
+fun DisplayImageFromBitmapPopup(index: Int, bitmap: Bitmap, navHostController: NavHostController, photoId: String, widthDp: Dp) {
+    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+    val imageWidth = (320.dp) / 3
+
+    Image(
+        bitmap = bitmap.asImageBitmap(),
+        contentDescription = null,
+        modifier = Modifier
+            .width(imageWidth)
+            .aspectRatio(1f)
+            .padding(2.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .clickable {
+                navHostController.navigate(GalleryStack.DetailPhotoFromServer.route+"/$photoId") {
+                    popUpTo(GalleryStack.PhotoSync.route)
+                }
+            },
+
+        contentScale = ContentScale.Crop,
+    )
+}
+
+@Composable
 fun CheckableDisplayImageFromUri(navHostController :NavHostController,index : Int, checked : Boolean, imageUri: String, onChangeChecked : (Int)->Unit) {
     val borderColor = if (checked) Color(0xFFEEC9C9) else Color.Transparent
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
@@ -126,6 +204,7 @@ fun CheckableDisplayImageFromUri(navHostController :NavHostController,index : In
                 ImageRequest
                     .Builder(LocalContext.current)
                     .data(data = imageUri)
+
                     .build()
             ),
             contentDescription = null,

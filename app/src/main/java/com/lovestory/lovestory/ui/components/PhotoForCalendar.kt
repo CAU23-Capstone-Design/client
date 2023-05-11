@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -25,10 +26,11 @@ fun PhotoForCalendar(
     token: String?,
     navHostController: NavHostController,
     allPhotoListState: LazyListState,
+    widthDp: Dp
 ){
     LazyColumn(
-        modifier = Modifier.padding(bottom = 70.dp).fillMaxWidth(),
-        contentPadding = PaddingValues(bottom = 100.dp),
+        modifier = Modifier.fillMaxWidth(),
+        //contentPadding = PaddingValues(bottom = 10.dp),
         state = allPhotoListState
     ){
         syncedPhotosByDate.forEach{(date, photos)->
@@ -44,11 +46,12 @@ fun PhotoForCalendar(
                             Box(
                                 modifier = Modifier.fillMaxHeight().background(color = Color.Transparent, RoundedCornerShape(12.dp))
                             ) {
-                                ThumbnailOfPhotoFromServer(
+                                ThumbnailOfPhotoFromServerPopup(
                                     index = photos.indexOf(photo),
                                     token = token,
                                     photoId = photo.id,
-                                    navHostController = navHostController
+                                    navHostController = navHostController,
+                                    widthDp = widthDp
                                 )
                             }
                         }
