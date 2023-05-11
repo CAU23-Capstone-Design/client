@@ -24,15 +24,6 @@ android {
         vectorDrawables {
             useSupportLibrary true
         }
-
-        javaCompileOptions {
-            annotationProcessorOptions {
-                arguments += [
-                        "room.schemaLocation":"$projectDir/schemas".toString(),
-                        "room.incremental":"true"
-                ]
-            }
-        }
     }
 
     buildTypes {
@@ -44,9 +35,6 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
-
-        // Enable support for the new language APIs
-        coreLibraryDesugaringEnabled true
     }
     kotlinOptions {
         jvmTarget = '1.8'
@@ -71,7 +59,6 @@ android {
 
 
 dependencies {
-    implementation 'com.google.android.gms:play-services-maps:18.1.0'
     def nav_version = "2.5.3"
     def sheet_version = "1.1.1"
     def room_version = "2.5.0"
@@ -174,15 +161,10 @@ dependencies {
     //shared preference convert gson
     implementation 'com.google.code.gson:gson:2.8.7'
 
-    implementation "androidx.lifecycle:lifecycle-runtime-ktx:<version>"
-
     //google map utilities (marker clustering)
     implementation 'com.google.maps.android:android-maps-utils:2.2.0'
 
     implementation 'com.google.maps.android:maps-compose:2.11.2'
-
-    // Make sure to also include the latest version of the Maps SDK for Android
-    implementation 'com.google.android.gms:play-services-maps:18.0.2'
 
     // Optionally, you can include the Compose utils library for Clustering, etc.
     implementation 'com.google.maps.android:maps-compose-utils:2.11.2'

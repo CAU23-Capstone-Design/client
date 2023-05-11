@@ -1,50 +1,30 @@
 package com.lovestory.lovestory.ui.screens
 
-import android.annotation.SuppressLint
-import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
-import android.graphics.drawable.Drawable
 import android.net.Uri
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
-import android.view.View
-import android.widget.ImageView
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.UiComposable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.*
-import com.google.maps.android.clustering.Cluster
 import com.google.maps.android.clustering.ClusterItem
-import com.google.maps.android.clustering.ClusterManager
-import com.google.maps.android.clustering.view.DefaultClusterRenderer
 import com.google.maps.android.compose.*
-import com.google.maps.android.ui.IconGenerator
-import com.lovestory.lovestory.model.averageLatLng
-import com.lovestory.lovestory.model.points1
 import com.lovestory.lovestory.ui.components.CustomMarker
 import com.lovestory.lovestory.ui.theme.LoveStoryTheme
-import kotlinx.coroutines.android.awaitFrame
-import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.launch
 import com.google.maps.android.compose.clustering.Clustering
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
@@ -53,7 +33,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
@@ -64,276 +43,187 @@ import androidx.core.content.ContextCompat
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.lovestory.lovestory.R
+import com.lovestory.lovestory.database.PhotoDatabase
+import com.lovestory.lovestory.database.repository.SyncedPhotoRepository
+import com.lovestory.lovestory.model.*
+import com.lovestory.lovestory.module.getToken
+import com.lovestory.lovestory.module.photo.getThumbnailForPhoto
+import com.lovestory.lovestory.network.getGps
+import com.lovestory.lovestory.network.getPhotoTable
 import com.lovestory.lovestory.ui.components.toInt
-import java.io.File
 
 
 @OptIn(MapsComposeExperimentalApi::class)
 @Composable
-fun MapScreen(navHostController: NavHostController){
+fun MapScreen(navHostController: NavHostController, date: String){
+    val context = LocalContext.current
+    val token = getToken(context)
+    val dataLoaded = remember { mutableStateOf(false) }
+    var latLng by remember { mutableStateOf(emptyList<LatLng>()) }
+    val items = remember{ mutableStateListOf<MyItem>() }
+    val items_google = remember{ mutableStateListOf<MyItem>() }
+    var viewPosition = LatLng(37.503735330931136, 126.95615523253305)
+    var cameraPositionState = rememberCameraPositionState {
+        position = CameraPosition.fromLatLngZoom(viewPosition!!, 18f)
+    }
+    lateinit var repository : SyncedPhotoRepository
+    var photoDate by remember { mutableStateOf(emptyList<String>()) }
+    var photoPosition by remember { mutableStateOf(emptyList<LatLng>()) }
+
+    val drawable1 = ContextCompat.getDrawable(context, R.drawable.img)
+    val bitmap1 = (drawable1 as BitmapDrawable).bitmap
+
+    LaunchedEffect(true){
+        //get GPS
+        val gps = getGps(token!!, date)
+        latLng = if (gps.body() != null) {
+            getLatLng(gps.body()!!)
+        }else{
+            val position = mutableListOf<LatLng>()
+            position.add(LatLng(37.503735330931136, 126.95615523253305))
+            position
+        }
+
+        val response = getPhotoTable(token!!)
+
+        if(response.isSuccessful) {
+            val photoDatabase = PhotoDatabase.getDatabase(context)
+            val photoDao = photoDatabase.syncedPhotoDao()
+            repository = SyncedPhotoRepository(photoDao)
+
+            val syncedPhoto = repository.getSyncedPhotosByDate(date)
+
+            photoDate = syncedPhoto.map{
+                it.date
+            }
+            photoPosition = syncedPhoto.map { it ->
+                LatLng(it.latitude, it.longitude)
+            }
+
+            syncedPhoto.forEach{
+                items.add(MyItem(LatLng(it.latitude, it.longitude), "Marker1", "사진",
+                    getThumbnailForPhoto(token!!, it.id)!!))
+            }
+        }
+
+        //사진 좌표와 비트맵
+        latLng.forEach{
+            items.add(MyItem(it,"Marker2","마커", bitmap1))
+        }
+        items.forEach{
+            Log.d("아이템 정보","$it")
+        }
+
+        dataLoaded.value = true
+    }
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        val viewPosition = averageLatLng(points1)
-        val cameraPositionState = rememberCameraPositionState {
-            position = CameraPosition.fromLatLngZoom(viewPosition!!, 18f)
-        }
-        val items = remember{ mutableStateListOf<MyItem>() }
-        //LaunchedEffect(true){
-        points1.forEach{ latLng ->
-            items.add(MyItem(latLng,"Marker","Snippet", CustomMarker(Uri.parse("file:///storage/emulated/0/DCIM/Camera/20230424_194354.jpg"))))
-        }
-        //}
+//        if (!dataLoaded.value) {
+//            //스켈레톤 추가
+//            Box(modifier = Modifier.fillMaxSize().background(color = Color.Transparent))
+//        } else {
+            viewPosition = averageLatLng(latLng)
+            cameraPositionState = CameraPositionState(position = CameraPosition.fromLatLngZoom(viewPosition, 15f))
 
-        GoogleMap(
-            modifier = Modifier.fillMaxSize(),
-            cameraPositionState = cameraPositionState,
-        ) {
-            val context = LocalContext.current
+            val zoomLevel = getZoomLevelForDistance(getMaxDistanceBetweenLatLng(viewPosition, latLng)) - 1
+            cameraPositionState = remember { CameraPositionState(position = CameraPosition.fromLatLngZoom(viewPosition, zoomLevel)) }
 
-            Clustering(
-                items = items,
-                // Optional: Handle clicks on clusters, cluster items, and cluster item info windows
-                onClusterClick = {
-                    Log.d("TAG", "Cluster clicked! $it") // 클러스터 클릭했을 때
-                    false
-                },
-                onClusterItemClick = {
-                    Log.d("TAG", "Cluster item clicked! $it") // 클러스팅 되지 않은 마커 클릭했을 때
-                    false
-                },
-                onClusterItemInfoWindowClick = {
-                    Log.d("TAG", "Cluster item info window clicked! $it") // 클러스팅 되지 않은 마커의 정보창을 클릭했을 때
-                },
-                // Optional: Custom rendering for clusters
-                clusterContent = { cluster ->
-                    Log.d("클러스터","${cluster.items.first().icon}")
-                    val drawable = ContextCompat.getDrawable(context, R.drawable.img)
-                    val bitmap = (drawable as BitmapDrawable).bitmap
-                    val size = 50.dp
-                    val scaledBitmap = bitmap?.let {
-                        val density = LocalDensity.current.density
-                        val scaledSize = (size * density).toInt()
-                        Bitmap.createScaledBitmap(it, scaledSize, scaledSize, false)
-                    }!!.asImageBitmap()
-//
-//                    val icon = bitmapDescriptor(
-//                        context, R.drawable.img
-//                    )
-//                    val clusterPositionState = rememberMarkerState(position = cluster.position)
-//                    Marker(
-//                        state = clusterPositionState,
-//                        icon = icon
-//                    )
-//                    Image(
-//                        bitmap = scaledBitmap,
-//                        contentDescription = "Marker Image",
-//                        modifier = Modifier.size(40.dp)
-//                    )
-                    Surface(
-                        //Modifier.size(40.dp),
-                        //shape = RectangleShape,
-                        //color = Color.Blue,
-                        shape = RoundedCornerShape(percent = 10),
-                        contentColor = Color.White,
-                        border = BorderStroke(1.dp, Color.White),
-                        elevation = 10.dp
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Image(
-                                bitmap = scaledBitmap,
-                                contentDescription = null,
-                                modifier = Modifier.size(60.dp)
-                            )
-                            Text(
-                                "%,d".format(cluster.size/2), //이 부분 왜 2배로 나오지..?
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Black,
-                                textAlign = TextAlign.Center
-                            )
+//            latLng.forEach{latLng ->
+//                items.add(MyItem(latLng, "Marker","Snippet",bitmap1))
+//            }
+
+            GoogleMap(
+                modifier = Modifier.fillMaxSize(),
+                cameraPositionState = cameraPositionState,
+            ) {
+                Clustering(
+                    items = items,
+                    // Optional: Handle clicks on clusters, cluster items, and cluster item info windows
+                    onClusterClick = {
+                        Log.d("TAG", "Cluster clicked! $it") // 클러스터 클릭했을 때
+                        false
+                    },
+                    onClusterItemClick = {
+                        Log.d("TAG", "Cluster item clicked! $it") // 클러스팅 되지 않은 마커 클릭했을 때
+                        false
+                    },
+                    onClusterItemInfoWindowClick = {
+                        Log.d("TAG", "Cluster item info window clicked! $it") // 클러스팅 되지 않은 마커의 정보창을 클릭했을 때
+                    },
+                    // Optional: Custom rendering for clusters
+                    clusterContent = { cluster ->
+                        Log.d("클러스터","${cluster.size}")
+                        //Log.d("클러스터","${cluster.items.first().icon}")
+//                        val drawable = ContextCompat.getDrawable(context, R.drawable.img)
+//                        val bitmap = (drawable as BitmapDrawable).bitmap
+                        val size = 50.dp
+                        val scaledBitmap = cluster.items.first().icon.let {
+                            val density = LocalDensity.current.density
+                            val scaledSize = (size * density).toInt()
+                            Bitmap.createScaledBitmap(it, scaledSize, scaledSize, false)
+                        }!!.asImageBitmap()
+                        Surface(
+                            shape = RoundedCornerShape(percent = 10),
+                            contentColor = Color.White,
+                            border = BorderStroke(1.dp, Color.White),
+                            elevation = 10.dp
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Image(
+                                    bitmap = scaledBitmap,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(60.dp)
+                                )
+                                Text(
+                                    "%,d".format(cluster.size), //이 부분 왜 2배로 나오지..?
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Black,
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+                        }
+                    },
+                    // Optional: Custom rendering for non-clustered items
+                    clusterItemContent = { item ->
+                        Log.d("아이템", "$item")
+                        val drawable = ContextCompat.getDrawable(context, R.drawable.img)
+                        val bitmap = (drawable as BitmapDrawable).bitmap
+                        val size = 50.dp
+                        val scaledBitmap = item.icon.let {
+                            val density = LocalDensity.current.density
+                            val scaledSize = (size * density).toInt()
+                            Bitmap.createScaledBitmap(it, scaledSize, scaledSize, false)
+                        }!!.asImageBitmap()
+                        Surface(
+                            shape = RoundedCornerShape(percent = 10),
+                            contentColor = Color.White,
+                            border = BorderStroke(1.dp, Color.White),
+                            elevation = 10.dp
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Image(
+                                    bitmap = scaledBitmap,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(60.dp)
+                                )
+                            }
                         }
                     }
-                },
-                // Optional: Custom rendering for non-clustered items
-                clusterItemContent = { item ->
-                    val drawable = ContextCompat.getDrawable(context, R.drawable.img)
-                    val bitmap = (drawable as BitmapDrawable).bitmap
-                    val size = 50.dp
-                    val scaledBitmap = bitmap?.let {
-                        val density = LocalDensity.current.density
-                        val scaledSize = (size * density).toInt()
-                        Bitmap.createScaledBitmap(it, scaledSize, scaledSize, false)
-                    }!!.asImageBitmap()
-                    Surface(
-                        shape = RoundedCornerShape(percent = 10),
-                        contentColor = Color.White,
-                        border = BorderStroke(1.dp, Color.White),
-                        elevation = 10.dp
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Image(
-                                bitmap = scaledBitmap,
-                                contentDescription = null,
-                                modifier = Modifier.size(60.dp)
-                            )
-                        }
-                    }
-
-                } //{ //item ->
-//                    val icon = bitmapDescriptor(
-//                        context, R.drawable.img
-//                    )
-//                    val clusterPositionState = rememberMarkerState(position = item.position)
-////                    Marker(
-//                        state = clusterPositionState,
-//                        icon = icon
-//                    )
-//                }
-            )
-            /*
-            var clusterManager by remember { mutableStateOf<ClusterManager<MyItem>?>(null) }
-            MapEffect(items) { map ->
-                if (clusterManager == null) {
-                    clusterManager = ClusterManager<MyItem>(context, map)
-                }
-                clusterManager?.addItems(items)
-                clusterManager?.renderer = MarkerClusterRender(context,map,clusterManager!!) {
-                    //showToast(it.itemTitle)
-                }
+                )
             }
-            LaunchedEffect(key1 = cameraPositionState.isMoving) {
-                if (!cameraPositionState.isMoving) {
-                    clusterManager?.onCameraIdle()
-                }
-            }
-            */
-
-            //points1.forEach{ latLng ->
-
-            //    val markerPositionState = rememberMarkerState(position = latLng)
-            //    Marker(state = markerPositionState)
-            //}
-
-            //Marker(
-            //    state = markerPositionState,
-            //    icon = CustomMarker(Uri.parse("file:///storage/emulated/0/DCIM/Camera/20230424_194354.jpg")),
-            //    onClick = {
-            //isClicked = true
-            //        navHostController.popBackStack()
-            //       true
-            //    }
-            //)
-            //Polyline(
-            //    points = points1,
-            //    color = Color.Black
-            //)
-        }
+//        }
     }
 }
 
-fun bitmapDescriptor(
-    context: Context,
-    vectorResId: Int
-): BitmapDescriptor? {
-
-    // retrieve the actual drawable
-    val drawable = ContextCompat.getDrawable(context, vectorResId) ?: return null
-    drawable.setBounds(0, 0, drawable.intrinsicWidth, drawable.intrinsicHeight)
-    val bm = Bitmap.createBitmap(
-        drawable.intrinsicWidth,
-        drawable.intrinsicHeight,
-        Bitmap.Config.ARGB_8888
-    )
-
-    // draw it onto the bitmap
-    val canvas = android.graphics.Canvas(bm)
-    drawable.draw(canvas)
-    return BitmapDescriptorFactory.fromBitmap(bm)
-}
-
-class MarkerClusterRender <T : ClusterItem>(
-    var context: Context,
-    var googleMap: GoogleMap,
-    clusterManager: ClusterManager<T>,
-    var onInfoWindowClick: (MyItem) -> Unit
-) :
-    DefaultClusterRenderer<T>(context, googleMap, clusterManager) {
-
-    private var clusterMap: HashMap<String, Marker> = hashMapOf()
-
-    override fun shouldRenderAsCluster(cluster: Cluster<T>): Boolean {
-        return cluster.size > 1
-    }
-
-    override fun getBucket(cluster: Cluster<T>): Int {
-        return cluster.size
-    }
-
-    override fun getClusterText(bucket: Int): String {
-        return super.getClusterText(bucket).replace("+", "")
-    }
-
-    override fun onClusterItemRendered(clusterItem: T, marker: Marker) {
-        super.onClusterItemRendered(clusterItem, marker)
-        clusterMap[(clusterItem as MyItem).itemTitle] = marker
-
-        setMarker((clusterItem as MyItem), marker)
-    }
-
-    @SuppressLint("PotentialBehaviorOverride")
-    private fun setMarker(poi: MyItem, marker: Marker?) {
-        val markerColor = BitmapDescriptorFactory.HUE_RED
-        marker?.let {
-            it.tag = poi
-            it.showInfoWindow()
-            changeMarkerColor(it, markerColor)
-        }
-        googleMap.setOnInfoWindowClickListener {
-            onInfoWindowClick(it.tag as MyItem)
-        }
-    }
-
-    private fun getClusterMarker(itemId: String): Marker? {
-        return if (clusterMap.containsKey(itemId)) clusterMap[itemId]
-        else null
-    }
-
-
-    fun showRouteInfoWindow(key: String) {
-        getClusterMarker(key)?.showInfoWindow()
-    }
-
-    private fun changeMarkerColor(marker: Marker, color: Float) {
-        try {
-            marker.setIcon(BitmapDescriptorFactory.defaultMarker(color));
-        } catch (ex: IllegalArgumentException) {
-            ex.printStackTrace()
-        } catch (ex: Exception) {
-            ex.printStackTrace()
-        }
-    }
-
-}
-/*
-data class CustomClusterItem(
-    val position: LatLng,
-    val title: String?,
-    val snippet: String?
-) : ClusterItem {
-    override fun getPosition(): LatLng = position
-    override fun getTitle(): String? = title
-    override fun getSnippet(): String? = snippet
-}
-
- */
 
 data class MyItem(
     val itemPosition: LatLng,
     val itemTitle: String,
     val itemSnippet: String,
-    val icon: BitmapDescriptor,
+    val icon: Bitmap,
 ) : ClusterItem {
     override fun getPosition(): LatLng =
         itemPosition
@@ -344,9 +234,9 @@ data class MyItem(
     override fun getSnippet(): String =
         itemSnippet
 
-    //fun getIcon(): BitmapDescriptor {
-    //    return icon
-    //}
+//    fun getIcon(): BitmapDescriptor {
+//        return icon
+//    }
 }
 
 @Preview
@@ -354,6 +244,5 @@ data class MyItem(
 fun Preview(){
     val navController = rememberNavController()
     LoveStoryTheme() {
-        MapScreen(navController)
     }
 }

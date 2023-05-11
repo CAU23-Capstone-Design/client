@@ -17,6 +17,10 @@ data class CoupleMemory(val date: LocalDate, var comment: String){
     )
 }
 
+fun dateToString(date: LocalDate): String{
+    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+    return date.format(formatter)
+}
 //data class StringMemory(val date: String, var comment: String)
 
 data class GetMemory(
