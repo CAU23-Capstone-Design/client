@@ -70,22 +70,18 @@ fun MapScreen(navHostController: NavHostController, date: String){
     var photoDate by remember { mutableStateOf(emptyList<String>()) }
     var photoPosition by remember { mutableStateOf(emptyList<LatLng>()) }
 
+    var bitmapList by remember { mutableStateOf(emptyList<Bitmap>()) }
+
     val drawable1 = ContextCompat.getDrawable(context, R.drawable.img)
     val bitmap1 = (drawable1 as BitmapDrawable).bitmap
 
     LaunchedEffect(true){
         //get GPS
         val gps = getGps(token!!, date)
-        latLng = if (gps.body() != null) {
-            getLatLng(gps.body()!!)
-        }else{
-            val position = mutableListOf<LatLng>()
-            position.add(LatLng(37.503735330931136, 126.95615523253305))
-            position
+        if (gps.body() != null) {
+            latLng = getLatLng(gps.body()!!)
         }
-
         val response = getPhotoTable(token!!)
-
         if(response.isSuccessful) {
             val photoDatabase = PhotoDatabase.getDatabase(context)
             val photoDao = photoDatabase.syncedPhotoDao()
@@ -99,11 +95,13 @@ fun MapScreen(navHostController: NavHostController, date: String){
             photoPosition = syncedPhoto.map { it ->
                 LatLng(it.latitude, it.longitude)
             }
-
             syncedPhoto.forEach{
                 items.add(MyItem(LatLng(it.latitude, it.longitude), "Marker1", "사진",
                     getThumbnailForPhoto(token!!, it.id)!!))
             }
+        }
+        photoPosition.forEach {
+            latLng += it
         }
 
         //사진 좌표와 비트맵
@@ -121,19 +119,15 @@ fun MapScreen(navHostController: NavHostController, date: String){
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-//        if (!dataLoaded.value) {
-//            //스켈레톤 추가
-//            Box(modifier = Modifier.fillMaxSize().background(color = Color.Transparent))
-//        } else {
+        if (!dataLoaded.value) {
+            //스켈레톤 추가
+            Box(modifier = Modifier.fillMaxSize().background(color = Color.Transparent))
+        } else {
             viewPosition = averageLatLng(latLng)
             cameraPositionState = CameraPositionState(position = CameraPosition.fromLatLngZoom(viewPosition, 15f))
 
             val zoomLevel = getZoomLevelForDistance(getMaxDistanceBetweenLatLng(viewPosition, latLng)) - 1
             cameraPositionState = remember { CameraPositionState(position = CameraPosition.fromLatLngZoom(viewPosition, zoomLevel)) }
-
-//            latLng.forEach{latLng ->
-//                items.add(MyItem(latLng, "Marker","Snippet",bitmap1))
-//            }
 
             GoogleMap(
                 modifier = Modifier.fillMaxSize(),
@@ -155,16 +149,31 @@ fun MapScreen(navHostController: NavHostController, date: String){
                     },
                     // Optional: Custom rendering for clusters
                     clusterContent = { cluster ->
-                        Log.d("클러스터","${cluster.size}")
+                        cluster.items.forEach {
+                            if(bitmap1 != it.icon){
+                                bitmapList += it.icon
+                            }
+                        }
+//                        Log.d("클러스터","${cluster.size}")
                         //Log.d("클러스터","${cluster.items.first().icon}")
 //                        val drawable = ContextCompat.getDrawable(context, R.drawable.img)
 //                        val bitmap = (drawable as BitmapDrawable).bitmap
                         val size = 50.dp
-                        val scaledBitmap = cluster.items.first().icon.let {
-                            val density = LocalDensity.current.density
-                            val scaledSize = (size * density).toInt()
-                            Bitmap.createScaledBitmap(it, scaledSize, scaledSize, false)
-                        }!!.asImageBitmap()
+                        val density = LocalDensity.current.density
+                        val scaledSize = (size * density).toInt()
+                        val scaledBitmap = if(bitmapList.isNotEmpty()){
+                            bitmapList.first().let{
+                                Bitmap.createScaledBitmap(it, scaledSize, scaledSize, false)
+                            }!!.asImageBitmap()
+                        }else{
+                            Bitmap.createScaledBitmap(bitmap1, scaledSize, scaledSize, false)!!.asImageBitmap()
+                        }
+                        //val scaledBitmap = cluster.items.first().icon.let {
+//                        val scaledBitmap = bitmapList.first().let {
+//                            val density = LocalDensity.current.density
+//                            val scaledSize = (size * density).toInt()
+//                            Bitmap.createScaledBitmap(it, scaledSize, scaledSize, false)
+//                        }!!.asImageBitmap()
                         Surface(
                             shape = RoundedCornerShape(percent = 10),
                             contentColor = Color.White,
@@ -188,7 +197,6 @@ fun MapScreen(navHostController: NavHostController, date: String){
                     },
                     // Optional: Custom rendering for non-clustered items
                     clusterItemContent = { item ->
-                        Log.d("아이템", "$item")
                         val drawable = ContextCompat.getDrawable(context, R.drawable.img)
                         val bitmap = (drawable as BitmapDrawable).bitmap
                         val size = 50.dp
@@ -197,6 +205,15 @@ fun MapScreen(navHostController: NavHostController, date: String){
                             val scaledSize = (size * density).toInt()
                             Bitmap.createScaledBitmap(it, scaledSize, scaledSize, false)
                         }!!.asImageBitmap()
+//                        val size = 50.dp
+//                        val density = LocalDensity.current.density
+//                        val scaledSize = (size * density).toInt()
+//                        val scaledSize2 = ((size/2) * density).toInt()
+//                        val scaledBitmap = if(item.icon != bitmap1){
+//                            Bitmap.createScaledBitmap(item.icon, scaledSize, scaledSize, false)!!.asImageBitmap()
+//                        }else{
+//                            Bitmap.createScaledBitmap(bitmap1, scaledSize2, scaledSize2, false)!!.asImageBitmap()
+//                        }
                         Surface(
                             shape = RoundedCornerShape(percent = 10),
                             contentColor = Color.White,
@@ -214,7 +231,7 @@ fun MapScreen(navHostController: NavHostController, date: String){
                     }
                 )
             }
-//        }
+        }
     }
 }
 
