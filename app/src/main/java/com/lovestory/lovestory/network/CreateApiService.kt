@@ -7,8 +7,8 @@ import java.util.concurrent.TimeUnit
 
 inline fun <reified T> createApiService(): T {
     val okHttpClient = OkHttpClient.Builder()
-        .connectTimeout(30, TimeUnit.SECONDS) // 연결 시간 제한을 늘립니다.
-        .readTimeout(30, TimeUnit.SECONDS) // 읽기 시간 제한을 늘립니다.
+        .connectTimeout(60, TimeUnit.SECONDS) // 연결 시간 제한을 늘립니다.
+        .readTimeout(60, TimeUnit.SECONDS) // 읽기 시간 제한을 늘립니다.
         .build()
 
     val retrofit = Retrofit.Builder()

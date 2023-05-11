@@ -39,4 +39,8 @@ interface PhotoService{
     @GET("/images/{local_id}")
     @Streaming
     suspend fun getPhotoDetailById(@Header("Authorization") jwtToken: String, @Path("local_id") localId: String, @Query("quality") quality: Int):Response<ResponseBody>
+
+    @Headers("Content-Type: application/json")
+    @DELETE("/images/{local_id}")
+    suspend fun deletePhotoById(@Header("Authorization") jwtToken : String, @Path("local_id") localId: String) : Response<ResponseBody>
 }

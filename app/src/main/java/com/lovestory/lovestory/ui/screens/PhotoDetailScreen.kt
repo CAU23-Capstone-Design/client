@@ -2,8 +2,10 @@ package com.lovestory.lovestory.ui.screens
 
 import android.annotation.SuppressLint
 import android.graphics.Bitmap
-import android.provider.ContactsContract.Contacts.Photo
 import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -17,6 +19,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -30,36 +33,63 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import androidx.room.ExperimentalRoomApi
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
+import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.pager.HorizontalPager
+import com.google.accompanist.pager.rememberPagerState
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.lovestory.lovestory.R
 import com.lovestory.lovestory.database.PhotoDatabase
+import com.lovestory.lovestory.database.entities.PhotoForSync
 import com.lovestory.lovestory.database.entities.SyncedPhoto
-import com.lovestory.lovestory.database.entities.SyncedPhotoDao
+import com.lovestory.lovestory.database.repository.PhotoForSyncRepository
 import com.lovestory.lovestory.database.repository.SyncedPhotoRepository
+import com.lovestory.lovestory.module.getImageById
 import com.lovestory.lovestory.module.getToken
 import com.lovestory.lovestory.module.loadBitmapFromDiskCache
 import com.lovestory.lovestory.module.photo.getDetailPhoto
-import com.lovestory.lovestory.module.photo.getThumbnailForPhoto
 import com.lovestory.lovestory.module.saveBitmapToDiskCache
-import com.lovestory.lovestory.ui.components.DisplayImageFromBitmap
+import com.lovestory.lovestory.view.SyncedPhotoView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.*
+import kotlin.io.path.ExperimentalPathApi
 
 @Composable
-fun PhotoDetailScreenFromDevice(navHostController: NavHostController, imageUri: String) {
+fun PhotoDetailScreenFromDevice(navHostController: NavHostController, photoId: String) {
+    val systemUiController = rememberSystemUiController()
+
+    val context = LocalContext.current
+
+    val database = PhotoDatabase.getDatabase(context)
+    val photoForSyncDao = database.photoForSyncDao()
+    val repository = PhotoForSyncRepository(photoForSyncDao)
+
+    val photoInfo = remember { mutableStateOf<PhotoForSync?>(null) }
+
+    LaunchedEffect(photoId){
+        photoInfo.value = repository.getPhotoForSyncById(photoId)!!
+    }
+
+    SideEffect {
+        systemUiController.setSystemBarsColor(
+            color = Color.Black,
+        )
+    }
+
     Box(
         modifier = Modifier
             .background(Color.Black)
             .fillMaxSize(),
     ) {
-        TransformableSample(imageUri = imageUri)
-
+        AnimatedVisibility(photoInfo.value != null, enter = fadeIn(), exit = fadeOut()){
+            TransformableSample(imageUri = photoInfo.value!!.imageUrl!!)
+        }
         Column(
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.Start,
@@ -81,50 +111,43 @@ fun PhotoDetailScreenFromDevice(navHostController: NavHostController, imageUri: 
                     modifier = Modifier.clickable {navHostController.popBackStack() },
                     tint = Color.White
                 )
+                Spacer(modifier = Modifier.width(20.dp))
+                AnimatedVisibility(photoInfo.value != null, enter = fadeIn(), exit = fadeOut()){
+                    Column() {
+                        val input = photoInfo.value!!.date
+                        val formatter = DateTimeFormatter.ofPattern("yyyy:MM:dd HH:mm:ss")
+                        val parsedDate = LocalDate.parse(input, formatter)
+
+                        val outputFormatter = DateTimeFormatter.ofPattern("yyyy년 M월 d일 (E)")
+                        val output = parsedDate.format(outputFormatter)
+
+                        Text(text = output, color = Color.White)
+                    }
+                }
             }
         }
 
     }
 }
 
+@OptIn(ExperimentalPagerApi::class)
 @Composable
-fun PhotoDetailScreenFromServer(navHostController: NavHostController, photoId : String){
+fun PhotoDetailScreenFromServer(
+    navHostController: NavHostController,
+    syncedPhotoView: SyncedPhotoView,
+    photoIndex : Int
+){
+    val syncedPhotos by syncedPhotoView.listOfSyncPhotos.observeAsState(initial = listOf())
+
     var isDropMenuForDetailPhoto by remember {mutableStateOf(false)}
 
     val context = LocalContext.current
-
-    val database = PhotoDatabase.getDatabase(context)
-    val syncedPhotoDao = database.syncedPhotoDao()
-
-    val syncedPhoto = remember { mutableStateOf<SyncedPhoto?>(null) }
-
-    val bitmap = remember { mutableStateOf<Bitmap?>(null) }
-
-    val cacheKey = "detail_${photoId}"
-
-    val token = getToken(context)
-
     val systemUiController = rememberSystemUiController()
 
-    LaunchedEffect(photoId) {
-        val cachedBitmap = loadBitmapFromDiskCache(context, cacheKey)
-        if (cachedBitmap != null) {
-            Log.d("detail","cache에서 로드")
-            bitmap.value = cachedBitmap
-        } else {
-            val getResult = getDetailPhoto(token!!, photoId, 20)
-            if(getResult != null){
-                saveBitmapToDiskCache(context, getResult, cacheKey)
-                bitmap.value = getResult
-                Log.d("detail","서버에서 로드")
-            }
-            else{
-                Log.d("COMPONENT-detail photo", "Error in transfer bitmap")
-            }
-        }
+    val pagerState = rememberPagerState()
 
-        val photo = syncedPhotoDao.getPhotoById(photoId)
-        syncedPhoto.value = photo
+    LaunchedEffect(null){
+        pagerState.scrollToPage(6)
     }
 
     SideEffect {
@@ -133,21 +156,69 @@ fun PhotoDetailScreenFromServer(navHostController: NavHostController, photoId : 
         )
     }
 
+    val database = PhotoDatabase.getDatabase(context)
+    val syncedPhotoDao = database.syncedPhotoDao()
+    val repository = SyncedPhotoRepository(syncedPhotoDao)
+
+    val syncedPhoto by syncedPhotoView.syncedPhoto.observeAsState(null)
+
+    val token = getToken(context)
+
+    LaunchedEffect(null){
+        if (photoIndex < 0){
+            pagerState.scrollToPage(0)
+        }
+        else{
+            pagerState.scrollToPage(photoIndex)
+        }
+    }
+
     Box(
         modifier = Modifier
             .background(Color.Black)
             .fillMaxSize(),
     ){
-        if (bitmap.value != null) {
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier
-                    .background(Color.Black)
-                    .fillMaxSize(),
-            ){
-                DetailImageFromBitmap(bitmap.value!!)
+
+        HorizontalPager(
+            count = syncedPhotos.size,
+            state = pagerState,
+            itemSpacing = 20.dp
+        ) {index ->
+            val cacheKey = "detail_${syncedPhotos[index].id}"
+            val bitmap = remember { mutableStateOf<Bitmap?>(null) }
+
+            LaunchedEffect(syncedPhotos[index].id) {
+                val cachedBitmap = loadBitmapFromDiskCache(context, cacheKey)
+                if (cachedBitmap != null) {
+                    bitmap.value = cachedBitmap
+                } else {
+                    val getResult = getDetailPhoto(token!!, syncedPhotos[index].id, 20)
+                    if(getResult != null){
+                        saveBitmapToDiskCache(context, getResult, cacheKey)
+                        bitmap.value = getResult
+                    }
+                    else{
+                        Log.d("COMPONENT-detail photo", "Error in transfer bitmap")
+                    }
+                }
+
+                val photoInfo = repository.getSyncedPhotoById(syncedPhotos[index].id)
+                if (photoInfo != null) {
+                    syncedPhotoView.updateSyncedPhoto(photoInfo)
+                }
+            }
+            AnimatedVisibility (bitmap.value != null,enter = fadeIn(), exit = fadeOut()) {
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .background(Color.Black)
+                        .fillMaxSize(),
+                ){
+                    DetailImageFromBitmap(bitmap.value!!)
+                }
             }
         }
+
 
         Column(
             verticalArrangement = Arrangement.Top,
@@ -174,16 +245,17 @@ fun PhotoDetailScreenFromServer(navHostController: NavHostController, photoId : 
                         tint = Color.White
                     )
                     Spacer(modifier = Modifier.width(20.dp))
-                    Column() {
-                        syncedPhoto.value?.let {
-                            val photoDate = LocalDate.parse(it.date.substring(0, 10))
+                    AnimatedVisibility(syncedPhoto != null, enter = fadeIn(), exit = fadeOut()){
+                        Column() {
+                            val photoDate = LocalDate.parse(syncedPhotos[pagerState.currentPage]!!.date.substring(0, 10))
                             val dateFormatter = DateTimeFormatter.ofPattern("yyyy년 M월 d일 (E)", Locale.getDefault())
                             val formattedDate = photoDate.format(dateFormatter)
 
-                            Text(text = it.area1+" "+it.area2+" "+it.area3, color = Color.White)
+                            Text(text = syncedPhotos[pagerState.currentPage]!!.area1+" "+syncedPhotos[pagerState.currentPage]!!.area2+" "+syncedPhotos[pagerState.currentPage]!!.area3, color = Color.White)
                             Text(text = formattedDate, color = Color.White)
                         }
                     }
+
                 }
 
                 Box(){
@@ -200,6 +272,12 @@ fun PhotoDetailScreenFromServer(navHostController: NavHostController, photoId : 
                     ) {
                         DropdownMenuItem(onClick = {
                             isDropMenuForDetailPhoto= false
+                            CoroutineScope(Dispatchers.IO).launch {
+                                if (token != null) {
+                                    getImageById(context = context, token = token, photo_id = syncedPhotos[pagerState.currentPage]!!.id)
+                                }
+                            }
+
                         }) {
                             Text(text = "원본 사진 다운로드")
                         }
@@ -227,7 +305,6 @@ fun DetailImageFromBitmap(bitmap: Bitmap){
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TransformableSample(imageUri: String) {
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
@@ -239,7 +316,9 @@ fun TransformableSample(imageUri: String) {
         if (newScale in 1f..3f) {
             scale = newScale
         }
+
     }
+
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier
@@ -254,10 +333,6 @@ fun TransformableSample(imageUri: String) {
                     .build()
             ),
             contentDescription = null,
-//                modifier = Modifier
-//                    .width(screenWidth),
-//                .border(width = 2.dp, color = borderColor)
-//                .clickable { onChangeChecked(index) },
             modifier = Modifier
                 .graphicsLayer(
                     scaleX = scale,

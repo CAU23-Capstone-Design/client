@@ -1,36 +1,34 @@
 package com.lovestory.lovestory.ui.components
 
-import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lovestory.lovestory.database.entities.SyncedPhoto
-import com.lovestory.lovestory.view.SyncedPhotoView
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.*
 
 @Composable
 fun DayGroupedGallery(
-    daySyncedPhotoByDate : Map<String, List<SyncedPhoto>>,
+    daySyncedPhotoByDate: Map<String, List<SyncedPhoto>>,
     token: String?,
-    currentDate : LocalDate,
-    allPhotoListState : LazyListState,
-    setSelectedButton : (String)->Unit,
-    cumOfSizeOfInnerElements : List<List<Int>>
+    currentDate: LocalDate,
+    allPhotoListState: LazyListState,
+    dayPhotoListState: LazyListState,
+    setSelectedButton: (String)->Unit,
+    cumOfSizeOfInnerElements: List<List<Int>>
 ){
 
     LazyColumn(
         modifier = Modifier.padding(bottom = 70.dp),
         contentPadding = PaddingValues(top=65.dp, bottom = 75.dp),
+        state = dayPhotoListState
         ){
         daySyncedPhotoByDate.onEachIndexed { index, (date, daySyncedPhoto) ->
 

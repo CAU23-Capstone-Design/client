@@ -64,7 +64,7 @@ fun RootNavigationGraph(){
                 startDestination = Graph.AUTH
             ) {
                 loginNavGraph(navHostController = navHostController)
-                composable(route = Graph.MAIN) {MainScreen(navHostController = navHostController)}
+                composable(route = Graph.MAIN) {MainScreen()}
             }
         }
     }

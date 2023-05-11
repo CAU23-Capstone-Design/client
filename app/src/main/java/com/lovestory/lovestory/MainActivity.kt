@@ -1,8 +1,13 @@
 package com.lovestory.lovestory
 
+import android.app.ActivityManager
+import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.PowerManager
+import android.provider.Settings
 import android.util.Log
 import android.view.Window
 import androidx.activity.ComponentActivity
@@ -22,6 +27,7 @@ import com.lovestory.lovestory.ui.theme.LoveStoryTheme
 import com.kakao.sdk.common.util.Utility
 import com.lovestory.lovestory.ui.theme.LoveStoryThemeForMD3
 
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,12 +37,28 @@ class MainActivity : ComponentActivity() {
             val systemUiController = rememberSystemUiController()
             val useDarkIcons = MaterialTheme.colors.isLight
 
-            val intent = Intent(this, LocationService::class.java)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                startForegroundService(intent)
-            } else {
-                startService(intent)
+            val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
+            if (!pm.isIgnoringBatteryOptimizations(packageName)){
+                val intent = Intent()
+                intent.action = Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
+                intent.data = Uri.parse("package:$packageName")
+                startActivity(intent)
             }
+
+            Log.d("[ACTIVITY] MainActivity", "$applicationContext")
+            Log.d("[ACTIVITY] MainActivity", "$applicationContext")
+            val intent = Intent(this, LocationService::class.java)
+            if(isMyServiceRunning(LocationService::class.java)){
+                Log.d("[ACTIVITY] MainActivity", "isServiceRunning is true")
+            }else{
+                Log.d("[ACTIVITY] MainActivity", "isServiceRunning is false, start location service")
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    startForegroundService(intent)
+                } else {
+                    startService(intent)
+                }
+            }
+
 
             SideEffect {
                 systemUiController.setSystemBarsColor(
@@ -58,6 +80,16 @@ class MainActivity : ComponentActivity() {
 
             //CalendarScreen(navHostController = navController)
         }
+    }
+
+    private fun isMyServiceRunning(serviceClass: Class<*>): Boolean {
+        val manager = getSystemService(ACTIVITY_SERVICE) as ActivityManager
+        for (service in manager.getRunningServices(Int.MAX_VALUE)) {
+            if (serviceClass.name == service.service.className) {
+                return true
+            }
+        }
+        return false
     }
 }
 

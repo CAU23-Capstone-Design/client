@@ -1,16 +1,19 @@
 package com.lovestory.lovestory.ui.components
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.lovestory.lovestory.database.entities.SyncedPhoto
+import com.lovestory.lovestory.view.SyncedPhotoView
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.*
@@ -21,8 +24,12 @@ fun GroupedGallery(
     token: String?,
     navHostController: NavHostController,
     currentDate: LocalDate,
-    allPhotoListState: LazyListState
+    allPhotoListState: LazyListState,
+    syncedPhotoView : SyncedPhotoView,
+    isPressedPhotoMode : MutableState<Boolean>,
+    listOfSelectedPhoto : MutableSet<String>
 ){
+
     LazyColumn(
         modifier = Modifier.padding(bottom = 70.dp),
         contentPadding = PaddingValues(top=65.dp, bottom = 75.dp),
@@ -62,8 +69,11 @@ fun GroupedGallery(
                                 ThumbnailOfPhotoFromServer(
                                     index = photos.indexOf(photo),
                                     token = token,
-                                    photoId = photo.id,
-                                    navHostController = navHostController
+                                    photo = photo,
+                                    navHostController = navHostController,
+                                    syncedPhotoView = syncedPhotoView,
+                                    isPressedPhotoMode = isPressedPhotoMode,
+                                    listOfSelectedPhoto = listOfSelectedPhoto
                                 )
                             }
                         }

@@ -16,6 +16,5 @@ class PhotoForSyncRepository(private val photoForSyncDao: PhotoForSyncDao) {
     fun insertPhotoForSync(item : PhotoForSync){coroutineScope.launch{photoForSyncDao.insertPhoto(photo = item)}}
     fun deletePhotoForSync(item : PhotoForSync){coroutineScope.launch{photoForSyncDao.deletePhoto(photo = item)}}
 
-    suspend fun getPhotoForSyncById(id : String): Boolean {return withContext(Dispatchers.IO){ photoForSyncDao.getPhotoById(id) != null } }
-
+    suspend fun getPhotoForSyncById(id : String): PhotoForSync? {return withContext(Dispatchers.IO){ photoForSyncDao.getPhotoById(id) } }
 }

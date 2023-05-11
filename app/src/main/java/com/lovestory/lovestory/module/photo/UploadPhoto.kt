@@ -1,9 +1,9 @@
-package com.lovestory.lovestory.module
+package com.lovestory.lovestory.module.photo
 
 import android.content.Context
 import android.net.Uri
 import android.util.Log
-import android.widget.Toast
+import androidx.compose.runtime.MutableState
 import com.lovestory.lovestory.database.PhotoDatabase
 import com.lovestory.lovestory.database.entities.PhotoForSync
 import com.lovestory.lovestory.database.entities.PhotoForSyncDao
@@ -11,17 +11,19 @@ import com.lovestory.lovestory.database.entities.SyncedPhoto
 import com.lovestory.lovestory.database.entities.SyncedPhotoDao
 import com.lovestory.lovestory.database.repository.PhotoForSyncRepository
 import com.lovestory.lovestory.database.repository.SyncedPhotoRepository
+import com.lovestory.lovestory.module.getToken
 import com.lovestory.lovestory.network.uploadPhotoToServer
-import com.lovestory.lovestory.view.PhotoForSyncView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 
-suspend fun uploadPhoto(context : Context, sendPhotos : List<PhotoForSync>, photoForSyncView : PhotoForSyncView){
-    photoForSyncView.setUploadPhotos(sendPhotos.size)
-
+suspend fun uploadPhoto(
+    context : Context,
+    sendPhotos : List<PhotoForSync>,
+    numOfCurrentUploadedPhoto : MutableState<Int>,
+){
     val photoDatabase: PhotoDatabase = PhotoDatabase.getDatabase(context)
 
     val photoForSyncDao : PhotoForSyncDao = photoDatabase.photoForSyncDao()
@@ -32,7 +34,7 @@ suspend fun uploadPhoto(context : Context, sendPhotos : List<PhotoForSync>, phot
 
     val token = getToken(context)
 
-    for(photo in sendPhotos){
+    sendPhotos.onEachIndexed{ index, photo ->
         Log.d("MODULE-uploadPhoto", "Uri : ${photo.imageUrl}")
         val uri = Uri.parse(photo.imageUrl)
         Log.d("MODULE-uploadPhoto", "Uri : $uri")
@@ -68,12 +70,11 @@ suspend fun uploadPhoto(context : Context, sendPhotos : List<PhotoForSync>, phot
                 )
 
                 photoForSyncRepository.deletePhotoForSync(photo)
+                numOfCurrentUploadedPhoto.value+=1
 
             }else{
                 Log.e("MODULE-uploadPhoto" , "${response.errorBody()}")
             }
         }
-        photoForSyncView.addCurrentUploadPhotos()
     }
-    photoForSyncView.setFinishedUploadPhotos()
 }
