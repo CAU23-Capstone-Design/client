@@ -29,6 +29,7 @@ import com.kizitonwose.calendar.core.CalendarMonth
 import com.kizitonwose.calendar.core.DayPosition
 import com.lovestory.lovestory.R
 import com.lovestory.lovestory.model.CoupleMemory
+import com.lovestory.lovestory.model.dateToString
 import kotlinx.coroutines.flow.filterNotNull
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -42,7 +43,7 @@ fun Day(
     day: CalendarDay,
     isSelected: Boolean = false,
     isPopupVisible: Boolean = false,
-    coupleMemoryList: List<CoupleMemory>,
+    meetDate: List<String>,
     onOpenDialogRequest : () -> Unit,
     onClick: (CalendarDay) -> Unit = {},
 ){
@@ -88,15 +89,14 @@ fun Day(
             )
             Spacer(modifier = Modifier.height(2.dp))
 
-            //LaunchedEffect()
-            coupleMemoryList.firstOrNull { it.date == day.date }?.let{
+            if(meetDate.contains ( dateToString(day.date) )){
                 Box(modifier = Modifier
                     .size(8.dp)
                     .background(color = circleColor, CircleShape), //colorResource(R.color.ls_pink)
                     contentAlignment = Alignment.Center){
                 }
             }
-
+            //LaunchedEffect()
         }
     }
 }

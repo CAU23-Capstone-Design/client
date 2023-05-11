@@ -138,12 +138,15 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
 
     var latLng by remember { mutableStateOf(emptyList<LatLng>()) }
     val dataLoaded = remember { mutableStateOf(false) }
+    val meetDate = remember { mutableStateListOf<String>() }
 
     val context = LocalContext.current
     val token = getToken(context)
     val dialogWidthDp = remember { mutableStateOf(0.dp) }
 
     lateinit var repository : SyncedPhotoRepository
+    lateinit var repositoryDummy : SyncedPhotoRepository //나중에 월별로 받아오면 삭제할 부분
+    val photoDate = remember { mutableStateListOf<String>() }
     val items = remember{ mutableStateListOf<MyItem>() }
 
     val syncedPhotosByDate by syncedPhotoView.groupedSyncedPhotosByDate.observeAsState(initial = mapOf())
@@ -176,6 +179,37 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
             }
 
             saveComment(context, coupleMemoryList)
+        coupleMemoryList.forEach{
+            if (!meetDate.contains(dateToString(it.date))) {
+                meetDate.add(dateToString(it.date))
+            }
+            Log.d("메모리리스트","$it")
+        }
+
+        val response = getPhotoTable(token)
+        if(response.isSuccessful) {
+            val photoDatabase = PhotoDatabase.getDatabase(context)
+            val photoDao = photoDatabase.syncedPhotoDao()
+            repositoryDummy = SyncedPhotoRepository(photoDao)
+
+            val syncedPhoto = repositoryDummy.listOfGetAllSyncedPhoto()
+
+            syncedPhoto.forEach{
+                val inputString = it.date
+                val index = inputString.indexOf("T")
+                val extractedString = inputString.substring(0, index)
+                if (!meetDate.contains(extractedString)) {
+                    meetDate.add(extractedString)
+                }
+                if (!photoDate.contains(extractedString)) {
+                    photoDate.add(extractedString)
+                }
+
+            }
+        }
+        meetDate.forEach{
+            Log.d("사진날짜","$it")
+        }
     }
 
 
@@ -253,7 +287,7 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                     isPopupVisible = isPopupVisible,
                     isSelected = selection == day,
                     onOpenDialogRequest = onOpenDialogRequest,
-                    coupleMemoryList = coupleMemoryList,
+                    meetDate = meetDate,
                 ) { clicked ->
                     selection = clicked
                 }
@@ -323,6 +357,7 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                         coroutineScope.launch{
                             val put : Response<Any> = putComment(token!!, dateToString(selection.date), editedcomment)
                             saveComment(context, coupleMemoryList)
+                            meetDate.add(dateToString(selection.date))
                         }
                     }
                 }
@@ -374,6 +409,9 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                                 val date = selection.date
                                 coupleMemoryList = coupleMemoryList.filterNot { it.date == date }
                                 val delete: Any = deleteComment(token!!, dateToString(selection.date))
+                                if(!photoDate.contains(dateToString(date))){
+                                    meetDate.remove(dateToString(date))
+                                }
                             }
                             saveComment(context, coupleMemoryList)
                             isPopupVisible = false
@@ -411,6 +449,7 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                                     coroutineScope.launch{
                                         val put : Response<Any> = putComment(token!!, dateToString(selection.date), editedcomment)
                                         saveComment(context, coupleMemoryList)
+                                        meetDate.add(dateToString(selection.date))
                                     }
                                 }
                             }
