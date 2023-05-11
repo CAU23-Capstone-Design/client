@@ -1,7 +1,9 @@
 package com.lovestory.lovestory.ui.components
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -13,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
@@ -47,7 +50,6 @@ fun Day(
     onOpenDialogRequest : () -> Unit,
     onClick: (CalendarDay) -> Unit = {},
 ){
-
     Box(
         modifier = Modifier
             .aspectRatio(1f) // This is important for square sizing!
@@ -56,10 +58,25 @@ fun Day(
             .clickable(
                 enabled = day.position == DayPosition.MonthDate,
                 onClick = {
-                    onClick(day)
-                    onOpenDialogRequest()
+//                    onClick(day)
+//                    onOpenDialogRequest()
+//                    Log.d("탭","싱글탭1")
                 }
             )
+            .pointerInput(Unit){
+                detectTapGestures(
+                    onTap = {
+                        onClick(day)
+                        onOpenDialogRequest()
+                        //Log.d("탭","싱글탭2")
+                    },
+                    onDoubleTap = {
+                        onClick(day)
+                        onOpenDialogRequest()
+                        //Log.d("탭","더블탭")
+                    }
+                )
+            }
             .background(color = if (day.date == LocalDate.now() && day.position == DayPosition.MonthDate) colorResource(com.lovestory.lovestory.R.color.ls_pink) else Color.Transparent),
         contentAlignment = Alignment.TopCenter //텍스트 상단 중앙 배치
     ) {
@@ -89,7 +106,7 @@ fun Day(
             )
             Spacer(modifier = Modifier.height(2.dp))
 
-            if(meetDate.contains ( dateToString(day.date) )){
+            if((meetDate.contains(dateToString(day.date)) && (day.date != LocalDate.now())) && (day.position == DayPosition.MonthDate)){
                 Box(modifier = Modifier
                     .size(8.dp)
                     .background(color = circleColor, CircleShape), //colorResource(R.color.ls_pink)
