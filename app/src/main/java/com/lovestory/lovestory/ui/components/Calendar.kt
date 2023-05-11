@@ -104,6 +104,7 @@ fun Day(
                 fontWeight = FontWeight.Bold,//굵기 조절
                 fontSize = 14.sp,
             )
+
             Spacer(modifier = Modifier.height(2.dp))
 
             if((meetDate.contains(dateToString(day.date)) && (day.date != LocalDate.now())) && (day.position == DayPosition.MonthDate)){
@@ -113,7 +114,6 @@ fun Day(
                     contentAlignment = Alignment.Center){
                 }
             }
-            //LaunchedEffect()
         }
     }
 }

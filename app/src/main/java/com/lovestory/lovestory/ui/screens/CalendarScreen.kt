@@ -148,6 +148,11 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
     lateinit var repositoryDummy : SyncedPhotoRepository //나중에 월별로 받아오면 삭제할 부분
     val photoDate = remember { mutableStateListOf<String>() }
     val items = remember{ mutableStateListOf<MyItem>() }
+    val drawable = ContextCompat.getDrawable(context, R.drawable.img) //마커 이미지로 변경
+    val bitmap = (drawable as BitmapDrawable).bitmap
+
+    var latLngExist by remember { mutableStateOf(false) }
+    var photoExist by remember { mutableStateOf(false) }
 
     val syncedPhotosByDate by syncedPhotoView.groupedSyncedPhotosByDate.observeAsState(initial = mapOf())
     val allPhotoListState = rememberLazyListState()
@@ -162,27 +167,25 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
         coupleMemoryList = data
         coupleMemoryList.forEach { CoupleMemory -> Log.d("쉐어드1", "$CoupleMemory") }
 
-        //서버에서 get Comment
+        //get Comment
         val getMemoryList: Response<List<GetMemory>> = getComment(token!!)
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
         for (getMemory in getMemoryList.body()!!) {
             val date = LocalDate.parse(getMemory.date, formatter)
             val comment = getMemory.comment
-            val coupleMemory = CoupleMemory(date, comment)
-
-            val newCoupleMemoryList = coupleMemoryList.plus(coupleMemory)
-            coupleMemoryList = newCoupleMemoryList
+            val stringMemory = StringMemory(date.toString(), comment)
+            stringMemoryList.add(stringMemory)
         }
-
+        coupleMemoryList = convertToCoupleMemoryList(stringMemoryList)
         saveComment(context, coupleMemoryList)
-        coupleMemoryList.forEach{
+        coupleMemoryList.forEach {
             if (!meetDate.contains(dateToString(it.date))) {
                 meetDate.add(dateToString(it.date))
             }
         }
 
         //데이터베이스에서 get sync date
-        val response = getPhotoTable(token)
+        val response = getPhotoTable(token!!)
         if(response.isSuccessful) {
             val photoDatabase = PhotoDatabase.getDatabase(context)
             val photoDao = photoDatabase.syncedPhotoDao()
@@ -204,43 +207,62 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
         }
     }
 
-
-
-    //Log.d("토큰","$token")
-    LaunchedEffect(isPopupVisible || isPopupVisibleSave){
-        //Log.d("코루틴", "실행")
-        //get Comment
-        val getMemoryList: Response<List<GetMemory>> = getComment(token!!)
-        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
-        for (getMemory in getMemoryList.body()!!) {
-            val date = LocalDate.parse(getMemory.date, formatter)
-            val comment = getMemory.comment
-            val stringMemory = StringMemory(date.toString(), comment)
-            stringMemoryList.add(stringMemory)
-        }
-        coupleMemoryList = convertToCoupleMemoryList(stringMemoryList)
-        coupleMemoryList.forEach { CoupleMemory -> Log.d("쉐어드3", "$CoupleMemory") }
-
-        //get GPS
-        val gps = getGps(token, dateToString(selection.date))
-        if (gps.body() != null) {
-            latLng = getLatLng(gps.body()!!)
-        }
-
-        //get syncedPhoto from database
-        val response = getPhotoTable(token)
-        if(response.isSuccessful) {
-            val photoDatabase = PhotoDatabase.getDatabase(context)
-            val photoDao = photoDatabase.syncedPhotoDao()
-            repository = SyncedPhotoRepository(photoDao)
-
-            val syncedPhoto = repository.getSyncedPhotosByDate(dateToString(selection.date))
-
-            syncedPhoto.forEach{
-                items.add(MyItem(LatLng(it.latitude, it.longitude), "Marker", "사진", getThumbnailForPhoto(token, it.id)!!))
+    LaunchedEffect(isPopupVisible || isPopupVisibleSave) {
+        if (isPopupVisible || isPopupVisibleSave) {
+            //get Comment
+            val getMemoryList: Response<List<GetMemory>> = getComment(token!!)
+            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+            for (getMemory in getMemoryList.body()!!) {
+                val date = LocalDate.parse(getMemory.date, formatter)
+                val comment = getMemory.comment
+                val stringMemory = StringMemory(date.toString(), comment)
+                stringMemoryList.add(stringMemory)
             }
+            coupleMemoryList = convertToCoupleMemoryList(stringMemoryList)
+            saveComment(context, coupleMemoryList)
+            coupleMemoryList.forEach {
+                if (!meetDate.contains(dateToString(it.date))) {
+                    meetDate.add(dateToString(it.date))
+                }
+            }
+
+            //get GPS
+            val gps = getGps(token, dateToString(selection.date))
+            if (gps.body() != null) {
+                latLng = getLatLng(gps.body()!!)
+                Log.d("위치좀보자", "$latLng")
+                latLngExist = true
+            }
+
+            //get syncedPhoto from database
+            val response = getPhotoTable(token)
+            if (response.isSuccessful) {
+                val photoDatabase = PhotoDatabase.getDatabase(context)
+                val photoDao = photoDatabase.syncedPhotoDao()
+                repository = SyncedPhotoRepository(photoDao)
+
+                val syncedPhoto = repository.getSyncedPhotosByDate(dateToString(selection.date))
+                syncedPhoto.forEach {
+                    items.add(
+                        MyItem(
+                            LatLng(it.latitude, it.longitude),
+                            "PHOTO",
+                            "PHOTO",
+                            getThumbnailForPhoto(token, it.id)!!
+                        )
+                    )
+                }
+                photoExist = true
+            }
+
+            if (latLng.isNotEmpty()) {
+                latLng.forEach {
+                    items.add(MyItem(it, "MARKER", "GPS", bitmap))
+                }
+            }
+
+            dataLoaded.value = true
         }
-        dataLoaded.value = true
     }
 
     Column(
@@ -250,8 +272,6 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
         //horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(modifier = Modifier.height(10.dp))
-
-        // /* 캘린더 타이틀 부분, preview 할 때, 곧바로 확인이 안 되서 잠시 주석 처리
         SimpleCalendarTitle(
             modifier = Modifier
                 .padding(horizontal = 16.dp, vertical = 12.dp),
@@ -267,9 +287,6 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                 }
             },
         )
-
-        // */
-
         Spacer(modifier = Modifier.height(10.dp))
         DaysOfWeekTitle(daysOfWeek = daysOfWeek)
         Spacer(modifier = Modifier.height(16.dp))
@@ -296,7 +313,6 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
         if (existingMemory != null) {
             editedcomment = existingMemory.comment
         }
-
         CalendarDialog(
             selection = selection,
             onDismissRequest = {
