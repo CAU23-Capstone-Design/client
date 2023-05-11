@@ -59,7 +59,8 @@ fun ThumbnailOfPhotoFromServer(
     photo: SyncedPhoto,
     navHostController: NavHostController,
     syncedPhotoView : SyncedPhotoView,
-    isPressedPhotoMode : MutableState<Boolean>
+    isPressedPhotoMode : MutableState<Boolean>,
+    listOfSelectedPhoto : MutableSet<String>
 ) {
     val context = LocalContext.current
     val bitmap = remember { mutableStateOf<Bitmap?>(null) }
@@ -87,8 +88,17 @@ fun ThumbnailOfPhotoFromServer(
         }
     }
 
-    AnimatedVisibility (bitmap.value != null, enter = fadeIn(), exit = fadeOut()) {
-        DisplayImageFromBitmap(index, bitmap.value!!, navHostController=navHostController, photoId = photo.id, photoIndex = indexForDetail, isPressedPhotoMode = isPressedPhotoMode)
+    AnimatedVisibility (
+        bitmap.value != null, enter = fadeIn(), exit = fadeOut()) {
+        DisplayImageFromBitmap(
+            index,
+            bitmap.value!!,
+            navHostController=navHostController,
+            photo = photo,
+            photoIndex = indexForDetail,
+            isPressedPhotoMode = isPressedPhotoMode,
+            listOfSelectedPhoto = listOfSelectedPhoto
+        )
     }
     AnimatedVisibility(bitmap.value== null, enter = fadeIn(), exit = fadeOut()) {
         val screenWidth = LocalConfiguration.current.screenWidthDp.dp
@@ -102,14 +112,35 @@ fun ThumbnailOfPhotoFromServer(
 }
 
 @Composable
-fun DisplayImageFromBitmap(index: Int, bitmap: Bitmap, navHostController: NavHostController, photoId: String, photoIndex : MutableState<Int>, isPressedPhotoMode : MutableState<Boolean>) {
-    val checked = remember {
-        mutableStateOf(false)
-    }
+fun DisplayImageFromBitmap(
+    index: Int,
+    bitmap: Bitmap,
+    navHostController:
+    NavHostController,
+    photo: SyncedPhoto,
+    photoIndex : MutableState<Int>,
+    isPressedPhotoMode : MutableState<Boolean>,
+    listOfSelectedPhoto : MutableSet<String>
+) {
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
     val imageWidth = screenWidth / 3
 
     val haptic = LocalHapticFeedback.current
+
+    val checked = remember {
+        mutableStateOf(listOfSelectedPhoto.contains(photo.id))
+    }
+
+    LaunchedEffect(key1 = listOfSelectedPhoto){
+        checked.value = listOfSelectedPhoto.contains(photo.id)
+    }
+
+    LaunchedEffect(key1 = isPressedPhotoMode.value){
+        if(!isPressedPhotoMode.value){
+            checked.value = false
+        }
+
+    }
 
     Box{
         Image(
@@ -119,71 +150,92 @@ fun DisplayImageFromBitmap(index: Int, bitmap: Bitmap, navHostController: NavHos
                 .width(imageWidth)
                 .aspectRatio(1f)
                 .padding(2.dp)
-                .clickable {
-                    navHostController.navigate(GalleryStack.DetailPhotoFromServer.route + "/${photoIndex.value}") {
-                        popUpTo(GalleryStack.PhotoSync.route)
-                    }
-                }
                 .pointerInput(Unit) {
-                    detectTapGestures(onLongPress = {
-                        isPressedPhotoMode.value = true
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                    })
+                    detectTapGestures(
+                        onDoubleTap = null,
+                        onLongPress = {
+                            isPressedPhotoMode.value = true
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        },
+                        onTap = {
+                            if (!isPressedPhotoMode.value) {
+                                navHostController.navigate(GalleryStack.DetailPhotoFromServer.route + "/${photoIndex.value}") {
+                                    popUpTo(GalleryStack.PhotoSync.route)
+                                }
+                            } else {
+                                Log.d(
+                                    "[COMPONENT] ImageFromBitmap",
+                                    "contain in set  : ${listOfSelectedPhoto.contains(photo.id)}"
+                                )
+                                if (listOfSelectedPhoto.contains(photo.id)) {
+                                    Log.d(
+                                        "[COMPONENT] ImageFromBitmap",
+                                        "checked $checked"
+                                    )
+                                    checked.value = false
+                                    listOfSelectedPhoto.remove(photo.id)
+                                } else {
+                                    Log.d(
+                                        "[COMPONENT] ImageFromBitmap",
+                                        "checked  $checked"
+                                    )
+                                    checked.value = true
+                                    listOfSelectedPhoto.add(photo.id)
+                                }
+                            }
+                        }
+                    )
                 },
             contentScale = ContentScale.Crop,
         )
-        AnimatedVisibility(visible = isPressedPhotoMode.value, enter = fadeIn(), exit = fadeOut()) {
-            AnimatedVisibility(checked.value, enter = fadeIn(), exit = fadeOut()){
-                Row(
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .background(Color(0x88DFA8A8))
-                        .width(imageWidth)
-                        .aspectRatio(1f)
-                        .padding(2.dp),
+        AnimatedVisibility(checked.value && isPressedPhotoMode.value, enter = fadeIn(), exit = fadeOut()){
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .background(Color(0x88DFA8A8))
+                    .width(imageWidth)
+                    .aspectRatio(1f)
+                    .padding(2.dp),
 //                .border(width = 2.dp, color = borderColor)
-                ){}
-            }
-            AnimatedVisibility(checked.value, enter = fadeIn(), exit = fadeOut(),
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(end = 5.dp, top = 5.dp))
-            {
-                Box(modifier = Modifier
-                    .width(35.dp)
-                    .height(35.dp)
-                    .clickable {checked.value = false },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.baseline_check_circle_24),
-                        contentDescription = null,
-                        tint = Color(0xFFF8B0B0),
-                    )
-                }
-            }
-            AnimatedVisibility(!checked.value, enter = fadeIn(), exit = fadeOut(),
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(end = 5.dp, top = 5.dp))
-            {
-                Box(modifier = Modifier
-                    .width(35.dp)
-                    .height(35.dp)
-                    .clickable { checked.value = true },
-                    contentAlignment = Alignment.Center
-                ){
-                    Icon(
-                        painter = painterResource(id = R.drawable.baseline_check_circle_outline_24),
-                        contentDescription = null,
-                        tint = Color(0xFF6B6B6B),
-                        modifier = Modifier
-                    )
-                }
-
+            ){}
+        }
+        AnimatedVisibility(checked.value && isPressedPhotoMode.value, enter = fadeIn(), exit = fadeOut(),
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(end = 5.dp, top = 5.dp))
+        {
+            Box(modifier = Modifier
+                .width(35.dp)
+                .height(35.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.baseline_check_circle_24),
+                    contentDescription = null,
+                    tint = Color(0xFFF8B0B0),
+                )
             }
         }
+        AnimatedVisibility((!checked.value) && isPressedPhotoMode.value, enter = fadeIn(), exit = fadeOut(),
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(end = 5.dp, top = 5.dp))
+        {
+            Box(modifier = Modifier
+                .width(35.dp)
+                .height(35.dp),
+                contentAlignment = Alignment.Center
+            ){
+                Icon(
+                    painter = painterResource(id = R.drawable.baseline_check_circle_outline_24),
+                    contentDescription = null,
+                    tint = Color(0xFF6B6B6B),
+                    modifier = Modifier
+                )
+            }
+        }
+
 
     }
 }

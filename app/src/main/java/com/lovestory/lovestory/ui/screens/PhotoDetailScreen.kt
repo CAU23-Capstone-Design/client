@@ -134,7 +134,6 @@ fun PhotoDetailScreenFromDevice(navHostController: NavHostController, photoId: S
 @Composable
 fun PhotoDetailScreenFromServer(
     navHostController: NavHostController,
-//    photoId : String,
     syncedPhotoView: SyncedPhotoView,
     photoIndex : Int
 ){
@@ -162,16 +161,10 @@ fun PhotoDetailScreenFromServer(
     val repository = SyncedPhotoRepository(syncedPhotoDao)
 
     val syncedPhoto by syncedPhotoView.syncedPhoto.observeAsState(null)
-    Log.d("[SCREEN] PhotoDetailScreen",
-        "id : ${syncedPhoto?.id} / date ; ${syncedPhoto?.date}")
 
     val token = getToken(context)
 
-    Log.d("[SCREEN] PhotoDetailScreen", "${pagerState.currentPage}")
-
     LaunchedEffect(null){
-//        val result = repository.getSyncedPhotoById(photoId)
-//        val initialIndex = syncedPhotos.indexOf(result)
         if (photoIndex < 0){
             pagerState.scrollToPage(0)
         }
@@ -197,14 +190,12 @@ fun PhotoDetailScreenFromServer(
             LaunchedEffect(syncedPhotos[index].id) {
                 val cachedBitmap = loadBitmapFromDiskCache(context, cacheKey)
                 if (cachedBitmap != null) {
-                    Log.d("detail","cache에서 로드")
                     bitmap.value = cachedBitmap
                 } else {
                     val getResult = getDetailPhoto(token!!, syncedPhotos[index].id, 20)
                     if(getResult != null){
                         saveBitmapToDiskCache(context, getResult, cacheKey)
                         bitmap.value = getResult
-                        Log.d("detail","서버에서 로드")
                     }
                     else{
                         Log.d("COMPONENT-detail photo", "Error in transfer bitmap")
@@ -314,7 +305,6 @@ fun DetailImageFromBitmap(bitmap: Bitmap){
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TransformableSample(imageUri: String) {
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
@@ -326,7 +316,9 @@ fun TransformableSample(imageUri: String) {
         if (newScale in 1f..3f) {
             scale = newScale
         }
+
     }
+
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier
@@ -341,10 +333,6 @@ fun TransformableSample(imageUri: String) {
                     .build()
             ),
             contentDescription = null,
-//                modifier = Modifier
-//                    .width(screenWidth),
-//                .border(width = 2.dp, color = borderColor)
-//                .clickable { onChangeChecked(index) },
             modifier = Modifier
                 .graphicsLayer(
                     scaleX = scale,

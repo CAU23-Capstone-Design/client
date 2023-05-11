@@ -1,12 +1,11 @@
 package com.lovestory.lovestory.ui.components
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -27,9 +26,9 @@ fun GroupedGallery(
     currentDate: LocalDate,
     allPhotoListState: LazyListState,
     syncedPhotoView : SyncedPhotoView,
-    isPressedPhotoMode : MutableState<Boolean>
+    isPressedPhotoMode : MutableState<Boolean>,
+    listOfSelectedPhoto : MutableSet<String>
 ){
-    val checkedSyncedPhotosList by syncedPhotoView.checkedSyncedPhotosList.observeAsState(initial = mapOf())
 
     LazyColumn(
         modifier = Modifier.padding(bottom = 70.dp),
@@ -74,6 +73,7 @@ fun GroupedGallery(
                                     navHostController = navHostController,
                                     syncedPhotoView = syncedPhotoView,
                                     isPressedPhotoMode = isPressedPhotoMode,
+                                    listOfSelectedPhoto = listOfSelectedPhoto
                                 )
                             }
                         }

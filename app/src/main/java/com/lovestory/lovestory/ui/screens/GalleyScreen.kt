@@ -31,6 +31,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import com.lovestory.lovestory.R
 import com.lovestory.lovestory.module.getToken
+import com.lovestory.lovestory.module.photo.deletePhotosByIds
 import com.lovestory.lovestory.ui.components.*
 import com.lovestory.lovestory.view.SyncedPhotoView
 import kotlinx.coroutines.withContext
@@ -51,6 +52,12 @@ fun GalleryScreen(navHostController: NavHostController, syncedPhotoView : Synced
 
     val cumOfSizeOfInnerElements by syncedPhotoView.cumOfSizeOfInnerElements.observeAsState(initial = syncedPhotoView.computeCumulativeSizes(sizesOfInnerElements))
 
+//    val listOfSelectedPhoto : MutableSet<String> = remember {
+//        mutableSetOf()
+//    }
+
+    val listOfSelectedPhoto = remember{ mutableStateOf<MutableSet<String>>(mutableSetOf()) }
+
     val systemUiController = rememberSystemUiController()
 
     val context = LocalContext.current
@@ -67,8 +74,6 @@ fun GalleryScreen(navHostController: NavHostController, syncedPhotoView : Synced
     val isDropMenuForGalleryScreen = remember { mutableStateOf(false) }
 
     val (selectedButton, setSelectedButton) = remember { mutableStateOf("전체") }
-
-
 
     val items = listOf<String>(
         "년", "월", "일", "전체"
@@ -97,6 +102,7 @@ fun GalleryScreen(navHostController: NavHostController, syncedPhotoView : Synced
                 allPhotoListState = allPhotoListState,
                 syncedPhotoView = syncedPhotoView,
                 isPressedPhotoMode = isPressedPhotoMode,
+                listOfSelectedPhoto = listOfSelectedPhoto.value
             )
         }
 
@@ -212,10 +218,6 @@ fun GalleryScreen(navHostController: NavHostController, syncedPhotoView : Synced
                             }
                         }
                     }
-
-
-
-
                 }
                 AnimatedVisibility(visible = isPressedPhotoMode.value, enter = fadeIn(), exit = fadeOut()){
                     Row(
@@ -230,61 +232,72 @@ fun GalleryScreen(navHostController: NavHostController, syncedPhotoView : Synced
                                 fontSize = 18.sp,
                                 fontWeight = FontWeight.Bold,
                                 modifier = Modifier.clickable {
+                                    listOfSelectedPhoto.value.clear()
                                     isPressedPhotoMode.value = false
                                 }
                             )
                         }
                         Box() {
+                            val countSelected = listOfSelectedPhoto.value.size
                             Text(
-                                text = "삭제",
+                                text = "${countSelected}장 삭제",
                                 fontSize = 18.sp,
+                                color = Color.Red,
                                 fontWeight = FontWeight.Bold,
                                 modifier = Modifier.clickable {
-
+                                    CoroutineScope(Dispatchers.IO).launch{
+                                        deletePhotosByIds(context, listOfSelectedPhoto.value)
+                                        withContext(Dispatchers.Main) {
+                                            isPressedPhotoMode.value = false
+                                            Toast.makeText(context, "사진 삭제 되었습니다.", Toast.LENGTH_SHORT).show()
+                                        }
+                                    }
                                 }
                             )
                         }
                     }
                 }
-
             }
 
             // floating bar Section
             Spacer(modifier = Modifier.weight(1f))
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(start = 10.dp, end=10.dp,bottom = 80.dp)
-            ) {
-                SelectMenuButtons(
-                    items = items,
-                    selectedButton = selectedButton,
-                    onClick ={ item : String ->
-                        isPressedPhotoMode.value = false
-                        setSelectedButton(item)
-                    })
+            AnimatedVisibility(visible = !isPressedPhotoMode.value, enter= fadeIn(), exit = fadeOut()) {
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(start = 10.dp, end=10.dp,bottom = 80.dp)
+                ) {
+                    SelectMenuButtons(
+                        items = items,
+                        selectedButton = selectedButton,
+                        onClick ={ item : String ->
+                            isPressedPhotoMode.value = false
+                            setSelectedButton(item)
+                        })
 
-                Spacer(modifier = Modifier.weight(1f))
+                    Spacer(modifier = Modifier.weight(1f))
 
-                Button(
-                    onClick = {
-                        navHostController.navigate(GalleryStack.PhotoSync.route) {
-                            popUpTo(MainScreens.Gallery.route)
+                    Button(
+                        onClick = {
+                            navHostController.navigate(GalleryStack.PhotoSync.route) {
+                                popUpTo(MainScreens.Gallery.route)
+                            }
+                        },
+                        colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFFCC5C5)),
+                        modifier = Modifier
+                            .height(55.dp)
+                            .width(55.dp),
+                        shape = RoundedCornerShape(40.dp),
+                        content = {
+                            Icon(
+                                painter = painterResource(id = R.drawable.baseline_upload_24),
+                                contentDescription = "upload photo"
+                            )
                         }
-                    },
-                    colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFFCC5C5)),
-                    modifier = Modifier
-                        .height(55.dp)
-                        .width(55.dp),
-                    shape = RoundedCornerShape(40.dp),
-                    content = {
-                        Icon(
-                            painter = painterResource(id = R.drawable.baseline_upload_24),
-                            contentDescription = "upload photo"
-                        )
-                    }
-                )
+                    )
+                }
             }
+
         }
     }
 }

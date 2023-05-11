@@ -27,10 +27,13 @@ class SyncedPhotoView(application:Application): ViewModel() {
 
     lateinit var daySyncedPhotosByDate : LiveData<Map<String, List<SyncedPhoto>>>
 
-    lateinit var checkedSyncedPhotosList : LiveData<Map<String, List<Boolean>>>
+//    lateinit var checkedSyncedPhotosList : LiveData<Map<String, List<Boolean>>>
 
     private val _syncedPhoto = MutableLiveData<SyncedPhoto?>()
     val syncedPhoto: LiveData<SyncedPhoto?> = _syncedPhoto
+
+//    var listOfSelectedPhotos = MutableLiveData<Set<String>>(setOf())
+//    val listOfSelectedPhoto : LiveData<Set<String>> = _listOfSelectedPhotos
 
     init {
         val photoDatabase = PhotoDatabase.getDatabase(application)
@@ -46,9 +49,9 @@ class SyncedPhotoView(application:Application): ViewModel() {
             syncedPhotos.groupBy { it.date.substring(0, 10) }
         }
 
-        checkedSyncedPhotosList = Transformations.map(listOfSyncPhotos){syncedPhotos ->
-            syncedPhotos.groupBy { it.date.substring(0, 10) }.mapValues { entry ->  entry.value.map{false}}
-        }
+//        checkedSyncedPhotosList = Transformations.map(listOfSyncPhotos){syncedPhotos ->
+//            syncedPhotos.groupBy { it.date.substring(0, 10) }.mapValues { entry ->  entry.value.map{false}}
+//        }
 
         syncedPhotosByDateAndArea = Transformations.map(listOfSyncPhotos){syncedPhotos->
             syncedPhotos.groupBy { it.date.substring(0, 10) }
@@ -96,4 +99,19 @@ class SyncedPhotoView(application:Application): ViewModel() {
     fun getAllSyncedPhotoIndex(photo: SyncedPhoto):Int{
         return listOfSyncPhotos.value!!.indexOf(photo)
     }
+
+//    fun addListOfSelectedPhotos(id : String){
+//        Log.d("[VIEW] SyncedPhotoView", "id : $id added")
+//        listOfSelectedPhotos.value?.toMutableSet()?.apply { add(id) }
+//        Log.d("[VIEW] SyncedPhotoView", "${listOfSelectedPhotos.value}")
+//    }
+//    fun removeListOfSelectedPhotos(id : String){
+//        Log.d("[VIEW] SyncedPhotoView", "id : $id removed")
+//        listOfSelectedPhotos.value?.toMutableSet()?.apply { remove(id) }
+//        Log.d("[VIEW] SyncedPhotoView", "${listOfSelectedPhotos.value}")
+//    }
+//
+//    fun checkListOfSelectedPhotos(id : String): Boolean? {
+//        return listOfSelectedPhotos.value?.contains(id)
+//    }
 }

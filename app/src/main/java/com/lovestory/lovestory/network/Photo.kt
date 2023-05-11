@@ -106,3 +106,18 @@ suspend fun getDetailById(token: String, photo_id : String, quality : Int): Resp
         Response.error(500, ResponseBody.create(null, "Unknown error"))
     }
 }
+
+suspend fun deletePhotoById(token: String, photo_id : String):Response<ResponseBody>{
+    val jwt : String = "Bearer $token"
+    val apiService: PhotoService = createApiService()
+
+    return try{
+        apiService.deletePhotoById(jwt, photo_id)
+    }catch (e: HttpException){
+        Log.e("NETWORK-deletePhotoById", "$e")
+        Response.error(e.code(), e.response()?.errorBody())
+    }catch (e : Exception){
+        Log.e("NETWORK-deletePhotoById", "$e")
+        Response.error(500, ResponseBody.create(null, "Unknown error"))
+    }
+}
