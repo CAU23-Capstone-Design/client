@@ -38,7 +38,7 @@ import java.time.LocalDate
 
 @Composable
 fun GalleryScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhotoView) {
-    val syncedPhotosByDate by syncedPhotoView.groupedSyncedPhotosByDate.observeAsState(initial = mapOf())
+
     val sizesOfInnerElements by syncedPhotoView.sizesOfInnerElements.observeAsState(initial = listOf())
     val cumOfSizeOfInnerElements by syncedPhotoView.cumOfSizeOfInnerElements.observeAsState(
         initial = syncedPhotoView.computeCumulativeSizes(sizesOfInnerElements)
@@ -58,8 +58,6 @@ fun GalleryScreen(navHostController: NavHostController, syncedPhotoView : Synced
 
     val yearSyncedPhotosByDate by syncedPhotoView.yearListOfSyncedPhotos.observeAsState(initial = listOf())
 
-
-
     val systemUiController = rememberSystemUiController()
     val context = LocalContext.current
 
@@ -75,6 +73,7 @@ fun GalleryScreen(navHostController: NavHostController, syncedPhotoView : Synced
     val isDropMenuForGalleryScreen = remember { mutableStateOf(false) }
     val countSelectedPhotos = remember { mutableStateOf(0) }
     val (selectedButton, setSelectedButton) = remember { mutableStateOf("전체") }
+    val showDeleteSyncedPhotoDialog = remember { mutableStateOf(false) }
 
     val items = listOf<String>(
         "년", "월", "일", "전체"
@@ -105,12 +104,20 @@ fun GalleryScreen(navHostController: NavHostController, syncedPhotoView : Synced
             .background(Color.White)
             .fillMaxSize()
     ) {
+        AnimatedVisibility (visible = showDeleteSyncedPhotoDialog.value, enter = fadeIn(), exit = fadeOut()){
+            DeleteSyncPhotosDialog(
+                showDeleteSyncedPhotoDialog = showDeleteSyncedPhotoDialog,
+                isPressedPhotoMode = isPressedPhotoMode,
+                countSelectedPhotos = countSelectedPhotos,
+                syncedPhotoView = syncedPhotoView,
+                context = context
+            )
+        }
+
         // Gallery List
         AnimatedVisibility(visible = selectedButton =="전체",
-//            enter = fadeIn(), exit = fadeOut()
         ){
             GroupedGallery(
-                syncedPhotosByDate = syncedPhotosByDate,
                 token = token,
                 navHostController = navHostController,
                 currentDate = currentDate,
@@ -267,13 +274,13 @@ fun GalleryScreen(navHostController: NavHostController, syncedPhotoView : Synced
                                 color = Color.Red,
                                 fontWeight = FontWeight.Bold,
                                 modifier = Modifier.clickable {
-                                    CoroutineScope(Dispatchers.IO).launch{
-                                        deletePhotosByIds(context, syncedPhotoView)
-                                        isPressedPhotoMode.value = false
-                                        withContext(Dispatchers.Main) {
-                                            Toast.makeText(context, "${countSelectedPhotos.value}장의 사진이 삭제 되었습니다.", Toast.LENGTH_SHORT).show()
-                                            countSelectedPhotos.value = 0
-                                        }
+                                    if(countSelectedPhotos.value >0){
+                                        showDeleteSyncedPhotoDialog.value = true
+                                    }
+                                    else{
+                                        Toast
+                                            .makeText(context, "선택된 사진이 없습니다.", Toast.LENGTH_SHORT)
+                                            .show()
                                     }
                                 }
                             )

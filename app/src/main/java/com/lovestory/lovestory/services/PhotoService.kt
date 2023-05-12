@@ -144,8 +144,8 @@ class PhotoService : Service(){
 
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val importance = NotificationManager.IMPORTANCE_LOW
-            val channel = NotificationChannel(CHANNEL_ID, "Photo Picker Service Channel", importance)
+            val importance = NotificationManager.IMPORTANCE_HIGH
+            val channel = NotificationChannel(CHANNEL_ID, "Lovestory", importance)
             val notificationManager: NotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(channel)
         }
@@ -153,8 +153,8 @@ class PhotoService : Service(){
 
     private fun createNotificationForPhotoService():Notification{
         return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("LoveStory 사진 서비스")
-            .setContentText("사진 서비스가 실행중입니다.")
+            .setContentTitle("LoveStory")
+            .setContentText("연인을 만나서 사진 동기화를 시작합니다!")
             .setSmallIcon(R.drawable.lovestory_logo)
             .build()
     }
@@ -187,8 +187,8 @@ class PhotoService : Service(){
     }
 
     companion object {
-        private const val CHANNEL_ID = "photo_picker_service_channel"
-        private const val NOTIFICATION_ID = 2
+        private const val CHANNEL_ID = "Lovestory"
+        private const val NOTIFICATION_ID = 1
     }
 
 }

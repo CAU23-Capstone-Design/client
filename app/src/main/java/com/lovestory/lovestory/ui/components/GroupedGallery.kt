@@ -1,6 +1,5 @@
 package com.lovestory.lovestory.ui.components
 
-import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -12,7 +11,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import com.lovestory.lovestory.database.entities.SyncedPhoto
 import com.lovestory.lovestory.view.SyncedPhotoView
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -20,7 +18,6 @@ import java.util.*
 
 @Composable
 fun GroupedGallery(
-    syncedPhotosByDate: Map<String, List<SyncedPhoto>>,
     token: String?,
     navHostController: NavHostController,
     currentDate: LocalDate,
@@ -30,6 +27,7 @@ fun GroupedGallery(
     listOfSelectedPhoto :  MutableState<MutableSet<String>>,
     countSelectedPhotos : MutableState<Int>
 ){
+    val syncedPhotosByDate by syncedPhotoView.groupedSyncedPhotosByDate.observeAsState(initial = mapOf())
 
     LazyColumn(
         modifier = Modifier.padding(bottom = 70.dp),
@@ -57,6 +55,7 @@ fun GroupedGallery(
             }
 
             items(photos.chunked(3).size) { index ->
+
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(),

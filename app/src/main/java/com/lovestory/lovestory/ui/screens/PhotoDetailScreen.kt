@@ -146,10 +146,6 @@ fun PhotoDetailScreenFromServer(
 
     val pagerState = rememberPagerState()
 
-    LaunchedEffect(null){
-        pagerState.scrollToPage(6)
-    }
-
     SideEffect {
         systemUiController.setSystemBarsColor(
             color = Color.Black,
@@ -201,6 +197,7 @@ fun PhotoDetailScreenFromServer(
                         Log.d("COMPONENT-detail photo", "Error in transfer bitmap")
                     }
                 }
+                Log.d("[Composable]PhotoDetailScreen", "start Detail ${syncedPhotos[index].id}")
 
                 val photoInfo = repository.getSyncedPhotoById(syncedPhotos[index].id)
                 if (photoInfo != null) {

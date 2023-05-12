@@ -166,7 +166,7 @@ class LocationService : Service() {
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val importance = NotificationManager.IMPORTANCE_LOW
-            val channel = NotificationChannel(CHANNEL_ID, "Location Service Channel", importance)
+            val channel = NotificationChannel(CHANNEL_ID, "Lovestory", importance)
             val notificationManager: NotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(channel)
         }
@@ -181,48 +181,10 @@ class LocationService : Service() {
     }
 
     companion object {
-        private const val CHANNEL_ID = "location_service_channel"
+        private const val CHANNEL_ID = "Lovestory"
         private const val NOTIFICATION_ID = 1
     }
 }
-
-
-
-//    private var locationRequest = object : LocationCallback() {
-//        override fun onLocationResult(locationResult: LocationResult) {
-//            for (location in locationResult.locations) {
-//                location.latitude
-//                location.longitude
-//                val token = getToken(context)
-//                saveLocation(token, location.latitude, location.longitude)
-//                CoroutineScope(Dispatchers.IO).launch {
-//                    val nearbyResponse = checkNearby(token)
-//                    if (nearbyResponse != null) {
-//                        updateLocationRequestInterval( (nearbyResponse.distance.toLong()/500 +1L) * 1000)
-//                        if(nearbyResponse.isNearby){
-//                            sendBroadcastToSecondService(ACTION_START_PHOTO_PICKER_SERVICE)
-//                        }else{
-//                            sendBroadcastToSecondService(ACTION_STOP_PHOTO_PICKER_SERVICE)
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//    }
-
-
-//    private fun updateLocationRequestInterval(newInterval: Long, context: Context) {
-//        Log.d("LOCATION-SERVICE", "interval : $newInterval")
-//        if (newInterval != updateInterval) {
-//            updateInterval = newInterval
-//            // 업데이트 주기를 변경하려면 먼저 현재 위치 업데이트를 중지해야 합니다.
-//            stopLocationUpdates()
-//
-//            // 새로운 업데이트 주기를 설정하고 위치 업데이트를 다시 시작합니다.
-//            startLocationUpdates(context = context, newInterval)
-//        }
-//    }
-
 
 
 

@@ -136,6 +136,10 @@ fun DisplayImageFromBitmap(
         mutableStateOf(listOfSelectedPhoto.value.contains(photo.id))
     }
 
+    val id = remember {
+        mutableStateOf(photo.id)
+    }
+
     LaunchedEffect(key1 = listOfSelectedPhoto){
         checked.value = listOfSelectedPhoto.value.contains(photo.id)
     }
@@ -144,7 +148,10 @@ fun DisplayImageFromBitmap(
         if(!isPressedPhotoMode.value){
             checked.value = false
         }
+    }
 
+    LaunchedEffect(key1 = photo){
+        id.value = photo.id
     }
 
     Box{
@@ -162,7 +169,7 @@ fun DisplayImageFromBitmap(
                             isPressedPhotoMode.value = true
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             checked.value = true
-                            syncedPhotoView.addSelectedPhotosSet(photo.id)
+                            syncedPhotoView.addSelectedPhotosSet(id.value)
                             countSelectedPhotos.value += 1
                         },
                         onTap = {
@@ -171,36 +178,14 @@ fun DisplayImageFromBitmap(
                                     popUpTo(GalleryStack.PhotoSync.route)
                                 }
                             } else {
-//                                Log.d(
-//                                    "[COMPONENT] ImageFromBitmap",
-//                                    "contain in set  : ${listOfSelectedPhoto.value.contains(photo.id)}"
-//                                )
-//                                Log.d(
-//                                    "[COMPONENT] ImageFromBitmap",
-//                                    "contain in set  : ${photo.id}"
-//                                )
-                                if (listOfSelectedPhoto.value.contains(photo.id)) {
-//                                    Log.d(
-//                                        "[COMPONENT] ImageFromBitmap",
-//                                        "checked $checked"
-//                                    )
+                                if (listOfSelectedPhoto.value.contains(id.value)) {
                                     checked.value = false
-                                    syncedPhotoView.removeSelectedPhotosSet(photo.id)
+                                    syncedPhotoView.removeSelectedPhotosSet(id.value)
                                     countSelectedPhotos.value -= 1
-//                                    for (id in listOfSelectedPhoto.value) {
-//                                        Log.d("[COMPONENT] ImageFromBitmap", "[$id]")
-//                                    }
                                 } else {
-//                                    Log.d(
-//                                        "[COMPONENT] ImageFromBitmap",
-//                                        "checked  $checked"
-//                                    )
                                     checked.value = true
-                                    syncedPhotoView.addSelectedPhotosSet(photo.id)
+                                    syncedPhotoView.addSelectedPhotosSet(id.value)
                                     countSelectedPhotos.value += 1
-//                                    for (id in listOfSelectedPhoto.value) {
-//                                        Log.d("[COMPONENT] ImageFromBitmap", "$id")
-//                                    }
                                 }
                             }
                         }
@@ -261,7 +246,12 @@ fun DisplayImageFromBitmap(
 }
 
 @Composable
-fun CheckableDisplayImageFromUri(navHostController :NavHostController,index : Int, checked : Boolean, imageInfo: PhotoForSync, onChangeChecked : (Int)->Unit) {
+fun CheckableDisplayImageFromUri(navHostController :NavHostController,
+                                 index : Int,
+                                 checked : Boolean,
+                                 imageInfo: PhotoForSync,
+                                 onChangeChecked : (Int)->Unit) {
+    Log.d("[Composable]DisplayImageFromBitmap", "$imageInfo")
     val borderColor = if (checked) Color(0xFFEEC9C9) else Color.Transparent
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
     val imageWidth = screenWidth / 3
