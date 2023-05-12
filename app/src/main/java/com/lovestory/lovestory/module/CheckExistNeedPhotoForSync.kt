@@ -28,10 +28,10 @@ suspend fun checkExistNeedPhotoForSync(context : Context){
             repository = SyncedPhotoRepository(photoDao)
 
             val syncedPhotos = repository.listOfGetAllSyncedPhoto()
-            Log.d("MODULE-checkExistNeedPhotoForSync", "$syncedPhotos")
+//            Log.d("MODULE-checkExistNeedPhotoForSync", "$syncedPhotos")
 
             val serverPhotosIdList = response.body()!!.map{it.local_id}
-            Log.d("MODULE-checkExistNeedPhotoForSync", "$serverPhotosIdList")
+//            Log.d("MODULE-checkExistNeedPhotoForSync", "$serverPhotosIdList")
 
             deleteNotExistingIdsInServerList(syncedPhotos = syncedPhotos, repository=repository, serverIdList = serverPhotosIdList)
 

@@ -130,7 +130,7 @@ fun BigThumbnail(
                 .clickable {
                     setSelectedButton("전체")
                     CoroutineScope(Dispatchers.Main).launch {
-                        allPhotoListState.scrollToItem(index = curIndex)
+                        allPhotoListState.scrollToItem(index = curIndex-1)
                     }
                 }
             ,

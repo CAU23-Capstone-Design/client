@@ -60,7 +60,8 @@ fun ThumbnailOfPhotoFromServer(
     navHostController: NavHostController,
     syncedPhotoView : SyncedPhotoView,
     isPressedPhotoMode : MutableState<Boolean>,
-    listOfSelectedPhoto :  MutableState<MutableSet<String>>
+    listOfSelectedPhoto :  MutableState<MutableSet<String>>,
+    countSelectedPhotos : MutableState<Int>
 ) {
     val context = LocalContext.current
     val bitmap = remember { mutableStateOf<Bitmap?>(null) }
@@ -98,7 +99,8 @@ fun ThumbnailOfPhotoFromServer(
             syncedPhotoView = syncedPhotoView,
             photoIndex = indexForDetail,
             isPressedPhotoMode = isPressedPhotoMode,
-            listOfSelectedPhoto = listOfSelectedPhoto
+            listOfSelectedPhoto = listOfSelectedPhoto,
+            countSelectedPhotos = countSelectedPhotos
         )
     }
     AnimatedVisibility(bitmap.value== null, enter = fadeIn(), exit = fadeOut()) {
@@ -122,7 +124,8 @@ fun DisplayImageFromBitmap(
     syncedPhotoView : SyncedPhotoView,
     photoIndex : MutableState<Int>,
     isPressedPhotoMode : MutableState<Boolean>,
-    listOfSelectedPhoto :  MutableState<MutableSet<String>>
+    listOfSelectedPhoto :  MutableState<MutableSet<String>>,
+    countSelectedPhotos : MutableState<Int>
 ) {
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
     val imageWidth = screenWidth / 3
@@ -158,6 +161,9 @@ fun DisplayImageFromBitmap(
                         onLongPress = {
                             isPressedPhotoMode.value = true
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            checked.value = true
+                            syncedPhotoView.addSelectedPhotosSet(photo.id)
+                            countSelectedPhotos.value += 1
                         },
                         onTap = {
                             if (!isPressedPhotoMode.value) {
@@ -165,36 +171,36 @@ fun DisplayImageFromBitmap(
                                     popUpTo(GalleryStack.PhotoSync.route)
                                 }
                             } else {
-                                Log.d(
-                                    "[COMPONENT] ImageFromBitmap",
-                                    "contain in set  : ${listOfSelectedPhoto.value.contains(photo.id)}"
-                                )
-                                Log.d(
-                                    "[COMPONENT] ImageFromBitmap",
-                                    "contain in set  : ${photo.id}"
-                                )
+//                                Log.d(
+//                                    "[COMPONENT] ImageFromBitmap",
+//                                    "contain in set  : ${listOfSelectedPhoto.value.contains(photo.id)}"
+//                                )
+//                                Log.d(
+//                                    "[COMPONENT] ImageFromBitmap",
+//                                    "contain in set  : ${photo.id}"
+//                                )
                                 if (listOfSelectedPhoto.value.contains(photo.id)) {
-                                    Log.d(
-                                        "[COMPONENT] ImageFromBitmap",
-                                        "checked $checked"
-                                    )
+//                                    Log.d(
+//                                        "[COMPONENT] ImageFromBitmap",
+//                                        "checked $checked"
+//                                    )
                                     checked.value = false
                                     syncedPhotoView.removeSelectedPhotosSet(photo.id)
-//                                    listOfSelectedPhoto.value.remove(photo.id)
-                                    for (id in listOfSelectedPhoto.value) {
-                                        Log.d("[COMPONENT] ImageFromBitmap", "[$id]")
-                                    }
+                                    countSelectedPhotos.value -= 1
+//                                    for (id in listOfSelectedPhoto.value) {
+//                                        Log.d("[COMPONENT] ImageFromBitmap", "[$id]")
+//                                    }
                                 } else {
-                                    Log.d(
-                                        "[COMPONENT] ImageFromBitmap",
-                                        "checked  $checked"
-                                    )
+//                                    Log.d(
+//                                        "[COMPONENT] ImageFromBitmap",
+//                                        "checked  $checked"
+//                                    )
                                     checked.value = true
-//                                    listOfSelectedPhoto.value.add(photo.id)
                                     syncedPhotoView.addSelectedPhotosSet(photo.id)
-                                    for (id in listOfSelectedPhoto.value) {
-                                        Log.d("[COMPONENT] ImageFromBitmap", "$id")
-                                    }
+                                    countSelectedPhotos.value += 1
+//                                    for (id in listOfSelectedPhoto.value) {
+//                                        Log.d("[COMPONENT] ImageFromBitmap", "$id")
+//                                    }
                                 }
                             }
                         }

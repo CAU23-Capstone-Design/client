@@ -27,8 +27,8 @@ fun GroupedGallery(
     allPhotoListState: LazyListState,
     syncedPhotoView : SyncedPhotoView,
     isPressedPhotoMode : MutableState<Boolean>,
-    listOfSelectedPhoto :  MutableState<MutableSet<String>>
-
+    listOfSelectedPhoto :  MutableState<MutableSet<String>>,
+    countSelectedPhotos : MutableState<Int>
 ){
 
     LazyColumn(
@@ -74,7 +74,8 @@ fun GroupedGallery(
                                     navHostController = navHostController,
                                     syncedPhotoView = syncedPhotoView,
                                     isPressedPhotoMode = isPressedPhotoMode,
-                                    listOfSelectedPhoto = listOfSelectedPhoto
+                                    listOfSelectedPhoto = listOfSelectedPhoto,
+                                    countSelectedPhotos = countSelectedPhotos,
                                 )
                             }
                         }

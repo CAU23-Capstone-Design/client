@@ -1,6 +1,9 @@
 package com.lovestory.lovestory.ui.screens
 
+import android.app.Activity
+import android.util.Log
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -25,31 +28,39 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.lovestory.lovestory.graphs.GalleryStack
 import com.lovestory.lovestory.graphs.MainScreens
 import com.lovestory.lovestory.module.checkExistNeedPhotoForSync
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import com.lovestory.lovestory.R
 import com.lovestory.lovestory.module.getToken
 import com.lovestory.lovestory.module.photo.deletePhotosByIds
 import com.lovestory.lovestory.ui.components.*
 import com.lovestory.lovestory.view.SyncedPhotoView
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import java.time.LocalDate
 
 @Composable
 fun GalleryScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhotoView) {
     val syncedPhotosByDate by syncedPhotoView.groupedSyncedPhotosByDate.observeAsState(initial = mapOf())
-    val daySyncedPhotosByDate by syncedPhotoView.daySyncedPhotosByDate.observeAsState(initial = mapOf())
-    val monthSyncedPhotosByDate by syncedPhotoView.monthListOfSyncedPhotos.observeAsState(initial = listOf())
-    val yearSyncedPhotosByDate by syncedPhotoView.yearListOfSyncedPhotos.observeAsState(initial = listOf())
     val sizesOfInnerElements by syncedPhotoView.sizesOfInnerElements.observeAsState(initial = listOf())
-    val cumOfSizeOfInnerElements by syncedPhotoView.cumOfSizeOfInnerElements.observeAsState(initial = syncedPhotoView.computeCumulativeSizes(sizesOfInnerElements))
+    val cumOfSizeOfInnerElements by syncedPhotoView.cumOfSizeOfInnerElements.observeAsState(
+        initial = syncedPhotoView.computeCumulativeSizes(sizesOfInnerElements)
+    )
 
-//    val selectedPhotosSet by syncedPhotoView.selectedPhotosSet
-//    val listOfSelectedPhoto = remember{ mutableStateOf<MutableSet<String>>(mutableSetOf()) }
+    val daySyncedPhotosByDate by syncedPhotoView.daySyncedPhotosByDate.observeAsState(initial = mapOf())
+    val sizeOfDaySyncedPhotos by syncedPhotoView.sizeOfDaySyncedPhotos.observeAsState(initial = listOf())
+    val cumOfDaySyncedPhotos by syncedPhotoView.cumOfDaySyncedPhotos.observeAsState(
+        initial = syncedPhotoView.computeCumulativeSizesForMonth(sizeOfDaySyncedPhotos)
+    )
+
+    val monthSyncedPhotosByDate by syncedPhotoView.monthListOfSyncedPhotos.observeAsState(initial = listOf())
+    val sizeOfMonthSyncedPhotos by syncedPhotoView.sizeOfMonthSyncedPhotos.observeAsState(initial = listOf())
+    val cumOfMonthSyncedPhotos by syncedPhotoView.cumOfMonthSyncedPhotos.observeAsState(
+        initial = syncedPhotoView.computeCumulativeSizesForMonth(sizeOfMonthSyncedPhotos)
+    )
+
+    val yearSyncedPhotosByDate by syncedPhotoView.yearListOfSyncedPhotos.observeAsState(initial = listOf())
+
+
 
     val systemUiController = rememberSystemUiController()
-
     val context = LocalContext.current
 
     val currentDate = LocalDate.now()
@@ -62,7 +73,7 @@ fun GalleryScreen(navHostController: NavHostController, syncedPhotoView : Synced
 
     val isPressedPhotoMode = remember { mutableStateOf(false) }
     val isDropMenuForGalleryScreen = remember { mutableStateOf(false) }
-
+    val countSelectedPhotos = remember { mutableStateOf(0) }
     val (selectedButton, setSelectedButton) = remember { mutableStateOf("전체") }
 
     val items = listOf<String>(
@@ -77,6 +88,16 @@ fun GalleryScreen(navHostController: NavHostController, syncedPhotoView : Synced
         systemUiController.setSystemBarsColor(
             color = Color(0xFFF3F3F3),
         )
+    }
+
+    BackHandler(enabled = true) {
+        if(isPressedPhotoMode.value){
+            syncedPhotoView.clearSelectedPhotosSet()
+            isPressedPhotoMode.value = false
+            countSelectedPhotos.value = 0
+        }else{
+            navHostController.popBackStack()
+        }
     }
 
     Box(
@@ -96,7 +117,8 @@ fun GalleryScreen(navHostController: NavHostController, syncedPhotoView : Synced
                 allPhotoListState = allPhotoListState,
                 syncedPhotoView = syncedPhotoView,
                 isPressedPhotoMode = isPressedPhotoMode,
-                listOfSelectedPhoto = syncedPhotoView.selectedPhotosSet
+                listOfSelectedPhoto = syncedPhotoView.selectedPhotosSet,
+                countSelectedPhotos = countSelectedPhotos
             )
         }
 
@@ -117,7 +139,11 @@ fun GalleryScreen(navHostController: NavHostController, syncedPhotoView : Synced
             RepresentPeriodGallery(
                 periodGallery = monthSyncedPhotosByDate,
                 token = token,
-                currentDate = currentDate
+                prevPhotoState = dayPhotoListState,
+                currentPhotoState = monthPhotoListState,
+                setSelectedButton = setSelectedButton,
+                cumPrevPhotosList = cumOfDaySyncedPhotos,
+                type = "월"
             )
         }
 
@@ -125,7 +151,11 @@ fun GalleryScreen(navHostController: NavHostController, syncedPhotoView : Synced
             RepresentPeriodGallery(
                 periodGallery = yearSyncedPhotosByDate,
                 token = token,
-                currentDate = currentDate
+                prevPhotoState = monthPhotoListState,
+                setSelectedButton = setSelectedButton,
+                currentPhotoState = yearPhotoListState,
+                cumPrevPhotosList = cumOfMonthSyncedPhotos,
+                type = "년"
             )
         }
 
@@ -226,12 +256,13 @@ fun GalleryScreen(navHostController: NavHostController, syncedPhotoView : Synced
                                 modifier = Modifier.clickable {
                                     syncedPhotoView.clearSelectedPhotosSet()
                                     isPressedPhotoMode.value = false
+                                    countSelectedPhotos.value = 0
                                 }
                             )
                         }
                         Box() {
                             Text(
-                                text = "${syncedPhotoView.selectedPhotosSet.value.size}장 삭제",
+                                text = "${countSelectedPhotos.value}장의 사진 삭제",
                                 fontSize = 18.sp,
                                 color = Color.Red,
                                 fontWeight = FontWeight.Bold,
@@ -240,7 +271,8 @@ fun GalleryScreen(navHostController: NavHostController, syncedPhotoView : Synced
                                         deletePhotosByIds(context, syncedPhotoView)
                                         isPressedPhotoMode.value = false
                                         withContext(Dispatchers.Main) {
-                                            Toast.makeText(context, "사진 삭제 되었습니다.", Toast.LENGTH_SHORT).show()
+                                            Toast.makeText(context, "${countSelectedPhotos.value}장의 사진이 삭제 되었습니다.", Toast.LENGTH_SHORT).show()
+                                            countSelectedPhotos.value = 0
                                         }
                                     }
                                 }
