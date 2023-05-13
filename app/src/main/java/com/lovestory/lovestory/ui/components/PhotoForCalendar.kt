@@ -8,6 +8,8 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -16,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.lovestory.lovestory.database.entities.SyncedPhoto
+import com.lovestory.lovestory.view.SyncedPhotoView
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.*
@@ -25,9 +28,12 @@ fun PhotoForCalendar(
     syncedPhotosByDate: Map<String, List<SyncedPhoto>>,
     token: String?,
     navHostController: NavHostController,
+    syncedPhotoView : SyncedPhotoView,
     allPhotoListState: LazyListState,
     widthDp: Dp
 ){
+    val syncedPhotosByDate = syncedPhotosByDate
+
     LazyColumn(
         modifier = Modifier.fillMaxWidth(),
         //contentPadding = PaddingValues(bottom = 10.dp),
@@ -49,6 +55,8 @@ fun PhotoForCalendar(
                                 ThumbnailOfPhotoFromServerPopup(
                                     index = photos.indexOf(photo),
                                     token = token,
+                                    photo = photo,
+                                    syncedPhotoView = syncedPhotoView,
                                     photoId = photo.id,
                                     navHostController = navHostController,
                                     widthDp = widthDp

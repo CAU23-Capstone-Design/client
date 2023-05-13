@@ -2,6 +2,7 @@ package com.lovestory.lovestory.view
 
 import android.app.Application
 import android.util.Log
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
@@ -26,14 +27,18 @@ class SyncedPhotoView(application:Application): ViewModel() {
     lateinit var cumOfSizeOfInnerElements : LiveData<List<List<Int>>>
 
     lateinit var daySyncedPhotosByDate : LiveData<Map<String, List<SyncedPhoto>>>
+    lateinit var daySyncedPhotosByMonth : LiveData<Map<String, Map<String, List<SyncedPhoto>>>>
+    lateinit var sizeOfDaySyncedPhotos : LiveData<List<List<Int>>>
+    lateinit var cumOfDaySyncedPhotos : LiveData<List<List<Int>>>
 
-//    lateinit var checkedSyncedPhotosList : LiveData<Map<String, List<Boolean>>>
+    lateinit var monthSyncedPhotosByYear : LiveData<Map<String, Map<String, List<SyncedPhoto>>>>
+    lateinit var sizeOfMonthSyncedPhotos : LiveData<List<List<Int>>>
+    lateinit var cumOfMonthSyncedPhotos : LiveData<List<List<Int>>>
 
     private val _syncedPhoto = MutableLiveData<SyncedPhoto?>()
     val syncedPhoto: LiveData<SyncedPhoto?> = _syncedPhoto
 
-//    var listOfSelectedPhotos = MutableLiveData<Set<String>>(setOf())
-//    val listOfSelectedPhoto : LiveData<Set<String>> = _listOfSelectedPhotos
+    var selectedPhotosSet = mutableStateOf( mutableSetOf<String>())
 
     init {
         val photoDatabase = PhotoDatabase.getDatabase(application)
@@ -49,10 +54,6 @@ class SyncedPhotoView(application:Application): ViewModel() {
             syncedPhotos.groupBy { it.date.substring(0, 10) }
         }
 
-//        checkedSyncedPhotosList = Transformations.map(listOfSyncPhotos){syncedPhotos ->
-//            syncedPhotos.groupBy { it.date.substring(0, 10) }.mapValues { entry ->  entry.value.map{false}}
-//        }
-
         syncedPhotosByDateAndArea = Transformations.map(listOfSyncPhotos){syncedPhotos->
             syncedPhotos.groupBy { it.date.substring(0, 10) }
                 .mapValues { entry ->
@@ -62,18 +63,51 @@ class SyncedPhotoView(application:Application): ViewModel() {
         sizesOfInnerElements = Transformations.map(syncedPhotosByDateAndArea){syncedPhotosByDateAndAreaMap->
             syncedPhotosByDateAndAreaMap.map { entry ->
                 entry.value.map { groupedByArea ->
-                    groupedByArea.value.size/3
+                    groupedByArea.value.size
+                }
+            }
+        }
+        cumOfSizeOfInnerElements = Transformations.map(sizesOfInnerElements){
+            computeCumulativeSizes(it)
+        }
+
+        daySyncedPhotosByDate = Transformations.map(dayListOfSyncedPhotos){syncedPhotos->
+            syncedPhotos.groupBy { it.date.substring(0, 10) }
+        }
+        daySyncedPhotosByMonth = Transformations.map(dayListOfSyncedPhotos){syncedPhotos->
+            syncedPhotos.groupBy { it.date.substring(0, 7) }.mapValues {entry->
+                entry.value.groupBy { it.date.substring(0, 10) }
+            }
+        }
+        sizeOfDaySyncedPhotos = Transformations.map(daySyncedPhotosByMonth){daySyncedPhotosByMonth->
+            daySyncedPhotosByMonth.map { entry ->
+                entry.value.map { groupedByMonth ->
+                    groupedByMonth.value.size
+                }
+            }
+        }
+        cumOfDaySyncedPhotos = Transformations.map(sizeOfDaySyncedPhotos){
+            computeCumulativeSizesForMonth(it)
+        }
+
+        monthSyncedPhotosByYear = Transformations.map(monthListOfSyncedPhotos){syncedPhotos->
+            syncedPhotos.groupBy { it.date.substring(0, 4) }.mapValues {entry->
+                entry.value.groupBy { it.date.substring(0, 7) }
+            }
+        }
+
+        sizeOfMonthSyncedPhotos = Transformations.map(monthSyncedPhotosByYear){monthSyncedPhotosByYear->
+            monthSyncedPhotosByYear.map { entry ->
+                entry.value.map { groupedByMonth ->
+                    groupedByMonth.value.size
                 }
             }
         }
 
-        daySyncedPhotosByDate = Transformations.map(dayListOfSyncedPhotos){syncedPhoto->
-            syncedPhoto.groupBy { it.date.substring(0, 10) }
+        cumOfMonthSyncedPhotos = Transformations.map(sizeOfMonthSyncedPhotos){
+            computeCumulativeSizesForMonth(it)
         }
 
-        cumOfSizeOfInnerElements = Transformations.map(sizesOfInnerElements){
-            computeCumulativeSizes(it)
-        }
     }
 
     fun computeCumulativeSizes(sizes: List<List<Int>>): List<List<Int>> {
@@ -81,15 +115,42 @@ class SyncedPhotoView(application:Application): ViewModel() {
 
         var cumValue = 0
         for (i in sizes.indices) {
+            cumValue+=1
             cumulativeList.add(mutableListOf())
             for (j in 0 until sizes[i].size) {
+                if(sizes[i][j]%3 != 0){cumValue += 1}
+                cumValue += sizes[i][j]/3
                 cumulativeList[i].add(cumValue)
-                cumValue += sizes[i][j]
             }
-
-            cumValue += 2
         }
         return cumulativeList
+    }
+
+    fun computeCumulativeSizesForMonth(sizes: List<List<Int>>): List<List<Int>> {
+        val cumulativeList = mutableListOf<MutableList<Int>>()
+
+        var cumValue = 0
+        for (i in sizes.indices) {
+            cumulativeList.add(mutableListOf())
+            for (j in 0 until sizes[i].size) {
+                cumValue += sizes[i][j]+1
+                cumulativeList[i].add(cumValue)
+            }
+        }
+        return cumulativeList
+    }
+
+    private fun groupByYearMonth(data: Map<String, List<SyncedPhoto>>): Map<String, List<SyncedPhoto>> {
+        val result = mutableMapOf<String, MutableList<SyncedPhoto>>()
+
+        data.forEach { (date, photos) ->
+            val yearMonth = date.substring(0, 7)
+            val list = result.getOrPut(yearMonth) { mutableListOf() }
+
+            list.addAll(photos)
+        }
+
+        return result
     }
 
     fun updateSyncedPhoto(newPhoto: SyncedPhoto) {
@@ -100,18 +161,23 @@ class SyncedPhotoView(application:Application): ViewModel() {
         return listOfSyncPhotos.value!!.indexOf(photo)
     }
 
-//    fun addListOfSelectedPhotos(id : String){
-//        Log.d("[VIEW] SyncedPhotoView", "id : $id added")
-//        listOfSelectedPhotos.value?.toMutableSet()?.apply { add(id) }
-//        Log.d("[VIEW] SyncedPhotoView", "${listOfSelectedPhotos.value}")
-//    }
-//    fun removeListOfSelectedPhotos(id : String){
-//        Log.d("[VIEW] SyncedPhotoView", "id : $id removed")
-//        listOfSelectedPhotos.value?.toMutableSet()?.apply { remove(id) }
-//        Log.d("[VIEW] SyncedPhotoView", "${listOfSelectedPhotos.value}")
-//    }
-//
-//    fun checkListOfSelectedPhotos(id : String): Boolean? {
-//        return listOfSelectedPhotos.value?.contains(id)
-//    }
+    fun getDaySyncedPhotoIndex(photo: SyncedPhoto):Int{
+        return dayListOfSyncedPhotos.value!!.indexOf(photo)
+    }
+
+    fun addSelectedPhotosSet(id : String){
+        selectedPhotosSet.value.add(id)
+    }
+
+    fun removeSelectedPhotosSet(id : String){
+        selectedPhotosSet.value.remove(id)
+    }
+
+    fun isExistSelectedPhotosSetById(id :String):Boolean{
+        return selectedPhotosSet.value.contains(id)
+    }
+
+    fun clearSelectedPhotosSet(){
+        selectedPhotosSet.value.clear()
+    }
 }

@@ -23,4 +23,8 @@ interface CalendarService{
     @Headers("Content-Type: application/json")
     @GET("/gps/couples") // 서버 endpoint
     suspend fun getGps(@Header("Authorization") jwtToken: String, @Query("date") date : String) : ClusterData
+
+    @Headers("Content-Type: application/json")
+    @GET("/gps/couples/dates/{yearMonth}") // 서버 endpoint
+    suspend fun getDay(@Header("Authorization") jwtToken: String, @Path("yearMonth") date : String) : List<Int>
 }

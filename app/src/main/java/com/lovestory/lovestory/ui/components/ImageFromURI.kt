@@ -360,14 +360,18 @@ fun ThumbnailOfPhotoFromServerPopup(
     index: Int,
     token: String,
     photoId: String,
+    photo: SyncedPhoto,
     navHostController: NavHostController,
+    syncedPhotoView : SyncedPhotoView,
     widthDp: Dp
 ) {
     val context = LocalContext.current
     val bitmap = remember { mutableStateOf<Bitmap?>(null) }
     val cacheKey = "thumbnail_$photoId"
+    val indexForDetail = remember { mutableStateOf(0) }
 
-    LaunchedEffect(photoId) {
+    LaunchedEffect(photo) {
+        indexForDetail.value = syncedPhotoView.getAllSyncedPhotoIndex(photo)
         val cachedBitmap = loadBitmapFromDiskCache(context, cacheKey)
         if (cachedBitmap != null) {
 //            Log.d("Thumbnail","cache에서 로드")
@@ -386,11 +390,11 @@ fun ThumbnailOfPhotoFromServerPopup(
     }
 
     AnimatedVisibility (bitmap.value != null, enter = fadeIn(), exit = fadeOut()) {
-        DisplayImageFromBitmapPopup(index, bitmap.value!!, navHostController=navHostController, photoId = photoId, widthDp = widthDp)
+        DisplayImageFromBitmapPopup(index, bitmap.value!!, navHostController=navHostController, photoId = photoId, widthDp = widthDp, photoIndex = indexForDetail,)
     }
     AnimatedVisibility(bitmap.value== null, enter = fadeIn(), exit = fadeOut()) {
         val screenWidth = LocalConfiguration.current.screenWidthDp.dp
-        val imageWidth = (320.dp) / 3
+        val imageWidth = (screenWidth - 90.dp) / 3
 //        Log.d("image width", "$imageWidth")
         SkeletonPopup(modifier = Modifier
             .width(imageWidth)
@@ -400,9 +404,16 @@ fun ThumbnailOfPhotoFromServerPopup(
 }
 
 @Composable
-fun DisplayImageFromBitmapPopup(index: Int, bitmap: Bitmap, navHostController: NavHostController, photoId: String, widthDp: Dp) {
+fun DisplayImageFromBitmapPopup(
+    index: Int,
+    bitmap: Bitmap,
+    navHostController: NavHostController,
+    photoId: String,
+    photoIndex : MutableState<Int>,
+    widthDp: Dp
+) {
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
-    val imageWidth = (320.dp) / 3
+    val imageWidth = (screenWidth - 90.dp) / 3
 
     Image(
         bitmap = bitmap.asImageBitmap(),
@@ -413,7 +424,7 @@ fun DisplayImageFromBitmapPopup(index: Int, bitmap: Bitmap, navHostController: N
             .padding(2.dp)
             .clip(RoundedCornerShape(12.dp))
             .clickable {
-                navHostController.navigate(GalleryStack.DetailPhotoFromServer.route+"/$photoId") {
+                navHostController.navigate(GalleryStack.DetailPhotoFromServer.route+"/${photoIndex.value}") {
                     popUpTo(GalleryStack.PhotoSync.route)
                 }
             },

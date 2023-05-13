@@ -348,9 +348,10 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
             }, //onDismissRequest,
             properties = DialogProperties(dismissOnBackPress = true, dismissOnClickOutside = true)
         ) {
+            val screenWidth = LocalConfiguration.current.screenWidthDp.dp
             Column(
                 modifier = Modifier
-                    .width(360.dp)
+                    .width(screenWidth-40.dp)
                     .wrapContentHeight()
                     .clip(RoundedCornerShape(12.dp))
                     .background(color = Color.White),
@@ -633,9 +634,11 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                             val filteredSyncedPhotosByDate = syncedPhotosByDate.filterKeys { key ->
                                 key == dateToString(selection.date)
                             }
+                            isPopupVisibleSave = true
                             PhotoForCalendar(
                                 syncedPhotosByDate = filteredSyncedPhotosByDate,
                                 token = token,
+                                syncedPhotoView = syncedPhotoView,
                                 navHostController = navHostController,
                                 allPhotoListState = allPhotoListState,
                                 widthDp = boxWidth.value.dp
