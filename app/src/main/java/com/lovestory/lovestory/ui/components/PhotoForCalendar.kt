@@ -30,7 +30,7 @@ fun PhotoForCalendar(
     navHostController: NavHostController,
     syncedPhotoView : SyncedPhotoView,
     allPhotoListState: LazyListState,
-    widthDp: Dp
+    widthDp: Dp,
 ){
     val syncedPhotosByDate = syncedPhotosByDate
 
@@ -59,7 +59,7 @@ fun PhotoForCalendar(
                                     syncedPhotoView = syncedPhotoView,
                                     photoId = photo.id,
                                     navHostController = navHostController,
-                                    widthDp = widthDp
+                                    widthDp = widthDp,
                                 )
                             }
                         }

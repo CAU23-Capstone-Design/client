@@ -108,7 +108,7 @@ suspend fun putComment(token : String, date: String, comment : String):Response<
 }
 
 
-suspend fun getDay(token : String, yearMonth: String):Response<List<Int>>{
+suspend fun getDay(token : String, date : String): Response<List<Int>> {
     val jwt : String = "Bearer $token"
     val retrofit = Retrofit.Builder()
         .baseUrl("https://api.cau-lovestory.site:3000/api-docs/")
@@ -118,15 +118,13 @@ suspend fun getDay(token : String, yearMonth: String):Response<List<Int>>{
     val apiService = retrofit.create(CalendarService::class.java)
 
     return try{
-        //val request = PutCommentRequest(comment)
-        val any : List<Int> = apiService.getDay(jwtToken = jwt, yearMonth )
-        Response.success((any))
+        val any : List<Int> = apiService.getDay(jwtToken = jwt, date)
+        Response.success(any)
     }catch (e : HttpException){
-        Log.e("put comment api error1", "$e")
+        Log.e("get Gps api error1", "$e")
         Response.error(e.code(), e.response()?.errorBody())
     }catch (e : Exception){
-        Log.e("put comment api error2", "$e")
+        Log.e("get Gps api error2", "$e")
         Response.error(500, ResponseBody.create(null, "Unknown error"))
     }
 }
-

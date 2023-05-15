@@ -363,7 +363,7 @@ fun ThumbnailOfPhotoFromServerPopup(
     photo: SyncedPhoto,
     navHostController: NavHostController,
     syncedPhotoView : SyncedPhotoView,
-    widthDp: Dp
+    widthDp: Dp,
 ) {
     val context = LocalContext.current
     val bitmap = remember { mutableStateOf<Bitmap?>(null) }
@@ -410,10 +410,11 @@ fun DisplayImageFromBitmapPopup(
     navHostController: NavHostController,
     photoId: String,
     photoIndex : MutableState<Int>,
-    widthDp: Dp
+    widthDp: Dp,
 ) {
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
     val imageWidth = (screenWidth - 90.dp) / 3
+
 
     Image(
         bitmap = bitmap.asImageBitmap(),

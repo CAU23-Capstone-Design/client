@@ -1,13 +1,25 @@
 package com.lovestory.lovestory.model
 
+import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.location.Location
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
+import androidx.annotation.DrawableRes
+import androidx.compose.runtime.*
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.PolylineOptions
 import kotlin.math.log2
+
+@Composable
+fun VectorToBitmap(@DrawableRes vectorResId: Int): Bitmap {
+    val vectorDrawable = ContextCompat.getDrawable(LocalContext.current, vectorResId)
+    val bitmap = Bitmap.createBitmap(vectorDrawable!!.intrinsicWidth, vectorDrawable.intrinsicHeight, Bitmap.Config.ARGB_8888)
+    val canvas = Canvas(bitmap)
+    vectorDrawable.setBounds(0, 0, canvas.width, canvas.height)
+    vectorDrawable.draw(canvas)
+    return bitmap
+}
 
 val points1 = listOf(
     LatLng(37.503735330931136, 126.95615523253305),

@@ -63,6 +63,29 @@ fun CalendarDialog(
 }
 
 @Composable
+fun MapDialog(
+    onDismissRequest : ()-> Unit,
+    properties: DialogProperties = DialogProperties(),
+    content : @Composable () -> Unit,
+){
+    Dialog(
+        onDismissRequest = onDismissRequest,
+        properties = properties,
+    ) {
+        Box(
+            modifier = Modifier
+                .background(Color.Transparent)
+        ) {
+            content()
+        }
+        //content()
+        //if (selectedMemory != null) {
+        //    onMemoryUpdated(selectedMemory.copy(comment = editedComment))
+        //  }
+    }
+}
+
+@Composable
 fun CoupleSyncDialog(
     navHostController: NavHostController,
     onDismissRequest : ()->Unit,

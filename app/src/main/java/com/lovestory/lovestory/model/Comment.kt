@@ -7,6 +7,7 @@ import androidx.compose.runtime.setValue
 import androidx.room.Entity
 import java.time.LocalDate
 import com.google.gson.annotations.SerializedName
+import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 
 
@@ -20,6 +21,23 @@ data class CoupleMemory(val date: LocalDate, var comment: String){
 fun dateToString(date: LocalDate): String{
     val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
     return date.format(formatter)
+}
+
+fun monthToString(yearMonth: YearMonth): String{
+    val formatter = DateTimeFormatter.ofPattern("yyyy-MM")
+    return yearMonth.format(formatter)
+}
+
+fun intToString(date: LocalDate, int: Int): String{
+    val dateString = dateToString(date)
+    val yearMonthString = dateString.substring(0, 7)
+    val dayString = String.format("%02d", int)
+    return "$yearMonthString-$dayString"
+}
+
+fun intmonthToString(yearMonth: YearMonth, int: Int): String{
+    val dayString = String.format("%02d", int)
+    return "${monthToString(yearMonth)}-$dayString"
 }
 //data class StringMemory(val date: String, var comment: String)
 
