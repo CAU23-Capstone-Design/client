@@ -65,13 +65,27 @@ fun MainNavGraph(
         }
         composable(CalendarStack.Map.route + "/{date}") {
             val date = it.arguments?.getString("date")
-            MapScreen(navHostController = navHostController, date = date!!)
+            MapScreen(navHostController = navHostController, syncedPhotoView = syncedPhotoView, date = date!!)
+        }
+        composable(CalendarStack.DetailScreen.route+"/{photoIndex}/{date}"){
+//            val photoId = it.arguments?.getString("photoId")
+            val photoIndex = it.arguments?.getString("photoIndex")!!.toInt()
+            val date = it.arguments?.getString("date")!!
+//            Log.d("naviagetion", "index : $indexForDetail")
+            CalendarPhotoDetailScreenFromServer(
+                navHostController = navHostController,
+                syncedPhotoView= syncedPhotoView,
+                photoIndex = photoIndex,
+                date = date
+            )
         }
     }
 }
 
 sealed class CalendarStack(val route: String) {
     object Map : CalendarStack(route = "Map")
+
+    object DetailScreen: CalendarStack(route = "Detail")
 }
 
 sealed class MainScreens(val route : String, val title : String, val icon : Int){

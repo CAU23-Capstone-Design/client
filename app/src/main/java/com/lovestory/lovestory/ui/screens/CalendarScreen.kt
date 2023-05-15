@@ -270,7 +270,8 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                             "PHOTO",
                             "PHOTO",
                             getThumbnailForPhoto(token, it.id)!!,
-                            "PHOTO"
+                            "PHOTO",
+                            it.id
                         )
                     )
                 }
@@ -285,7 +286,7 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
 
             if (latLng.isNotEmpty()) {
                 latLng.forEach {
-                    items.add(MyItem(it, "MARKER", "GPS", bitmap, "POSITION"))
+                    items.add(MyItem(it, "MARKER", "GPS", bitmap, "POSITION", "HI"))
                 }
             }
 
@@ -719,6 +720,7 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                                 navHostController = navHostController,
                                 allPhotoListState = allPhotoListState,
                                 widthDp = boxWidth.value.dp,
+                                selectDate = dateToString(selection.date)
                             )
                         }
                         Spacer(modifier = Modifier.height(20.dp))

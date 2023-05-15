@@ -78,10 +78,6 @@ fun MapDialog(
         ) {
             content()
         }
-        //content()
-        //if (selectedMemory != null) {
-        //    onMemoryUpdated(selectedMemory.copy(comment = editedComment))
-        //  }
     }
 }
 

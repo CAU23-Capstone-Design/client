@@ -36,6 +36,7 @@ import coil.request.ImageRequest
 import com.lovestory.lovestory.R
 import com.lovestory.lovestory.database.entities.PhotoForSync
 import com.lovestory.lovestory.database.entities.SyncedPhoto
+import com.lovestory.lovestory.graphs.CalendarStack
 import com.lovestory.lovestory.graphs.GalleryStack
 import com.lovestory.lovestory.graphs.MainScreens
 import com.lovestory.lovestory.module.loadBitmapFromDiskCache
@@ -364,6 +365,7 @@ fun ThumbnailOfPhotoFromServerPopup(
     navHostController: NavHostController,
     syncedPhotoView : SyncedPhotoView,
     widthDp: Dp,
+    date: String
 ) {
     val context = LocalContext.current
     val bitmap = remember { mutableStateOf<Bitmap?>(null) }
@@ -371,7 +373,8 @@ fun ThumbnailOfPhotoFromServerPopup(
     val indexForDetail = remember { mutableStateOf(0) }
 
     LaunchedEffect(photo) {
-        indexForDetail.value = syncedPhotoView.getAllSyncedPhotoIndex(photo)
+        indexForDetail.value = syncedPhotoView.calendarSyncedPhotoIndex(photo, date)
+        Log.d("인덱스","${indexForDetail.value}")
         val cachedBitmap = loadBitmapFromDiskCache(context, cacheKey)
         if (cachedBitmap != null) {
 //            Log.d("Thumbnail","cache에서 로드")
@@ -390,7 +393,7 @@ fun ThumbnailOfPhotoFromServerPopup(
     }
 
     AnimatedVisibility (bitmap.value != null, enter = fadeIn(), exit = fadeOut()) {
-        DisplayImageFromBitmapPopup(index, bitmap.value!!, navHostController=navHostController, photoId = photoId, widthDp = widthDp, photoIndex = indexForDetail,)
+        DisplayImageFromBitmapPopup(index, bitmap.value!!, navHostController=navHostController, photoId = photoId, widthDp = widthDp, photoIndex = indexForDetail, date = date)
     }
     AnimatedVisibility(bitmap.value== null, enter = fadeIn(), exit = fadeOut()) {
         val screenWidth = LocalConfiguration.current.screenWidthDp.dp
@@ -411,10 +414,10 @@ fun DisplayImageFromBitmapPopup(
     photoId: String,
     photoIndex : MutableState<Int>,
     widthDp: Dp,
+    date: String
 ) {
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
     val imageWidth = (screenWidth - 90.dp) / 3
-
 
     Image(
         bitmap = bitmap.asImageBitmap(),
@@ -425,11 +428,10 @@ fun DisplayImageFromBitmapPopup(
             .padding(2.dp)
             .clip(RoundedCornerShape(12.dp))
             .clickable {
-                navHostController.navigate(GalleryStack.DetailPhotoFromServer.route+"/${photoIndex.value}") {
-                    popUpTo(GalleryStack.PhotoSync.route)
+                navHostController.navigate(CalendarStack.DetailScreen.route+"/${photoIndex.value}/${date}") {
+                    popUpTo(CalendarStack.DetailScreen.route)
                 }
             },
-
         contentScale = ContentScale.Crop,
     )
 }

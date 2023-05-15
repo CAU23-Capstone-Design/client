@@ -13,9 +13,8 @@ import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,22 +25,22 @@ import androidx.navigation.compose.rememberNavController
 import com.google.android.gms.maps.model.*
 import com.google.maps.android.clustering.ClusterItem
 import com.google.maps.android.compose.*
-import com.lovestory.lovestory.ui.components.CustomMarker
 import com.lovestory.lovestory.ui.theme.LoveStoryTheme
 import com.google.maps.android.compose.clustering.Clustering
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -59,19 +58,20 @@ import com.google.maps.android.clustering.ClusterManager
 import com.google.maps.android.clustering.view.DefaultClusterRenderer
 import com.lovestory.lovestory.R
 import com.lovestory.lovestory.database.PhotoDatabase
+import com.lovestory.lovestory.database.entities.SyncedPhoto
 import com.lovestory.lovestory.database.repository.SyncedPhotoRepository
 import com.lovestory.lovestory.model.*
 import com.lovestory.lovestory.module.getToken
 import com.lovestory.lovestory.module.photo.getThumbnailForPhoto
 import com.lovestory.lovestory.network.getGps
 import com.lovestory.lovestory.network.getPhotoTable
-import com.lovestory.lovestory.ui.components.MapDialog
-import com.lovestory.lovestory.ui.components.toInt
+import com.lovestory.lovestory.ui.components.*
+import com.lovestory.lovestory.view.SyncedPhotoView
 
 
 @OptIn(MapsComposeExperimentalApi::class)
 @Composable
-fun MapScreen(navHostController: NavHostController, date: String){
+fun MapScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhotoView, date: String){
     val context = LocalContext.current
     val token = getToken(context)
     val dataLoaded = remember { mutableStateOf(false) }
@@ -92,7 +92,11 @@ fun MapScreen(navHostController: NavHostController, date: String){
     val bitmap1 = (drawable1 as BitmapDrawable).bitmap
 
     var isPopupVisible by remember { mutableStateOf(false) }
-    val itemPopup by remember { mutableStateOf(emptyList<MyItem>()) }
+    var itemPopup by remember { mutableStateOf(emptyList<MyItem>()) }
+
+    val allPhotoListState = rememberLazyListState()
+
+    val syncedPhotosByDate by syncedPhotoView.groupedSyncedPhotosByDate.observeAsState(initial = mapOf())
 
     LaunchedEffect(true){
         //get GPS
@@ -116,13 +120,13 @@ fun MapScreen(navHostController: NavHostController, date: String){
             }
             syncedPhoto.forEach{
                 items.add(MyItem(LatLng(it.latitude, it.longitude), "Marker1", "사진",
-                    getThumbnailForPhoto(token!!, it.id)!!, "PHOTO"))
+                    getThumbnailForPhoto(token!!, it.id)!!, "PHOTO", it.id))
             }
         }
 
         //사진 좌표와 비트맵
         latLng.forEach{
-            items.add(MyItem(it,"Marker2","마커", bitmap1, "POSITION"))
+            items.add(MyItem(it,"Marker2","마커", bitmap1, "POSITION", "HI"))
         }
 
         photoPosition.forEach {
@@ -132,8 +136,6 @@ fun MapScreen(navHostController: NavHostController, date: String){
         items.forEach{
             Log.d("아이템 정보","$it")
         }
-
-        items.add(MyItem(LatLng(37.434418922927335, 127.1283632568734),"Marker3","마커",bitmap1, "PHOTO"))
 
         dataLoaded.value = true
     }
@@ -176,6 +178,7 @@ fun MapScreen(navHostController: NavHostController, date: String){
                     items = items,
                     // Optional: Handle clicks on clusters, cluster items, and cluster item info windows
                     onClusterClick = {
+                        itemPopup = it.items.filter{it.itemType == "PHOTO"}
                         isPopupVisible = true
                         false
                     },
@@ -188,10 +191,6 @@ fun MapScreen(navHostController: NavHostController, date: String){
                     },
                     // Optional: Custom rendering for clusters
                     clusterContent = { cluster ->
-                        cluster.items.forEach { item ->
-                            if(item.itemType == "PHOTO")
-                                itemPopup.plus(item)
-                        }
                         val size = 50.dp
                         val density = LocalDensity.current.density
                         val scaledSize = (size * density).toInt()
@@ -317,7 +316,51 @@ fun MapScreen(navHostController: NavHostController, date: String){
     }
 
     if(isPopupVisible){
-        Log.d("마이아이템","$itemPopup")
+        MapDialog(
+            onDismissRequest = { isPopupVisible = false },
+            properties = DialogProperties(dismissOnBackPress = true, dismissOnClickOutside = true)
+        )
+        {
+            val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+            val screenHeight = LocalConfiguration.current.screenHeightDp.dp
+            Column(
+                modifier = Modifier
+                    .width(screenWidth - 40.dp)
+                    .height(screenWidth)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(color = Color.White),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentHeight()
+                        .padding(20.dp)
+                        .background(color = Color.Transparent, RoundedCornerShape(12.dp))
+                ) {
+                    val boxWidth = remember { mutableStateOf(0) }
+                    val popupWidthDp = with(LocalDensity.current) {
+                        LocalContext.current.resources.displayMetrics.widthPixels.dp
+                    }
+                    val filteredSyncedPhotos = syncedPhotosByDate
+                        .filter { (date, photos) ->
+                            photos.any { photo -> itemPopup.any { myItem -> myItem.id == photo.id } }
+                        }
+
+                    //isPopupVisibleSave = true
+                    PhotoForMap(
+                        syncedPhotosByDate = filteredSyncedPhotos,
+                        token = token,
+                        syncedPhotoView = syncedPhotoView,
+                        navHostController = navHostController,
+                        allPhotoListState = allPhotoListState,
+                        widthDp = boxWidth.value.dp,
+                        selectDate = date
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -327,7 +370,8 @@ data class MyItem(
     val itemTitle: String,
     val itemSnippet: String,
     val icon: Bitmap,
-    val itemType: String
+    val itemType: String,
+    val id: String
 ) : ClusterItem {
     override fun getPosition(): LatLng =
         itemPosition
