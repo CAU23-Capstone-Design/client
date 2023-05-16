@@ -221,6 +221,55 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
 
     LaunchedEffect(isPopupVisible || isPopupVisibleSave) {
         if (isPopupVisible || isPopupVisibleSave) {
+            //get GPS
+            val gps = getGps(token!!, dateToString(selection.date))
+            if (gps.body() != null) {
+                latLng = getLatLng(gps.body()!!)
+                if(latLng.isNotEmpty()){
+                    latLngExist = true
+                }
+            }
+
+            //get syncedPhoto from database
+            val response = getPhotoTable(token!!)
+            if (response.isSuccessful) {
+                val photoDatabase = PhotoDatabase.getDatabase(context)
+                val photoDao = photoDatabase.syncedPhotoDao()
+                repository = SyncedPhotoRepository(photoDao)
+
+                val syncedPhoto = repository.getSyncedPhotosByDate(dateToString(selection.date))
+                syncedPhoto.forEach {
+                    items.add(
+                        MyItem(
+                            LatLng(it.latitude, it.longitude),
+                            "PHOTO",
+                            "PHOTO",
+                            getThumbnailForPhoto(token, it.id)!!,
+                            "PHOTO",
+                            it.id
+                        )
+                    )
+                }
+                photoPosition = syncedPhoto.map { it ->
+                    LatLng(it.latitude, it.longitude)
+                }
+                if(syncedPhoto.isNotEmpty()){
+                    photoExist = true
+                }
+            }
+
+            if (latLng.isNotEmpty()) {
+                latLng.forEach {
+                    items.add(MyItem(it, "MARKER", "GPS", bitmap, "POSITION", "HI"))
+                }
+            }
+
+            photoPosition.forEach {
+                latLng += it
+            }
+
+            dataLoaded.value = true
+
             //get Comment
             val getMemoryList: Response<List<GetMemory>> = getComment(token!!)
             val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
@@ -245,57 +294,6 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                     meetDate.add(dateToString(it.date))
                 }
             }
-
-            //get GPS
-            val gps = getGps(token, dateToString(selection.date))
-            if (gps.body() != null) {
-                latLng = getLatLng(gps.body()!!)
-                if(latLng.isNotEmpty()){
-                    latLngExist = true
-                }
-            }
-
-            //get syncedPhoto from database
-            val response = getPhotoTable(token)
-            if (response.isSuccessful) {
-                val photoDatabase = PhotoDatabase.getDatabase(context)
-                val photoDao = photoDatabase.syncedPhotoDao()
-                repository = SyncedPhotoRepository(photoDao)
-
-                val syncedPhoto = repository.getSyncedPhotosByDate(dateToString(selection.date))
-                syncedPhoto.forEach {
-                    items.add(
-                        MyItem(
-                            LatLng(it.latitude, it.longitude),
-                            "PHOTO",
-                            "PHOTO",
-                            getThumbnailForPhoto(token, it.id)!!,
-                            "PHOTO",
-                            it.id
-                        )
-                    )
-                }
-
-                photoPosition = syncedPhoto.map { it ->
-                    LatLng(it.latitude, it.longitude)
-                }
-                if(syncedPhoto.isNotEmpty()){
-                    photoExist = true
-                }
-            }
-
-            if (latLng.isNotEmpty()) {
-                latLng.forEach {
-                    items.add(MyItem(it, "MARKER", "GPS", bitmap, "POSITION", "HI"))
-                }
-            }
-
-            photoPosition.forEach {
-                latLng += it
-            }
-
-            dataLoaded.value = true
-            Log.d("좌표 개수", "${latLng.size}")
         }
     }
 
@@ -537,7 +535,13 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                                     .fillMaxWidth()
                                     .aspectRatio(2f)
                                     .background(color = Color.Transparent)
-                            )
+                                    .clip(RoundedCornerShape(12.dp))
+                            ){
+                                Text(
+                                    text = "지도 로드 중...",
+                                    modifier = Modifier.align(Alignment.Center)
+                                )
+                            }
                         } else if (dataLoaded.value) {
                             val viewposition = averageLatLng(latLng)
 //                            cameraPositionState = CameraPositionState(

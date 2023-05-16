@@ -148,7 +148,13 @@ fun MapScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhot
             //스켈레톤 추가
             Box(modifier = Modifier
                 .fillMaxSize()
-                .background(color = Color.Transparent))
+                .background(color = Color.Transparent)
+            ){
+                Text(
+                    text = "지도 로드 중...",
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            }
         } else {
             val viewPosition = averageLatLng(latLng)
 //            cameraPositionState = CameraPositionState(position = CameraPosition.fromLatLngZoom(viewPosition, 15f))
@@ -328,6 +334,7 @@ fun MapScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhot
                     .width(screenWidth - 40.dp)
                     .height(screenWidth)
                     .clip(RoundedCornerShape(12.dp))
+
                     .background(color = Color.White),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
