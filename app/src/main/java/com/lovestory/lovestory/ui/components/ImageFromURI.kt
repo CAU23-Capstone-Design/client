@@ -365,7 +365,8 @@ fun ThumbnailOfPhotoFromServerPopup(
     navHostController: NavHostController,
     syncedPhotoView : SyncedPhotoView,
     widthDp: Dp,
-    date: String
+    date: String,
+    onImageClick: () -> Unit
 ) {
     val context = LocalContext.current
     val bitmap = remember { mutableStateOf<Bitmap?>(null) }
@@ -393,7 +394,7 @@ fun ThumbnailOfPhotoFromServerPopup(
     }
 
     AnimatedVisibility (bitmap.value != null, enter = fadeIn(), exit = fadeOut()) {
-        DisplayImageFromBitmapPopup(index, bitmap.value!!, navHostController=navHostController, photoId = photoId, widthDp = widthDp, photoIndex = indexForDetail, date = date)
+        DisplayImageFromBitmapPopup(index, bitmap.value!!, navHostController=navHostController, photoId = photoId, widthDp = widthDp, photoIndex = indexForDetail, date = date, onImageClick = onImageClick)
     }
     AnimatedVisibility(bitmap.value== null, enter = fadeIn(), exit = fadeOut()) {
         val screenWidth = LocalConfiguration.current.screenWidthDp.dp
@@ -414,7 +415,8 @@ fun DisplayImageFromBitmapPopup(
     photoId: String,
     photoIndex : MutableState<Int>,
     widthDp: Dp,
-    date: String
+    date: String,
+    onImageClick: () -> Unit
 ) {
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
     val imageWidth = (screenWidth - 90.dp) / 3
@@ -428,6 +430,7 @@ fun DisplayImageFromBitmapPopup(
             .padding(2.dp)
             .clip(RoundedCornerShape(12.dp))
             .clickable {
+                onImageClick
                 navHostController.navigate(CalendarStack.DetailScreen.route+"/${photoIndex.value}/${date}") {
                     popUpTo(CalendarStack.DetailScreen.route)
                 }

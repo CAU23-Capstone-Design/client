@@ -189,11 +189,10 @@ fun MapScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhot
                         false
                     },
                     onClusterItemClick = {
-                        Log.d("TAG", "Cluster item clicked! $it") // 클러스팅 되지 않은 마커 클릭했을 때
                         false
                     },
                     onClusterItemInfoWindowClick = {
-                        Log.d("TAG", "Cluster item info window clicked! $it") // 클러스팅 되지 않은 마커의 정보창을 클릭했을 때
+                        false
                     },
                     // Optional: Custom rendering for clusters
                     clusterContent = { cluster ->
@@ -344,7 +343,8 @@ fun MapScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhot
                         .fillMaxWidth()
                         .wrapContentHeight()
                         .padding(20.dp)
-                        .background(color = Color.Transparent, RoundedCornerShape(12.dp))
+                        .background(color = Color.Transparent, RoundedCornerShape(12.dp)),
+                    contentAlignment = Alignment.TopCenter
                 ) {
                     val boxWidth = remember { mutableStateOf(0) }
                     val popupWidthDp = with(LocalDensity.current) {

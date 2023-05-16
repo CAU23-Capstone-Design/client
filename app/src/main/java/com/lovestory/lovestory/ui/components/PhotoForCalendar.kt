@@ -10,6 +10,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -32,7 +33,9 @@ fun PhotoForCalendar(
     syncedPhotoView : SyncedPhotoView,
     allPhotoListState: LazyListState,
     widthDp: Dp,
-    selectDate: String
+    selectDate: String,
+    isPopupVisibleSave: Boolean,
+    //onPopupVisibilityChange: (Boolean) -> Unit
 ){
     val syncedPhotosByDate = syncedPhotosByDate
 
@@ -61,7 +64,10 @@ fun PhotoForCalendar(
                                     photoId = photo.id,
                                     navHostController = navHostController,
                                     widthDp = widthDp,
-                                    date = selectDate
+                                    date = selectDate,
+                                    onImageClick = {
+                                    //    onPopupVisibilityChange(true) // Call the callback with the desired value
+                                    }
                                 )
                             }
                         }
@@ -87,14 +93,16 @@ fun PhotoForMap(
     LazyColumn(
         modifier = Modifier.fillMaxWidth(),
         //contentPadding = PaddingValues(bottom = 10.dp),
-        state = allPhotoListState
+        state = allPhotoListState,
+        //verticalArrangement = Arrangement.Top
     ){
         syncedPhotosByDate.forEach{(date, photos)->
             items(photos.chunked(3).size) { index ->
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Start
+                    horizontalArrangement = Arrangement.Start,
+                    verticalAlignment = Alignment.Top
                 ) {
                     photos.chunked(3)[index].forEach { photo ->
                         if (token != null) {
@@ -109,7 +117,8 @@ fun PhotoForMap(
                                     photoId = photo.id,
                                     navHostController = navHostController,
                                     widthDp = widthDp,
-                                    date = selectDate
+                                    date = selectDate,
+                                    onImageClick = {}
                                 )
                             }
                         }

@@ -593,21 +593,13 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                                     items = items,
                                     // Optional: Handle clicks on clusters, cluster items, and cluster item info windows
                                     onClusterClick = {
-                                        Log.d("TAG", "Cluster clicked! $it") // 클러스터 클릭했을 때
                                         false
                                     },
                                     onClusterItemClick = {
-                                        Log.d(
-                                            "TAG",
-                                            "Cluster item clicked! $it"
-                                        ) // 클러스팅 되지 않은 마커 클릭했을 때
                                         false
                                     },
                                     onClusterItemInfoWindowClick = {
-                                        Log.d(
-                                            "TAG",
-                                            "Cluster item info window clicked! $it"
-                                        ) // 클러스팅 되지 않은 마커의 정보창을 클릭했을 때
+                                        false
                                     },
                                     // Optional: Custom rendering for clusters
                                     clusterContent = { cluster ->
@@ -724,7 +716,8 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                                 navHostController = navHostController,
                                 allPhotoListState = allPhotoListState,
                                 widthDp = boxWidth.value.dp,
-                                selectDate = dateToString(selection.date)
+                                selectDate = dateToString(selection.date),
+                                isPopupVisibleSave = isPopupVisibleSave,
                             )
                         }
                         Spacer(modifier = Modifier.height(20.dp))
