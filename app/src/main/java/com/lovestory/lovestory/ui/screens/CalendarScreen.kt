@@ -71,6 +71,7 @@ import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.*
 import androidx.lifecycle.lifecycleScope
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
@@ -159,6 +160,7 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
     val syncedPhotosByDate by syncedPhotoView.groupedSyncedPhotosByDate.observeAsState(initial = mapOf())
     val allPhotoListState = rememberLazyListState()
 
+    val systemUiController = rememberSystemUiController()
 
     //해야 되는 게 코루틴 정리. 룸 db
     LaunchedEffect(key1 = true) {
@@ -191,36 +193,10 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
             }
         }
 
-        //dataLoaded.value = true
-
-        /*
-        //데이터베이스에서 get sync date
-        val response = getPhotoTable(token!!)
-        if(response.isSuccessful) {
-            val photoDatabase = PhotoDatabase.getDatabase(context)
-            val photoDao = photoDatabase.syncedPhotoDao()
-            repositoryDummy = SyncedPhotoRepository(photoDao)
-
-            val syncedPhoto = repositoryDummy.listOfGetAllSyncedPhoto()
-
-            syncedPhoto.forEach{
-                val inputString = it.date
-                val index = inputString.indexOf("T")
-                val extractedString = inputString.substring(0, index)
-                if (!meetDate.contains(extractedString)) {
-                    meetDate.add(extractedString)
-                }
-                if (!photoDate.contains(extractedString)) {
-                    photoDate.add(extractedString)
-                }
-            }
-        }
-
-         */
     }
 
-    LaunchedEffect(isPopupVisible || isPopupVisibleSave) {
-        if (isPopupVisible || isPopupVisibleSave) {
+    LaunchedEffect(isPopupVisible) {
+        if (isPopupVisible) {
             //get GPS
             val gps = getGps(token!!, dateToString(selection.date))
             if (gps.body() != null) {
@@ -230,32 +206,29 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                 }
             }
 
-            //get syncedPhoto from database
-            val response = getPhotoTable(token!!)
-            if (response.isSuccessful) {
-                val photoDatabase = PhotoDatabase.getDatabase(context)
-                val photoDao = photoDatabase.syncedPhotoDao()
-                repository = SyncedPhotoRepository(photoDao)
+            val photoDatabase = PhotoDatabase.getDatabase(context)
+            val photoDao = photoDatabase.syncedPhotoDao()
+            repository = SyncedPhotoRepository(photoDao)
 
-                val syncedPhoto = repository.getSyncedPhotosByDate(dateToString(selection.date))
-                syncedPhoto.forEach {
-                    items.add(
-                        MyItem(
-                            LatLng(it.latitude, it.longitude),
-                            "PHOTO",
-                            "PHOTO",
-                            getThumbnailForPhoto(token, it.id)!!,
-                            "PHOTO",
-                            it.id
-                        )
+            val syncedPhoto = repository.getSyncedPhotosByDate(dateToString(selection.date))
+            syncedPhoto.forEach {
+                items.add(
+                    MyItem(
+                        LatLng(it.latitude, it.longitude),
+                        "PHOTO",
+                        "PHOTO",
+                        null,
+                        //getThumbnailForPhoto(token, it.id)!!,
+                        "PHOTO",
+                        it.id
                     )
-                }
-                photoPosition = syncedPhoto.map { it ->
-                    LatLng(it.latitude, it.longitude)
-                }
-                if(syncedPhoto.isNotEmpty()){
-                    photoExist = true
-                }
+                )
+            }
+            photoPosition = syncedPhoto.map { it ->
+                LatLng(it.latitude, it.longitude)
+            }
+            if(syncedPhoto.isNotEmpty()){
+                photoExist = true
             }
 
             if (latLng.isNotEmpty()) {
@@ -302,6 +275,12 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
         meetDay.body()?.forEach{
             meetDate.add(intmonthToString(visibleMonth.yearMonth, it))
         }
+    }
+
+    SideEffect {
+        systemUiController.setSystemBarsColor(
+            color = Color(0xFFF3F3F3),
+        )
     }
 
     Column(
@@ -363,6 +342,7 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
         if (existingMemory != null) {
             editedcomment = existingMemory.comment
         }
+
         CalendarDialog(
             selection = selection,
             onDismissRequest = {
@@ -514,7 +494,6 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                Log.d("컨텐츠","$dialogContent")
                 if(dialogContent) {
                     Box(
                         modifier = Modifier
@@ -523,10 +502,6 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                             .wrapContentHeight()
                             .background(color = Color.LightGray, RoundedCornerShape(12.dp))
                     ) {
-                        //var viewposition = LatLng(37.503735330931136, 126.95615523253305)
-//                        var cameraPositionState = rememberCameraPositionState {
-//                            position = CameraPosition.fromLatLngZoom(viewposition, 15f)
-//                        }
                         selectionSave = selection
                         if (!dataLoaded.value) {
                             //스켈레톤 추가
@@ -615,7 +590,7 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                                         // Set the cluster icon based on the presence of a photoClusterItem
                                         if (photoClusterItem != null) {
                                             val scaledBitmap1 = photoClusterItem.icon.let{
-                                                Bitmap.createScaledBitmap(it, scaledSize, scaledSize, false)
+                                                Bitmap.createScaledBitmap(it!!, scaledSize, scaledSize, false)
                                             }!!.asImageBitmap()
                                             Surface(
                                                 shape = RoundedCornerShape(percent = 10),
@@ -623,7 +598,7 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                                                 border = BorderStroke(1.dp, Color.White),
                                                 elevation = 10.dp
                                             ) {
-                                                Box(contentAlignment = Alignment.Center) {
+                                                Box(contentAlignment = Alignment.Center, ) {
                                                     Image(
                                                         bitmap = scaledBitmap1,
                                                         contentDescription = null,
@@ -635,6 +610,7 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                                                         fontWeight = FontWeight.Black,
                                                         textAlign = TextAlign.Center
                                                     )
+
                                                 }
                                             }
                                         } else {
@@ -662,31 +638,69 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                                     },
                                     // Optional: Custom rendering for non-clustered items
                                     clusterItemContent = { item ->
-                                        val size = 50.dp
-                                        val scaledBitmap = item.icon.let {
-                                            val density = LocalDensity.current.density
-                                            val scaledSize = (size * density).toInt()
-                                            Bitmap.createScaledBitmap(
-                                                it,
-                                                scaledSize,
-                                                scaledSize,
-                                                false
-                                            )
-                                        }!!.asImageBitmap()
-                                        Surface(
-                                            shape = RoundedCornerShape(percent = 10),
-                                            contentColor = Color.White,
-                                            border = BorderStroke(1.dp, Color.White),
-                                            elevation = 10.dp
-                                        ) {
-                                            Box(contentAlignment = Alignment.Center) {
-                                                Image(
-                                                    bitmap = scaledBitmap,
-                                                    contentDescription = null,
-                                                    modifier = Modifier.size(60.dp)
-                                                )
-                                            }
+                                        val bit = remember{ mutableStateOf(item.icon) }
+                                        val photoLoaded = remember { mutableStateOf(false) }
+                                        LaunchedEffect(null){
+                                            bit.value = getThumbnailForPhoto(token!!, item.id)
+                                            photoLoaded.value = true
                                         }
+
+                                            if (!photoLoaded.value){
+                                                val size = 50.dp
+                                                val scaledBitmap = bitmap.let {
+                                                    val density = LocalDensity.current.density
+                                                    val scaledSize = (size * density).toInt()
+                                                    Bitmap.createScaledBitmap(
+                                                        it!!,
+                                                        scaledSize,
+                                                        scaledSize,
+                                                        false
+                                                    )
+                                                }!!.asImageBitmap()
+                                                Surface(
+                                                    shape = RoundedCornerShape(percent = 10),
+                                                    contentColor = Color.White,
+                                                    border = BorderStroke(1.dp, Color.White),
+                                                    elevation = 10.dp
+                                                ) {
+                                                    Box(
+                                                        contentAlignment = Alignment.Center,
+                                                    ) {
+                                                        Image(
+                                                            bitmap = scaledBitmap,
+                                                            contentDescription = null,
+                                                            modifier = Modifier.size(60.dp)
+                                                        )
+                                                    }
+                                                }
+                                            }else{
+                                                val size = 50.dp
+                                                val scaledBitmap = bit.value.let {
+                                                    val density = LocalDensity.current.density
+                                                    val scaledSize = (size * density).toInt()
+                                                    Bitmap.createScaledBitmap(
+                                                        it!!,
+                                                        scaledSize,
+                                                        scaledSize,
+                                                        false
+                                                    )
+                                                }!!.asImageBitmap()
+                                                Surface(
+                                                    shape = RoundedCornerShape(percent = 10),
+                                                    contentColor = Color.White,
+                                                    border = BorderStroke(1.dp, Color.White),
+                                                    elevation = 10.dp
+                                                ) {
+                                                    Box(contentAlignment = Alignment.Center) {
+                                                        Image(
+                                                            bitmap = scaledBitmap,
+                                                            contentDescription = null,
+                                                            modifier = Modifier.size(60.dp)
+                                                        )
+                                                    }
+                                                }
+                                            }
+
                                     }
                                 )
                             }

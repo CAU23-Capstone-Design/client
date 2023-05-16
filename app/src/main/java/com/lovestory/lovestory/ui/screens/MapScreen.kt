@@ -209,7 +209,7 @@ fun MapScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhot
                         // Set the cluster icon based on the presence of a photoClusterItem
                         if (photoClusterItem != null) {
                             val scaledBitmap1 = photoClusterItem.icon.let{
-                                Bitmap.createScaledBitmap(it, scaledSize, scaledSize, false)
+                                Bitmap.createScaledBitmap(it!!, scaledSize, scaledSize, false)
                             }!!.asImageBitmap()
                             Surface(
                                 shape = RoundedCornerShape(percent = 10),
@@ -282,7 +282,7 @@ fun MapScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhot
                         val scaledSize = (size * density).toInt()
                         if (item.itemType == "PHOTO") {
                             val scaledBitmap1 = item.icon.let{
-                                Bitmap.createScaledBitmap(it, scaledSize, scaledSize, false)
+                                Bitmap.createScaledBitmap(it!!, scaledSize, scaledSize, false)
                             }!!.asImageBitmap()
                             Surface(
                                 shape = RoundedCornerShape(percent = 10),
@@ -376,7 +376,7 @@ data class MyItem(
     val itemPosition: LatLng,
     val itemTitle: String,
     val itemSnippet: String,
-    val icon: Bitmap,
+    val icon: Bitmap?,
     val itemType: String,
     val id: String
 ) : ClusterItem {
@@ -388,10 +388,6 @@ data class MyItem(
 
     override fun getSnippet(): String =
         itemSnippet
-
-//    fun getIcon(): BitmapDescriptor {
-//        return icon
-//    }
 }
 
 //class MarkerClusterRender<T : MyItem>(
