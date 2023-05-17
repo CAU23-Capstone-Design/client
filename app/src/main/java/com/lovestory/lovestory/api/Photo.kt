@@ -14,7 +14,7 @@ interface PhotoService{
         @Header("Authorization") jwtToken: String,
         @Part image: MultipartBody.Part,
         @Part ("local_id") local_id : String)
-    : PhotoBody
+    : Response<PhotoBody>
 
     @Headers("Content-Type: application/json")
     @GET("/images/local-ids/info")

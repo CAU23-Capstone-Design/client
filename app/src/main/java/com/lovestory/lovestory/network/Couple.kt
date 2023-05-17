@@ -4,6 +4,7 @@ import android.util.Log
 import com.lovestory.lovestory.model.CoupleInfo
 import com.lovestory.lovestory.api.CoupleService
 import com.lovestory.lovestory.model.LoginResponse
+import com.lovestory.lovestory.model.UsersOfCoupleInfo
 import okhttp3.ResponseBody
 import retrofit2.HttpException
 import retrofit2.Response
@@ -42,5 +43,23 @@ suspend fun checkCouple(token: String?):Response<LoginResponse>{
     }catch (e : Exception){
         Log.e("NETWORK-checkCouple", "$e")
         Response.error(500, ResponseBody.create(null, "Unknown error"))
+    }
+}
+
+suspend fun getUsersInfo(token : String): UsersOfCoupleInfo? {
+    val jwt : String = "Bearer $token"
+    val apiService: CoupleService = createApiService()
+
+    return try{
+        val result = apiService.getCouplesInfo(jwt)
+        Log.d("NETWORK-getCoupleInfo", "${result.body()}")
+        result.body()
+    }catch (e : HttpException){
+        Log.e("NETWORK-getCoupleInfo", "${e.response()?.errorBody()}")
+        null
+    }catch (e : Exception){
+        Log.e("NETWORK-getCoupleInfo", "$e")
+        Log.e("NETWORK-getCoupleInfo", "unknown error")
+        null
     }
 }

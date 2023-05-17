@@ -17,11 +17,15 @@ suspend fun uploadPhotoToServer(
     local_id : String
 ):Response<PhotoBody>{
     val jwt : String = "Bearer $token"
+    Log.d("NETWORK-uploadPhotoToServer", "$jwt")
+    Log.d("NETWORK-uploadPhotoToServer", "$imagePart")
+    Log.d("NETWORK-uploadPhotoToServer", "$local_id")
     val apiService: PhotoService = createApiService()
 
     return try{
         val call = apiService.uploadImage(jwt, imagePart, local_id)
-        Response.success(call)
+        Log.e("NETWORK-uploadPhotoToServer", "${call.errorBody()}")
+        call
     }catch (e : HttpException){
         Log.e("NETWORK-uploadPhotoToServer", "$e")
         Response.error(e.code(), e.response()?.errorBody())

@@ -58,6 +58,7 @@ dependencies {
     def sheet_version = "1.1.1"
     def room_version = "2.5.0"
     def activity_version = "1.6.1"
+    def lottieVersion = "6.0.0"
 
     implementation 'androidx.core:core-ktx:1.7.0'
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.3.1'
@@ -145,4 +146,8 @@ dependencies {
 //    implementation "androidx.paging:paging-compose:1.0.0-alpha14"
 //    implementation "androidx.paging:paging-runtime:3.1.0"
     implementation "com.google.accompanist:accompanist-pager:0.28.0"
+
+    //lottie
+    implementation "com.airbnb.android:lottie:$lottieVersion"
+    implementation "com.airbnb.android:lottie-compose:$lottieVersion"
 }

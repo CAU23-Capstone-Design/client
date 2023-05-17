@@ -1,8 +1,11 @@
 package com.lovestory.lovestory
 
+import android.Manifest
+import android.Manifest.permission.ACCESS_BACKGROUND_LOCATION
 import android.app.ActivityManager
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -10,8 +13,10 @@ import android.os.PowerManager
 import android.provider.Settings
 import android.util.Log
 import android.view.Window
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
@@ -30,6 +35,37 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         requestWindowFeature(Window.FEATURE_NO_TITLE)
+
+        val requestPermissionLauncher =
+            registerForActivityResult(
+                ActivityResultContracts.RequestMultiplePermissions()
+            ) {permissions->
+                if(permissions.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false)) {
+//                Toast.makeText(this, "정확한 위치 권한 승인", Toast.LENGTH_SHORT).show()
+
+            }
+                else if(permissions.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false)){
+//                Toast.makeText(this, "대략적인 위치 권한 승인", Toast.LENGTH_SHORT).show()
+            }
+                else if(permissions.getOrDefault(Manifest.permission.READ_MEDIA_IMAGES, false)){
+//                    Toast.makeText(this, " 사진 권한 승인", Toast.LENGTH_SHORT).show()
+                }
+                else if(permissions.getOrDefault(Manifest.permission.POST_NOTIFICATIONS, false)){
+//                    Toast.makeText(this, " 알람 권한 승인", Toast.LENGTH_SHORT).show()
+                }
+                else{
+//                    Toast.makeText(this, "권한 얻기 실패...", Toast.LENGTH_SHORT).show()
+//                    ActivityResultContracts.RequestMultiplePermissions()
+                }
+            }
+
+        val permissions = arrayOf(
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.READ_MEDIA_IMAGES,
+            Manifest.permission.POST_NOTIFICATIONS
+        )
+        requestPermissionLauncher.launch(permissions)
 
         setContent {
             val systemUiController = rememberSystemUiController()

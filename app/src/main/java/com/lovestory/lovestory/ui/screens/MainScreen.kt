@@ -22,7 +22,7 @@ import com.lovestory.lovestory.view.*
 fun MainScreen(navHostController: NavHostController = rememberNavController()) {
     val context = LocalContext.current
 
-    getLocationPermission()
+//    getLocationPermission()
 //    getMediaPermission()
 //    val photoDatabase = PhotoDatabase.getDatabase(context)
 

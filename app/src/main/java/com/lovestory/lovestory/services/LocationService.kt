@@ -174,8 +174,8 @@ class LocationService : Service() {
 
     private fun createNotificationForLocationService():Notification{
         return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("LoveStory 사진 서비스")
-            .setContentText("사진 서비스가 실행중입니다.")
+            .setContentTitle("LoveStory")
+            .setContentText("혼자")
             .setSmallIcon(R.drawable.lovestory_logo)
             .build()
     }
