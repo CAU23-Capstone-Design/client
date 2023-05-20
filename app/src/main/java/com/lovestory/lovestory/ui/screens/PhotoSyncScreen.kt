@@ -6,24 +6,20 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.indication
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -40,6 +36,7 @@ import com.lovestory.lovestory.database.entities.PhotoForSyncDao
 import com.lovestory.lovestory.database.repository.PhotoForSyncRepository
 import com.lovestory.lovestory.module.photo.uploadPhoto
 import com.lovestory.lovestory.ui.components.CheckableDisplayImageFromUri
+import com.lovestory.lovestory.ui.components.CheckableDisplayImageFromUriWithPicker
 import com.lovestory.lovestory.ui.components.DeletPhotoDialog
 import com.lovestory.lovestory.ui.components.DropDownIcon
 import com.lovestory.lovestory.view.PhotoForSyncView
@@ -48,7 +45,7 @@ import kotlinx.coroutines.*
 @Composable
 fun PhotoSyncScreen(navHostController: NavHostController, photoForSyncView: PhotoForSyncView){
     val notSyncedPhotos by photoForSyncView.listOfPhotoForSync.observeAsState(initial = listOf())
-//    lateinit var checkPhotoList : List<Boolean>
+    val additionalNotSync by photoForSyncView.listOfAdditionPhotosForSync.observeAsState(initial = listOf())
 
     var isDropMenuForRemovePhoto = remember {mutableStateOf(false)}
     val showDeletePhotoDialog = remember { mutableStateOf(false) }
@@ -142,24 +139,70 @@ fun PhotoSyncScreen(navHostController: NavHostController, photoForSyncView: Phot
         }
 
 
+
         LazyVerticalGrid(
             columns = GridCells.Fixed(3),
             modifier = Modifier
-                .fillMaxSize(),
+                .padding(bottom = 10.dp)
+                .fillMaxWidth()
+                .fillMaxHeight(),
             contentPadding = PaddingValues(top = 65.dp, bottom = 65.dp)
         ) {
-            items(notSyncedPhotos.size) { index ->
-                if (index < notSyncedPhotos.size && index < photoForSyncView.checkPhotoList.value.size){
-                    CheckableDisplayImageFromUri(
-                        index = index,
-                        checked = photoForSyncView.checkPhotoList.value[index],
-                        imageInfo = notSyncedPhotos[index],
-                        onChangeChecked = onChangeChecked,
-                        navHostController = navHostController
-                    )
+            mapOf<String, List<Any>>( "camera" to listOf(notSyncedPhotos)  , "gallery" to listOf(additionalNotSync)).forEach {
+                item (
+                    span = {
+                        GridItemSpan(
+                            maxLineSpan
+                        )
+                    }
+
+                ){
+                    Column(
+                        modifier = Modifier
+                            .padding(vertical = 10.dp, horizontal = 15.dp),
+//                        verticalArrangement = Arrangement.Center
+                    ){
+                        if(it.key =="camera"){
+                            Text(text = "카메라로 찍은 사진 : ${notSyncedPhotos.size}장", fontSize = 18.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(vertical = 5.dp))
+                        }else if(it.key == "gallery"){
+                            Divider(color = Color.LightGray, thickness = 1.dp)
+                            Text(text = "갤러리에서 선택된 사진 : ${additionalNotSync.size}장", fontSize = 18.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 20.dp, bottom = 5.dp))
+                        }
+                    }
+                }
+
+                if(it.key =="camera"){
+                    items(notSyncedPhotos.size) { index ->
+                        if (index < notSyncedPhotos.size && index < photoForSyncView.checkPhotoList.value.size){
+                            CheckableDisplayImageFromUri(
+                                index = index,
+                                checked = photoForSyncView.checkPhotoList.value[index],
+                                imageInfo = notSyncedPhotos[index],
+                                onChangeChecked = onChangeChecked,
+                                navHostController = navHostController
+                            )
+                        }
+                    }
+                }
+
+                else if(it.key == "gallery"){
+                    items(additionalNotSync.size){ index ->
+                        if(index < additionalNotSync.size){
+                            CheckableDisplayImageFromUriWithPicker(
+                                navHostController = navHostController,
+                                index = index,
+                                checked = false,
+                                imageInfo = additionalNotSync[index],
+                                onChangeChecked = {index:Int->{index}}
+                            )
+                        }
+
+
+                    }
                 }
             }
         }
+
 
 
         Column(
@@ -196,7 +239,7 @@ fun PhotoSyncScreen(navHostController: NavHostController, photoForSyncView: Phot
                     showDeletePhotoDialog = showDeletePhotoDialog,
                     notSyncedPhotos = notSyncedPhotos,
                     checkPhotoList = photoForSyncView.checkPhotoList.value,
-                    context = context
+                    context = context,
                 )
             }
 

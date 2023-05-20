@@ -1,24 +1,30 @@
 package com.lovestory.lovestory.ui.components
 
+import android.app.Activity
 import android.content.Context
+import android.net.Uri
+import android.provider.ContactsContract.Contacts.Photo
+import android.util.Log
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.DropdownMenuItem
-import androidx.compose.material.Icon
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import com.lovestory.lovestory.R
 import com.lovestory.lovestory.database.entities.PhotoForSync
+import com.lovestory.lovestory.module.photo.addPhotoFromGallery
 import com.lovestory.lovestory.ui.screens.getListOfNotCheckedPhoto
 
 @Composable
@@ -27,8 +33,14 @@ fun DropDownIcon(
     showDeletePhotoDialog : MutableState<Boolean>,
     notSyncedPhotos : List<PhotoForSync>,
     checkPhotoList : List<Boolean>,
-    context : Context
+    context : Context,
     ){
+
+    val photoLauncher = rememberLauncherForActivityResult(contract = ActivityResultContracts.PickMultipleVisualMedia(30)){uri ->
+        addPhotoFromGallery(uri, context)
+    }
+
+
     Box() {
         Icon(
             painter = painterResource(id = R.drawable.baseline_more_vert_24),
@@ -53,6 +65,13 @@ fun DropDownIcon(
                 }
             ) {
                 Text(text = "선택 안한 사진 삭제")
+            }
+            DropdownMenuItem(
+                onClick = {
+                    photoLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                }
+            ) {
+                Text(text = "갤러리 사진 추가 하기")
             }
         }
     }

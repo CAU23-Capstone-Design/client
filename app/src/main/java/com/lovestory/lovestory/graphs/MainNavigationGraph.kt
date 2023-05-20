@@ -44,6 +44,10 @@ fun MainNavGraph(
             val photoId = it.arguments?.getString("photoId")
             PhotoDetailScreenFromDevice(navHostController = navHostController, photoId = photoId!!)
         }
+        composable(GalleryStack.DetailPhotoFromDeviceWithPicker.route+"/{photoId}"){
+            val photoId = it.arguments?.getString("photoId")
+            PhotoDetailScreenFromDeviceWithMediaPicker(navHostController = navHostController, photoId = photoId!!)
+        }
         composable(GalleryStack.DetailPhotoFromServer.route+"/{photoIndex}"){
 //            val photoId = it.arguments?.getString("photoId")
             val photoIndex = it.arguments?.getString("photoIndex")!!.toInt()
@@ -69,6 +73,8 @@ sealed class MainScreens(val route : String, val title : String, val icon : Int)
 sealed class GalleryStack(val route : String){
     object PhotoSync : GalleryStack(route = "PhotoSync")
     object DetailPhotoFromDevice : GalleryStack(route= "DetailPhoto")
+
+    object DetailPhotoFromDeviceWithPicker : GalleryStack(route="DetailPhotoWithPicker")
 
     object DetailPhotoFromServer : GalleryStack(route = "DetailPhotoFromServer")
 }

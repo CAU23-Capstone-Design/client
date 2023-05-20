@@ -4,15 +4,14 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import com.lovestory.lovestory.database.entities.PhotoForSync
-import com.lovestory.lovestory.database.entities.PhotoForSyncDao
-import com.lovestory.lovestory.database.entities.SyncedPhoto
-import com.lovestory.lovestory.database.entities.SyncedPhotoDao
+import com.lovestory.lovestory.database.entities.*
 
-@Database(entities = [SyncedPhoto::class, PhotoForSync::class], version = 1)
+@Database(entities = [SyncedPhoto::class, PhotoForSync::class, AdditionalPhoto::class], version = 1)
 abstract class PhotoDatabase : RoomDatabase(){
     abstract fun syncedPhotoDao(): SyncedPhotoDao
     abstract fun photoForSyncDao(): PhotoForSyncDao
+
+    abstract fun additionalPhotoDao() : AdditionalPhotoDao
 
     companion object {
         @Volatile

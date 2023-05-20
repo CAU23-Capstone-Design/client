@@ -32,6 +32,7 @@ import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.lovestory.lovestory.R
+import com.lovestory.lovestory.database.entities.AdditionalPhoto
 import com.lovestory.lovestory.database.entities.PhotoForSync
 import com.lovestory.lovestory.database.entities.SyncedPhoto
 import com.lovestory.lovestory.graphs.GalleryStack
@@ -275,6 +276,95 @@ fun CheckableDisplayImageFromUri(navHostController :NavHostController,
 //                .border(width = 2.dp, color = borderColor)
                 .clickable {
                     navHostController.navigate(GalleryStack.DetailPhotoFromDevice.route + "/${imageInfo.id}") {
+                        popUpTo(GalleryStack.PhotoSync.route)
+                    }
+                },
+            contentScale = ContentScale.Crop
+        )
+
+        AnimatedVisibility(checked, enter = fadeIn(), exit = fadeOut()){
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .background(Color(0x88DFA8A8))
+                    .width(imageWidth)
+                    .aspectRatio(1f)
+                    .padding(2.dp),
+//                .border(width = 2.dp, color = borderColor)
+            ){}
+        }
+        AnimatedVisibility(checked, enter = fadeIn(), exit = fadeOut(),
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(end = 5.dp, top = 5.dp))
+        {
+            Box(modifier = Modifier
+                .width(35.dp)
+                .height(35.dp)
+                .clickable { onChangeChecked(index) },
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.baseline_check_circle_24),
+                    contentDescription = null,
+                    tint = Color(0xFFF8B0B0),
+                )
+            }
+        }
+        AnimatedVisibility(!checked, enter = fadeIn(), exit = fadeOut(),
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(end = 5.dp, top = 5.dp))
+        {
+            Box(modifier = Modifier
+                .width(35.dp)
+                .height(35.dp)
+                .clickable { onChangeChecked(index) },
+                contentAlignment = Alignment.Center
+            ){
+                Icon(
+                    painter = painterResource(id = R.drawable.baseline_check_circle_outline_24),
+                    contentDescription = null,
+                    tint = Color(0xFF6B6B6B),
+                    modifier = Modifier
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun CheckableDisplayImageFromUriWithPicker(
+    navHostController :NavHostController,
+    index : Int,
+    checked : Boolean,
+    imageInfo: AdditionalPhoto,
+    onChangeChecked : (Int)->Unit) {
+    Log.d("[Composable]DisplayImageFromBitmap", "$imageInfo")
+    val borderColor = if (checked) Color(0xFFEEC9C9) else Color.Transparent
+    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+    val imageWidth = screenWidth / 3
+
+    val painter = rememberAsyncImagePainter(
+        ImageRequest
+            .Builder(LocalContext.current)
+            .data(data = imageInfo.imageUrl)
+            .build()
+    )
+
+
+    Box{
+        Image(
+            painter = painter,
+            contentDescription = null,
+            modifier = Modifier
+                .width(imageWidth)
+                .aspectRatio(1f)
+                .padding(2.dp)
+//                .border(width = 2.dp, color = borderColor)
+                .clickable {
+                    navHostController.navigate(GalleryStack.DetailPhotoFromDeviceWithPicker.route + "/${imageInfo.id}") {
                         popUpTo(GalleryStack.PhotoSync.route)
                     }
                 },

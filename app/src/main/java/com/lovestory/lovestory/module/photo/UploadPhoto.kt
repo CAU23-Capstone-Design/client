@@ -54,7 +54,7 @@ suspend fun uploadPhoto(
                 uploadPhotoToServer(token!!, imagePart!!, photo.id)
             }
             Log.d("MODULE-uploadPhoto", "사진 업로드 실행")
-            Log.d("MODULE-uploadPhoto", "${response.errorBody()}")
+            Log.e("MODULE-uploadPhoto", "${response.errorBody()}")
             if(response.isSuccessful){
                 Log.d("MODULE-uploadPhoto", "${response.body()}")
 

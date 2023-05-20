@@ -21,6 +21,7 @@ import com.lovestory.lovestory.broadcasts.LocationToPhoto.ACTION_STOP_PHOTO_PICK
 import com.lovestory.lovestory.module.checkNearby
 import com.lovestory.lovestory.module.getToken
 import com.lovestory.lovestory.module.saveLocation
+import com.lovestory.lovestory.module.shared.saveDistanceInfo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -106,6 +107,7 @@ class LocationService : Service() {
                     CoroutineScope(Dispatchers.IO).launch {
                         val nearbyResponse = checkNearby(token)
                         if (nearbyResponse != null) {
+                            saveDistanceInfo(context, nearbyResponse.distance.toInt())
                             updateLocationRequestInterval( (nearbyResponse.distance.toLong()/500 +1L) * 60 * 1000)
                             if(nearbyResponse.isNearby){
                                 sendBroadcastToSecondService(ACTION_START_PHOTO_PICKER_SERVICE)

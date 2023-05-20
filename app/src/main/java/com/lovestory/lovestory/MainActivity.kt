@@ -6,6 +6,7 @@ import android.app.ActivityManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.location.LocationManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -63,13 +64,19 @@ class MainActivity : ComponentActivity() {
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.ACCESS_COARSE_LOCATION,
             Manifest.permission.READ_MEDIA_IMAGES,
-            Manifest.permission.POST_NOTIFICATIONS
+            Manifest.permission.POST_NOTIFICATIONS,
+            Manifest.permission.ACCESS_MEDIA_LOCATION,
         )
         requestPermissionLauncher.launch(permissions)
 
         setContent {
             val systemUiController = rememberSystemUiController()
             val useDarkIcons = MaterialTheme.colors.isLight
+
+            val lm = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+            if(!lm.isLocationEnabled){
+//                intent.action = Settings.
+            }
 
             val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
             if (!pm.isIgnoringBatteryOptimizations(packageName)){

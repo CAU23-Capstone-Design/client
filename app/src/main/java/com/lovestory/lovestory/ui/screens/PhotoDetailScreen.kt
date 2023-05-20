@@ -42,8 +42,10 @@ import com.google.accompanist.pager.rememberPagerState
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.lovestory.lovestory.R
 import com.lovestory.lovestory.database.PhotoDatabase
+import com.lovestory.lovestory.database.entities.AdditionalPhoto
 import com.lovestory.lovestory.database.entities.PhotoForSync
 import com.lovestory.lovestory.database.entities.SyncedPhoto
+import com.lovestory.lovestory.database.repository.AdditionalPhotoRepository
 import com.lovestory.lovestory.database.repository.PhotoForSyncRepository
 import com.lovestory.lovestory.database.repository.SyncedPhotoRepository
 import com.lovestory.lovestory.module.getImageById
@@ -126,7 +128,76 @@ fun PhotoDetailScreenFromDevice(navHostController: NavHostController, photoId: S
                 }
             }
         }
+    }
+}
 
+
+@Composable
+fun PhotoDetailScreenFromDeviceWithMediaPicker(navHostController: NavHostController, photoId: String) {
+    val systemUiController = rememberSystemUiController()
+
+    val context = LocalContext.current
+
+    val database = PhotoDatabase.getDatabase(context)
+    val additionalPhotoDao = database.additionalPhotoDao()
+    val repository = AdditionalPhotoRepository(additionalPhotoDao)
+
+    val photoInfo = remember { mutableStateOf<AdditionalPhoto?>(null) }
+
+    LaunchedEffect(photoId){
+        photoInfo.value = repository.getAdditionalPhotoById(photoId)!!
+    }
+
+    SideEffect {
+        systemUiController.setSystemBarsColor(
+            color = Color.Black,
+        )
+    }
+
+    Box(
+        modifier = Modifier
+            .background(Color.Black)
+            .fillMaxSize(),
+    ) {
+        AnimatedVisibility(photoInfo.value != null, enter = fadeIn(), exit = fadeOut()){
+            TransformableSample(imageUri = photoInfo.value!!.imageUrl!!)
+        }
+        Column(
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.Start,
+            modifier = Modifier
+                .fillMaxWidth()
+        ){
+            Row(
+                horizontalArrangement = Arrangement.Start,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .background(Color(0x2A000000))
+                    .fillMaxWidth()
+                    .height(60.dp)
+                    .padding(horizontal = 20.dp)
+            ){
+                Icon(
+                    painter = painterResource(id = R.drawable.baseline_arrow_back_24),
+                    contentDescription = null,
+                    modifier = Modifier.clickable {navHostController.popBackStack() },
+                    tint = Color.White
+                )
+                Spacer(modifier = Modifier.width(20.dp))
+                AnimatedVisibility(photoInfo.value != null, enter = fadeIn(), exit = fadeOut()){
+                    Column() {
+                        val input = photoInfo.value!!.date
+                        val formatter = DateTimeFormatter.ofPattern("yyyy:MM:dd HH:mm:ss")
+                        val parsedDate = LocalDate.parse(input, formatter)
+
+                        val outputFormatter = DateTimeFormatter.ofPattern("yyyy년 M월 d일 (E)")
+                        val output = parsedDate.format(outputFormatter)
+
+                        Text(text = output, color = Color.White)
+                    }
+                }
+            }
+        }
     }
 }
 

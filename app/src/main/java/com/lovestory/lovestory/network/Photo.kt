@@ -1,11 +1,9 @@
 package com.lovestory.lovestory.network
 
-import android.graphics.Bitmap
 import android.util.Log
 import com.lovestory.lovestory.api.PhotoService
 import com.lovestory.lovestory.model.PhotoBody
 import com.lovestory.lovestory.model.PhotoInfo
-import com.lovestory.lovestory.model.PhotoTable
 import okhttp3.MultipartBody
 import okhttp3.ResponseBody
 import retrofit2.HttpException
