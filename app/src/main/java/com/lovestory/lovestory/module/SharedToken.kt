@@ -14,3 +14,11 @@ fun getToken(context: Context): String? {
     val sharedPreferences = context.getSharedPreferences("LoveStoryToken", Context.MODE_PRIVATE)
     return sharedPreferences.getString("JWT_TOKEN", null)
 }
+
+fun deleteToken(context: Context) {
+    val sharedPreferences = context.getSharedPreferences("LoveStoryToken", Context.MODE_PRIVATE)
+    with(sharedPreferences.edit()) {
+        remove("JWT_TOKEN")
+        apply()
+    }
+}

@@ -2,6 +2,7 @@ package com.lovestory.lovestory.api
 
 import com.lovestory.lovestory.model.CoupleInfo
 import com.lovestory.lovestory.model.LoginResponse
+import com.lovestory.lovestory.module.CoupleInfoResponse
 import retrofit2.http.*
 
 
@@ -14,4 +15,11 @@ interface CoupleService{
     @GET("/couples")
     suspend fun verifiedCouple(@Header("Authorization") jwtToken : String) : LoginResponse
 
+    @Headers("Content-Type: application/json")
+    @GET("/couples/info")
+    suspend fun coupleInfo(@Header("Authorization") jwtToken : String) : CoupleInfoResponse
+
+    @Headers("Content-Type: application/json")
+    @DELETE("/couples")
+    suspend fun deleteCouple(@Header("Authorization") jwtToken : String) : LoginResponse
 }

@@ -95,6 +95,7 @@ import kotlin.math.roundToInt
 
 @OptIn(MapsComposeExperimentalApi::class)
 @SuppressLint("CoroutineCreationDuringComposition")
+
 @Composable
 fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhotoView) {
     val currentMonth = remember { YearMonth.now() }
