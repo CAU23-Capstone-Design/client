@@ -145,7 +145,10 @@ fun PhotoDetailScreenFromDeviceWithMediaPicker(navHostController: NavHostControl
     val photoInfo = remember { mutableStateOf<AdditionalPhoto?>(null) }
 
     LaunchedEffect(photoId){
-        photoInfo.value = repository.getAdditionalPhotoById(photoId)!!
+        CoroutineScope(Dispatchers.IO).launch {
+            photoInfo.value = repository.getAdditionalPhotoById(photoId)!!
+        }
+
     }
 
     SideEffect {

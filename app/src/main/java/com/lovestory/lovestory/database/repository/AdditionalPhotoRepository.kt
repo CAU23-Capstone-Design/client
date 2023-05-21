@@ -1,5 +1,6 @@
 package com.lovestory.lovestory.database.repository
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import com.lovestory.lovestory.database.entities.AdditionalPhoto
 import com.lovestory.lovestory.database.entities.AdditionalPhotoDao
@@ -18,7 +19,8 @@ class AdditionalPhotoRepository(private val additionalPhotoDao: AdditionalPhotoD
 
     fun deleteAllAdditionalPhoto(){additionalPhotoDao.deleteAll()}
 
-    suspend fun getAdditionalPhotoById(id : String): AdditionalPhoto?{
-        return withContext(Dispatchers.IO){additionalPhotoDao.getPhotoById(id)}
+    fun getAdditionalPhotoById(id : String): AdditionalPhoto?{
+       Log.d("Respository","${additionalPhotoDao.getPhotoById(id)}")
+        return additionalPhotoDao.getPhotoById(id)
     }
 }

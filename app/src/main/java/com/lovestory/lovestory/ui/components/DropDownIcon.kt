@@ -20,12 +20,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import com.lovestory.lovestory.R
 import com.lovestory.lovestory.database.entities.PhotoForSync
 import com.lovestory.lovestory.module.photo.addPhotoFromGallery
 import com.lovestory.lovestory.ui.screens.getListOfNotCheckedPhoto
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @Composable
 fun DropDownIcon(
@@ -37,7 +39,9 @@ fun DropDownIcon(
     ){
 
     val photoLauncher = rememberLauncherForActivityResult(contract = ActivityResultContracts.PickMultipleVisualMedia(30)){uri ->
-        addPhotoFromGallery(uri, context)
+        CoroutineScope(Dispatchers.IO).launch{
+            addPhotoFromGallery(uri, context)
+        }
     }
 
 
@@ -69,6 +73,7 @@ fun DropDownIcon(
             DropdownMenuItem(
                 onClick = {
                     photoLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                    isDropMenuForRemovePhoto.value = false
                 }
             ) {
                 Text(text = "갤러리 사진 추가 하기")

@@ -34,7 +34,7 @@ interface AdditionalPhotoDao{
     fun getAll():LiveData<List<AdditionalPhoto>>
 
     @Query("SELECT * FROM additionalPhoto WHERE photo_id = :id")
-    suspend fun getPhotoById(id : String): AdditionalPhoto?
+    fun getPhotoById(id : String): AdditionalPhoto?
 
     @Insert
     fun insertPhoto(photo: AdditionalPhoto)

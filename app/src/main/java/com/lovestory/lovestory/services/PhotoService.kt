@@ -106,7 +106,8 @@ class PhotoService : Service(){
 
                             val exifInterface = inputStream?.let { androidx.exifinterface.media.ExifInterface(it) }
 
-                            val uriItemInfo = getInfoFromImage(exifInterface = exifInterface)
+                            val uriItemInfo =
+                                getInfoFromImage(exifInterface = exifInterface) ?: return@launch
                             val photoId = getUriMD5Hash(uri = uri)
 
                             val photoForSyncDao = photoDatabase.photoForSyncDao()

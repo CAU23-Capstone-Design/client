@@ -25,7 +25,6 @@ fun RepresentPeriodGallery(
     cumPrevPhotosList : List<List<Int>>,
     type : String
     ){
-    Log.d("[COMPOSABLE] RepresentPreiodGallery", "cum : $cumPrevPhotosList")
     LazyColumn(
         modifier = Modifier.padding(bottom = 70.dp),
         contentPadding = PaddingValues(top=65.dp, bottom = 75.dp),
@@ -69,8 +68,6 @@ fun RepresentPeriodGallery(
                                 type = type
                             )
                         }
-
-
                     }
                 }
             }

@@ -31,10 +31,12 @@ import androidx.navigation.NavHostController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.lovestory.lovestory.R
 import com.lovestory.lovestory.database.PhotoDatabase
+import com.lovestory.lovestory.database.entities.AdditionalPhoto
 import com.lovestory.lovestory.database.entities.PhotoForSync
 import com.lovestory.lovestory.database.entities.PhotoForSyncDao
 import com.lovestory.lovestory.database.repository.PhotoForSyncRepository
 import com.lovestory.lovestory.module.photo.uploadPhoto
+import com.lovestory.lovestory.module.photo.uploadPhotoFromGallery
 import com.lovestory.lovestory.ui.components.CheckableDisplayImageFromUri
 import com.lovestory.lovestory.ui.components.CheckableDisplayImageFromUriWithPicker
 import com.lovestory.lovestory.ui.components.DeletPhotoDialog
@@ -63,7 +65,7 @@ fun PhotoSyncScreen(navHostController: NavHostController, photoForSyncView: Phot
     val photoForSyncDao : PhotoForSyncDao = photoDatabase.photoForSyncDao()
     val photoForSyncRepository = PhotoForSyncRepository(photoForSyncDao)
 
-    LaunchedEffect(key1 = notSyncedPhotos) {
+    LaunchedEffect(key1 = notSyncedPhotos.size) {
         photoForSyncView.checkPhotoList.value = MutableList<Boolean>(notSyncedPhotos.size) { true }
 
         if (notSyncedPhotos.size > photoForSyncView.checkPhotoList.value.size) {
@@ -79,6 +81,22 @@ fun PhotoSyncScreen(navHostController: NavHostController, photoForSyncView: Phot
         }
     }
 
+    LaunchedEffect(key1 = additionalNotSync.size){
+        photoForSyncView.checkPhotoFromGalleryList.value = MutableList<Boolean>(additionalNotSync.size){true}
+
+        if(additionalNotSync.size > photoForSyncView.checkPhotoFromGalleryList.value.size){
+            val newSize = additionalNotSync.size
+            val oldSize = photoForSyncView.checkPhotoFromGalleryList.value.size
+            val newCheckPhotoList = photoForSyncView.checkPhotoFromGalleryList.value.toMutableList()
+
+            for(i in oldSize until newSize){
+                newCheckPhotoList.add(true)
+            }
+
+            photoForSyncView.checkPhotoFromGalleryList.value = newCheckPhotoList
+        }
+    }
+
     SideEffect {
         systemUiController.setSystemBarsColor(
             color = Color(0xFFF3F3F3),
@@ -87,6 +105,12 @@ fun PhotoSyncScreen(navHostController: NavHostController, photoForSyncView: Phot
 
     val onChangeChecked: (Int) -> Unit = { index ->
         photoForSyncView.checkPhotoList.value = photoForSyncView.checkPhotoList.value.toMutableList().also {
+            it[index] = !it[index]
+        }
+    }
+
+    val onChangeCheckedGalley : (Int) -> Unit = {index ->
+        photoForSyncView.checkPhotoFromGalleryList.value = photoForSyncView.checkPhotoFromGalleryList.value.toMutableList().also{
             it[index] = !it[index]
         }
     }
@@ -163,10 +187,10 @@ fun PhotoSyncScreen(navHostController: NavHostController, photoForSyncView: Phot
 //                        verticalArrangement = Arrangement.Center
                     ){
                         if(it.key =="camera"){
-                            Text(text = "카메라로 찍은 사진 : ${notSyncedPhotos.size}장", fontSize = 18.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(vertical = 5.dp))
+                            Text(text = "카메라로 찍은 사진", fontSize = 18.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(vertical = 5.dp))
                         }else if(it.key == "gallery"){
                             Divider(color = Color.LightGray, thickness = 1.dp)
-                            Text(text = "갤러리에서 선택된 사진 : ${additionalNotSync.size}장", fontSize = 18.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 20.dp, bottom = 5.dp))
+                            Text(text = "갤러리에서 선택한 사진", fontSize = 18.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 20.dp, bottom = 5.dp))
                         }
                     }
                 }
@@ -187,13 +211,13 @@ fun PhotoSyncScreen(navHostController: NavHostController, photoForSyncView: Phot
 
                 else if(it.key == "gallery"){
                     items(additionalNotSync.size){ index ->
-                        if(index < additionalNotSync.size){
+                        if(index < additionalNotSync.size && index < photoForSyncView.checkPhotoFromGalleryList.value.size){
                             CheckableDisplayImageFromUriWithPicker(
                                 navHostController = navHostController,
                                 index = index,
-                                checked = false,
+                                checked = photoForSyncView.checkPhotoFromGalleryList.value[index],
                                 imageInfo = additionalNotSync[index],
-                                onChangeChecked = {index:Int->{index}}
+                                onChangeChecked = onChangeCheckedGalley
                             )
                         }
 
@@ -259,26 +283,91 @@ fun PhotoSyncScreen(navHostController: NavHostController, photoForSyncView: Phot
                         .background(Color.Transparent)
                         .padding(10.dp),
                     onClick = {
-                        val sendPhotos = getListOfCheckedPhoto(notSyncedPhotos, photoForSyncView.checkPhotoList.value)
-                        if (sendPhotos.isNotEmpty()) {
-                            numOfTotalUploadPhoto.value = sendPhotos.size
-                            showUploadPhotoDialog.value = true
-                            CoroutineScope(Dispatchers.IO).launch {
-                                uploadPhoto(
-                                    context = context,
-                                    sendPhotos = sendPhotos,
-                                    numOfCurrentUploadedPhoto =  numOfCurrentUploadedPhoto,
-                                )
-                                withContext(Dispatchers.Main){
-                                    showUploadPhotoDialog.value = false
-                                    Toast.makeText(context, "${sendPhotos.size}개의 사진을 업로드 했습니다.", Toast.LENGTH_SHORT).show()
-                                    Log.d("PhotoSyncScreen", "notSyncedPhotos.value) :  ${notSyncedPhotos.size}")
-                                    numOfCurrentUploadedPhoto.value = 0
-                                    if(notSyncedPhotos.size == 1){
-                                        navHostController.popBackStack()
+                        val sendPhotosFromCamera = getListOfCheckedPhoto(
+                            allPhotos = notSyncedPhotos,
+                            checkPhotoList =  photoForSyncView.checkPhotoList.value,
+                        )
+                        val sendPhotosFromGallery = getListOfCheckedPhotoFromGallery(
+                            allPhotosFromGallery = additionalNotSync,
+                            checkPhotoListFromGallery = photoForSyncView.checkPhotoFromGalleryList.value
+                        )
+                        if (sendPhotosFromCamera.isNotEmpty() || sendPhotosFromGallery.isNotEmpty()) {
+                            if(sendPhotosFromCamera.isNotEmpty() && sendPhotosFromGallery.isNotEmpty()){
+                                numOfTotalUploadPhoto.value = sendPhotosFromCamera.size + sendPhotosFromGallery.size
+                                showUploadPhotoDialog.value = true
+                                CoroutineScope(Dispatchers.IO).launch {
+                                    uploadPhoto(
+                                        context = context,
+                                        sendPhotos = sendPhotosFromCamera,
+                                        numOfCurrentUploadedPhoto =  numOfCurrentUploadedPhoto,
+                                    )
+
+                                    uploadPhotoFromGallery(
+                                        context = context,
+                                        sendPhotosFromGallery = sendPhotosFromGallery,
+                                        numOfCurrentUploadedPhoto = numOfCurrentUploadedPhoto,
+                                    )
+
+                                    withContext(Dispatchers.Main){
+                                        showUploadPhotoDialog.value = false
+                                        Toast.makeText(context, "${numOfTotalUploadPhoto.value}개의 사진을 업로드 했습니다.", Toast.LENGTH_SHORT).show()
+
+
+                                        Log.d("PhotoSyncScreen", "notSyncedPhotos.value) :  ${notSyncedPhotos.size}")
+                                        Log.d("PhotoSyncScreen", "notSyncedPhotos.value) :  ${additionalNotSync.size}")
+                                        numOfCurrentUploadedPhoto.value = 0
+                                        if(notSyncedPhotos.size == 1 && additionalNotSync.size == 1){
+                                            navHostController.popBackStack()
+                                        }
                                     }
                                 }
                             }
+                            else if(sendPhotosFromCamera.isNotEmpty()){
+                                numOfTotalUploadPhoto.value = sendPhotosFromCamera.size
+                                showUploadPhotoDialog.value = true
+
+                                CoroutineScope(Dispatchers.IO).launch {
+                                    uploadPhoto(
+                                        context = context,
+                                        sendPhotos = sendPhotosFromCamera,
+                                        numOfCurrentUploadedPhoto =  numOfCurrentUploadedPhoto,
+                                    )
+
+                                    withContext(Dispatchers.Main){
+                                        showUploadPhotoDialog.value = false
+                                        Toast.makeText(context, "${numOfTotalUploadPhoto.value}개의 사진을 업로드 했습니다.", Toast.LENGTH_SHORT).show()
+
+                                        Log.d("PhotoSyncScreen", "notSyncedPhotos.value) :  ${notSyncedPhotos.size}")
+                                        numOfCurrentUploadedPhoto.value = 0
+                                        if(notSyncedPhotos.size == 1){
+                                            navHostController.popBackStack()
+                                        }
+                                    }
+                                }
+                            }
+                            else if(sendPhotosFromGallery.isNotEmpty()){
+                                numOfTotalUploadPhoto.value = sendPhotosFromGallery.size
+                                showUploadPhotoDialog.value = true
+                                CoroutineScope(Dispatchers.IO).launch {
+                                    uploadPhotoFromGallery(
+                                        context = context,
+                                        sendPhotosFromGallery = sendPhotosFromGallery,
+                                        numOfCurrentUploadedPhoto = numOfCurrentUploadedPhoto,
+                                    )
+
+                                    withContext(Dispatchers.Main){
+                                        showUploadPhotoDialog.value = false
+                                        Toast.makeText(context, "${numOfTotalUploadPhoto.value}개의 사진을 업로드 했습니다.", Toast.LENGTH_SHORT).show()
+
+                                        Log.d("PhotoSyncScreen", "notSyncedPhotos.value) :  ${additionalNotSync.size}")
+                                        numOfCurrentUploadedPhoto.value = 0
+                                        if(additionalNotSync.size == 1){
+                                            navHostController.popBackStack()
+                                        }
+                                    }
+                                }
+                            }
+
                         } else {
                             Toast
                                 .makeText(context, "선택된 사진이 없습니다.", Toast.LENGTH_SHORT)
@@ -298,7 +387,10 @@ fun PhotoSyncScreen(navHostController: NavHostController, photoForSyncView: Phot
     }
 }
 
-fun getListOfCheckedPhoto (allPhotos : List<PhotoForSync>, checkPhotoList : List<Boolean>) : List<PhotoForSync>{
+fun getListOfCheckedPhoto (
+    allPhotos : List<PhotoForSync>,
+    checkPhotoList : List<Boolean>,
+) : List<PhotoForSync>{
     var listOfCheck =  mutableListOf<PhotoForSync>()
 
     for(current in allPhotos.indices){
@@ -306,6 +398,22 @@ fun getListOfCheckedPhoto (allPhotos : List<PhotoForSync>, checkPhotoList : List
             listOfCheck.add(allPhotos[current])
         }
     }
+
+    return listOfCheck
+}
+
+fun getListOfCheckedPhotoFromGallery(
+    allPhotosFromGallery : List<AdditionalPhoto>,
+    checkPhotoListFromGallery : List<Boolean>
+):List<AdditionalPhoto>{
+    var listOfCheck =  mutableListOf<AdditionalPhoto>()
+
+    for(current in allPhotosFromGallery.indices){
+        if(checkPhotoListFromGallery[current]){
+            listOfCheck.add(allPhotosFromGallery[current])
+        }
+    }
+
     return listOfCheck
 }
 

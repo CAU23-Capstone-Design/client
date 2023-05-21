@@ -5,7 +5,6 @@ import android.net.Uri
 import android.util.Log
 import com.lovestory.lovestory.database.PhotoDatabase
 import com.lovestory.lovestory.database.entities.AdditionalPhoto
-import com.lovestory.lovestory.database.entities.PhotoForSync
 import com.lovestory.lovestory.database.repository.AdditionalPhotoRepository
 import com.lovestory.lovestory.module.getInfoFromImage
 import kotlinx.coroutines.CoroutineScope
@@ -22,24 +21,31 @@ fun addPhotoFromGallery(uri : List<Uri>, context : Context){
 
     uri.map { photo_url ->
         Log.d("DropDown Menu", "$photo_url")
+        val id = photo_url.toString().substringAfterLast("/media/").substringBeforeLast("/")
+        val transUri = "content://media/external/images/media/$id"
+        val uri = Uri.parse(transUri)
 
-        val inputStream = context.contentResolver.openInputStream(photo_url)
+        val inputStream = context.contentResolver.openInputStream(uri)
         val exifInterface = inputStream?.let { androidx.exifinterface.media.ExifInterface(it) }
         val uriItemInfo = getInfoFromImage(exifInterface = exifInterface)
-        if(uriItemInfo.latitude == null || uriItemInfo.longitude == null){
-            return
+        Log.d("FUNCTION-getLocationInfoFromImage", "latitude ${uriItemInfo!!.latitude!!} - longitude :${uriItemInfo!!.longitude!!}")
+        if (uriItemInfo != null) {
+            val photoId = getUriMD5Hash(uri = photo_url)
+
+            val addPhotoItem = AdditionalPhoto(
+                id = photoId!!,
+                date = uriItemInfo.dateTime,
+                imageUrl = uri.toString(),
+                latitude = uriItemInfo.latitude,
+                longitude = uriItemInfo.longitude
+            )
+
+            if(additionalPhotoRepository.getAdditionalPhotoById(photoId!!) == null){
+                additionalPhotoRepository.insertAdditionalPhoto(addPhotoItem)
+            }
+//            additionalPhotoRepository.insertAdditionalPhoto(addPhotoItem)
         }
-        val photoId = getUriMD5Hash(uri = photo_url)
 
-        val addPhotoItem = AdditionalPhoto(
-            id = photoId!!,
-            date = uriItemInfo.dateTime,
-            imageUrl = photo_url.toString(),
-            latitude = uriItemInfo.latitude,
-            longitude = uriItemInfo.longitude
-        )
-
-        additionalPhotoRepository.insertAdditionalPhoto(addPhotoItem)
     }
 }
 

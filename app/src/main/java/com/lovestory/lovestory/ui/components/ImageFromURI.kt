@@ -252,7 +252,6 @@ fun CheckableDisplayImageFromUri(navHostController :NavHostController,
                                  checked : Boolean,
                                  imageInfo: PhotoForSync,
                                  onChangeChecked : (Int)->Unit) {
-    Log.d("[Composable]DisplayImageFromBitmap", "$imageInfo")
     val borderColor = if (checked) Color(0xFFEEC9C9) else Color.Transparent
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
     val imageWidth = screenWidth / 3
@@ -341,7 +340,6 @@ fun CheckableDisplayImageFromUriWithPicker(
     checked : Boolean,
     imageInfo: AdditionalPhoto,
     onChangeChecked : (Int)->Unit) {
-    Log.d("[Composable]DisplayImageFromBitmap", "$imageInfo")
     val borderColor = if (checked) Color(0xFFEEC9C9) else Color.Transparent
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
     val imageWidth = screenWidth / 3
