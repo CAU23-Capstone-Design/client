@@ -18,13 +18,27 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import androidx.core.content.ContextCompat
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.lovestory.lovestory.graphs.RootNavigationGraph
 import com.lovestory.lovestory.services.LocationService
@@ -67,7 +81,6 @@ class MainActivity : ComponentActivity() {
             Manifest.permission.POST_NOTIFICATIONS,
             Manifest.permission.ACCESS_MEDIA_LOCATION,
         )
-        requestPermissionLauncher.launch(permissions)
 
         setContent {
             val systemUiController = rememberSystemUiController()
@@ -86,8 +99,6 @@ class MainActivity : ComponentActivity() {
                 startActivity(intent)
             }
 
-            Log.d("[ACTIVITY] MainActivity", "$applicationContext")
-            Log.d("[ACTIVITY] MainActivity", "$applicationContext")
             val intent = Intent(this, LocationService::class.java)
             if(isMyServiceRunning(LocationService::class.java)){
                 Log.d("[ACTIVITY] MainActivity", "isServiceRunning is true")
@@ -113,6 +124,54 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = androidx.compose.material3.MaterialTheme.colorScheme.background
                 ) {
+                    val isDialogOpen = remember{ mutableStateOf(true) }
+                    val onDismissRequest : () -> Unit = {isDialogOpen.value = false}
+
+                    val context = LocalContext.current
+                    val permissions = arrayOf(
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.ACCESS_COARSE_LOCATION,
+                        Manifest.permission.READ_MEDIA_IMAGES,
+                        Manifest.permission.POST_NOTIFICATIONS,
+                        Manifest.permission.ACCESS_MEDIA_LOCATION,
+                    )
+                    val permissionResult = ContextCompat.checkSelfPermission(context, permissions[0]) == PackageManager.PERMISSION_GRANTED
+                            && ContextCompat.checkSelfPermission(context, permissions[1]) == PackageManager.PERMISSION_GRANTED
+                            && ContextCompat.checkSelfPermission(context, permissions[2]) == PackageManager.PERMISSION_GRANTED
+                            && ContextCompat.checkSelfPermission(context, permissions[3]) == PackageManager.PERMISSION_GRANTED
+                            && ContextCompat.checkSelfPermission(context, permissions[4]) == PackageManager.PERMISSION_GRANTED
+
+                    if(!permissionResult){
+                        AnimatedVisibility(visible = isDialogOpen.value, enter= fadeIn(), exit= fadeOut()) {
+                            Dialog(
+                                onDismissRequest = onDismissRequest,
+                                properties = DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = false)
+                            ) {
+                                Column(
+                                    modifier = Modifier
+                                        .width(360.dp)
+                                        .wrapContentHeight()
+                                        .clip(RoundedCornerShape(25.dp))
+                                        .background(color = Color.White),
+                                    verticalArrangement = Arrangement.Center,
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                ){
+                                    Spacer(modifier = Modifier.height(20.dp))
+                                    Text(text = "LoveStory 이용을 위한 권한 설정이 필요합니다.")
+                                    Button(onClick = {
+                                        isDialogOpen.value = false
+
+                                        requestPermissionLauncher.launch(permissions)
+                                    }) {
+                                        Text(text = "설정하기")
+                                    }
+                                    Spacer(modifier = Modifier.height(20.dp))
+                                }
+                            }
+                        }
+                    }
+
+
                     RootNavigationGraph()
                 }
             }
