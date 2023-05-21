@@ -34,6 +34,7 @@ import com.lovestory.lovestory.database.PhotoDatabase
 import com.lovestory.lovestory.database.entities.AdditionalPhoto
 import com.lovestory.lovestory.database.entities.PhotoForSync
 import com.lovestory.lovestory.database.entities.PhotoForSyncDao
+import com.lovestory.lovestory.database.repository.AdditionalPhotoRepository
 import com.lovestory.lovestory.database.repository.PhotoForSyncRepository
 import com.lovestory.lovestory.module.photo.uploadPhoto
 import com.lovestory.lovestory.module.photo.uploadPhotoFromGallery
@@ -64,6 +65,9 @@ fun PhotoSyncScreen(navHostController: NavHostController, photoForSyncView: Phot
     val photoDatabase: PhotoDatabase = PhotoDatabase.getDatabase(context)
     val photoForSyncDao : PhotoForSyncDao = photoDatabase.photoForSyncDao()
     val photoForSyncRepository = PhotoForSyncRepository(photoForSyncDao)
+
+    val additionalPhotoDao = photoDatabase.additionalPhotoDao()
+    val additionalPhotoRepository = AdditionalPhotoRepository(additionalPhotoDao)
 
     LaunchedEffect(key1 = notSyncedPhotos.size) {
         photoForSyncView.checkPhotoList.value = MutableList<Boolean>(notSyncedPhotos.size) { true }
@@ -127,8 +131,11 @@ fun PhotoSyncScreen(navHostController: NavHostController, photoForSyncView: Phot
                 notSyncedPhotos = notSyncedPhotos,
                 checkPhotoList = photoForSyncView.checkPhotoList.value,
                 photoForSyncRepository = photoForSyncRepository,
+                additionalPhotoRepository = additionalPhotoRepository,
                 navHostController = navHostController,
                 context = context,
+                additionalPhotos = additionalNotSync,
+                checkPhotoFromGalleryList = photoForSyncView.checkPhotoFromGalleryList.value,
             )
         }
         AnimatedVisibility(visible = showUploadPhotoDialog.value, enter = fadeIn(), exit = fadeOut()){
@@ -263,6 +270,8 @@ fun PhotoSyncScreen(navHostController: NavHostController, photoForSyncView: Phot
                     showDeletePhotoDialog = showDeletePhotoDialog,
                     notSyncedPhotos = notSyncedPhotos,
                     checkPhotoList = photoForSyncView.checkPhotoList.value,
+                    additionalPhotos = additionalNotSync,
+                    checkPhotoFromGalleryList = photoForSyncView.checkPhotoFromGalleryList.value,
                     context = context,
                 )
             }
@@ -425,5 +434,17 @@ fun getListOfNotCheckedPhoto (allPhotos : List<PhotoForSync>, checkPhotoList : L
             listOfCheck.add(allPhotos[current])
         }
     }
+    return listOfCheck
+}
+
+fun getListOfNotCheckedPhotoFromGallery(allPhotoFromGallery : List<AdditionalPhoto>, checkPhotoFromGalleryList : List<Boolean>):List<AdditionalPhoto>{
+    var listOfCheck = mutableListOf<AdditionalPhoto>()
+
+    for(current in allPhotoFromGallery.indices){
+        if(!checkPhotoFromGalleryList[current]){
+            listOfCheck.add(allPhotoFromGallery[current])
+        }
+    }
+
     return listOfCheck
 }

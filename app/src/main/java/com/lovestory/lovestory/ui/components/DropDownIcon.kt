@@ -22,9 +22,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import com.lovestory.lovestory.R
+import com.lovestory.lovestory.database.entities.AdditionalPhoto
 import com.lovestory.lovestory.database.entities.PhotoForSync
 import com.lovestory.lovestory.module.photo.addPhotoFromGallery
 import com.lovestory.lovestory.ui.screens.getListOfNotCheckedPhoto
+import com.lovestory.lovestory.ui.screens.getListOfNotCheckedPhotoFromGallery
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -34,7 +36,9 @@ fun DropDownIcon(
     isDropMenuForRemovePhoto : MutableState<Boolean>,
     showDeletePhotoDialog : MutableState<Boolean>,
     notSyncedPhotos : List<PhotoForSync>,
+    additionalPhotos: List<AdditionalPhoto>,
     checkPhotoList : List<Boolean>,
+    checkPhotoFromGalleryList : List<Boolean>,
     context : Context,
     ){
 
@@ -60,7 +64,8 @@ fun DropDownIcon(
             DropdownMenuItem(
                 onClick = {
                     val deleteFromLoveStory =  getListOfNotCheckedPhoto(notSyncedPhotos, checkPhotoList)
-                    if(deleteFromLoveStory.isNotEmpty()){
+                    val deleteFromGallery = getListOfNotCheckedPhotoFromGallery(additionalPhotos, checkPhotoFromGalleryList)
+                    if(deleteFromLoveStory.isNotEmpty() || deleteFromGallery.isNotEmpty()){
                         showDeletePhotoDialog.value = true
                     }else{
                         Toast.makeText(context, "삭제할 사진이 없습니다.", Toast.LENGTH_SHORT).show()

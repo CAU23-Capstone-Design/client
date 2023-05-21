@@ -18,10 +18,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.lovestory.lovestory.database.entities.AdditionalPhoto
 import com.lovestory.lovestory.database.entities.PhotoForSync
+import com.lovestory.lovestory.database.repository.AdditionalPhotoRepository
 import com.lovestory.lovestory.database.repository.PhotoForSyncRepository
 import com.lovestory.lovestory.module.photo.deletePhotosByIds
 import com.lovestory.lovestory.ui.screens.getListOfNotCheckedPhoto
+import com.lovestory.lovestory.ui.screens.getListOfNotCheckedPhotoFromGallery
 import com.lovestory.lovestory.view.SyncedPhotoView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -32,8 +35,11 @@ import kotlinx.coroutines.withContext
 fun DeletPhotoDialog(
     showDeletePhotoDialog : MutableState<Boolean>,
     notSyncedPhotos : List<PhotoForSync>,
+    additionalPhotos: List<AdditionalPhoto>,
     checkPhotoList : List<Boolean>,
+    checkPhotoFromGalleryList : List<Boolean>,
     photoForSyncRepository : PhotoForSyncRepository,
+    additionalPhotoRepository : AdditionalPhotoRepository,
     navHostController : NavHostController,
     context : Context
 ){
@@ -55,13 +61,26 @@ fun DeletPhotoDialog(
                 TextButton(onClick = {
                     showDeletePhotoDialog.value = false
                     val deleteFromLoveStory =  getListOfNotCheckedPhoto(notSyncedPhotos, checkPhotoList)
-                    for(item in deleteFromLoveStory){
-                        photoForSyncRepository.deletePhotoForSync(item)
+                    val deleteFromGallery = getListOfNotCheckedPhotoFromGallery(additionalPhotos, checkPhotoFromGalleryList)
+
+                    var countDeleteItem = 0
+                    if(deleteFromLoveStory.isNotEmpty()){
+                        for(item in deleteFromLoveStory){
+                            photoForSyncRepository.deletePhotoForSync(item)
+                        }
+                        countDeleteItem += deleteFromLoveStory.size
                     }
-                    Toast.makeText(context, "${deleteFromLoveStory.size}개의 사진을 삭제했습니다.", Toast.LENGTH_SHORT).show()
-                    if(notSyncedPhotos.size == 1){
-                        navHostController.popBackStack()
+                    if(deleteFromGallery.isNotEmpty()){
+                        for(item in deleteFromGallery){
+                            additionalPhotoRepository.deleteAdditionalPhoto(item)
+                        }
+                        countDeleteItem += deleteFromGallery.size
                     }
+
+                    Toast.makeText(context, "${countDeleteItem}개의 사진을 삭제했습니다.", Toast.LENGTH_SHORT).show()
+//                    if(notSyncedPhotos.size == 1){
+//                        navHostController.popBackStack()
+//                    }
                 }) {
                     Text(text="확인",color = Color.Red, fontWeight = FontWeight.Bold, fontSize = 16.sp)
                 }
