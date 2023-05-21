@@ -2,16 +2,20 @@ package com.lovestory.lovestory.ui.screens
 
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
@@ -36,6 +40,7 @@ import com.lovestory.lovestory.database.entities.PhotoForSync
 import com.lovestory.lovestory.database.entities.PhotoForSyncDao
 import com.lovestory.lovestory.database.repository.AdditionalPhotoRepository
 import com.lovestory.lovestory.database.repository.PhotoForSyncRepository
+import com.lovestory.lovestory.module.photo.addPhotoFromGallery
 import com.lovestory.lovestory.module.photo.uploadPhoto
 import com.lovestory.lovestory.module.photo.uploadPhotoFromGallery
 import com.lovestory.lovestory.ui.components.CheckableDisplayImageFromUri
@@ -68,6 +73,8 @@ fun PhotoSyncScreen(navHostController: NavHostController, photoForSyncView: Phot
 
     val additionalPhotoDao = photoDatabase.additionalPhotoDao()
     val additionalPhotoRepository = AdditionalPhotoRepository(additionalPhotoDao)
+
+    Log.d("PhotoSyncScreen - Screen", "${notSyncedPhotos.size} // ${additionalNotSync.size}")
 
     LaunchedEffect(key1 = notSyncedPhotos.size) {
         photoForSyncView.checkPhotoList.value = MutableList<Boolean>(notSyncedPhotos.size) { true }
@@ -116,6 +123,12 @@ fun PhotoSyncScreen(navHostController: NavHostController, photoForSyncView: Phot
     val onChangeCheckedGalley : (Int) -> Unit = {index ->
         photoForSyncView.checkPhotoFromGalleryList.value = photoForSyncView.checkPhotoFromGalleryList.value.toMutableList().also{
             it[index] = !it[index]
+        }
+    }
+
+    val photoLauncher = rememberLauncherForActivityResult(contract = ActivityResultContracts.PickMultipleVisualMedia(30)){uri ->
+        CoroutineScope(Dispatchers.IO).launch{
+            addPhotoFromGallery(uri, context)
         }
     }
 
@@ -169,8 +182,6 @@ fun PhotoSyncScreen(navHostController: NavHostController, photoForSyncView: Phot
             }
         }
 
-
-
         LazyVerticalGrid(
             columns = GridCells.Fixed(3),
             modifier = Modifier
@@ -195,9 +206,59 @@ fun PhotoSyncScreen(navHostController: NavHostController, photoForSyncView: Phot
                     ){
                         if(it.key =="camera"){
                             Text(text = "카메라로 찍은 사진", fontSize = 18.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(vertical = 5.dp))
+                            AnimatedVisibility(visible = notSyncedPhotos.isEmpty(),enter = fadeIn(), exit = fadeOut()){
+                                Column(
+                                    verticalArrangement = Arrangement.Center,
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp)
+                                ) {
+                                    Text(
+                                        text = "연인과 만났을 때 찍은 사진이 표시 됩니다.",
+                                        fontSize = 16.sp
+                                    )
+                                }
+                            }
                         }else if(it.key == "gallery"){
                             Divider(color = Color.LightGray, thickness = 1.dp)
                             Text(text = "갤러리에서 선택한 사진", fontSize = 18.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 20.dp, bottom = 5.dp))
+                            AnimatedVisibility(visible = additionalNotSync.isEmpty(),enter = fadeIn(), exit = fadeOut()){
+                                Column(
+                                    verticalArrangement = Arrangement.Center,
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp)
+                                ){
+                                    Text(
+                                        text = "사진이 없습니다. 갤러리에서 사진을 골라보세요!",
+                                        fontSize = 16.sp,
+                                        modifier = Modifier.padding(bottom = 20.dp)
+                                    )
+                                    Box(
+                                        modifier = Modifier.border(2.dp, Color.Black, CircleShape).clickable {
+                                            photoLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                                        }.clip(CircleShape),
+
+                                     ) {
+                                        Row(
+                                            modifier = Modifier.padding(vertical = 10.dp, horizontal = 15.dp),
+                                            horizontalArrangement = Arrangement.SpaceAround,
+                                            verticalAlignment = Alignment.CenterVertically,
+                                        ){
+                                            Icon(
+                                                painter = painterResource(id = R.drawable.ic_gallery),
+                                                contentDescription = "icon",
+                                                tint = Color.Black
+                                            )
+                                            Text(
+                                                text="갤러리 열기",
+                                                fontSize = 14.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                modifier = Modifier.padding(start = 10.dp)
+                                            )
+                                        }
+
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -233,8 +294,6 @@ fun PhotoSyncScreen(navHostController: NavHostController, photoForSyncView: Phot
                 }
             }
         }
-
-
 
         Column(
             verticalArrangement = Arrangement.Top,

@@ -33,7 +33,6 @@ class PhotoService : Service(){
 
     private val ioScope = CoroutineScope(Dispatchers.IO)
 
-
     override fun onBind(intent: Intent?): IBinder? {return null}
 
     override fun onCreate() {
@@ -156,7 +155,7 @@ class PhotoService : Service(){
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("LoveStory")
             .setContentText("연인을 만나서 사진 동기화를 시작합니다!")
-            .setSmallIcon(R.drawable.lovestory_logo)
+            .setSmallIcon(R.drawable.ic_status_bar_foreground)
             .build()
     }
 

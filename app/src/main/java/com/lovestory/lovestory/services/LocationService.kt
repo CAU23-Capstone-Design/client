@@ -178,7 +178,7 @@ class LocationService : Service() {
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("LoveStory")
             .setContentText("혼자")
-            .setSmallIcon(R.drawable.lovestory_logo)
+            .setSmallIcon(R.drawable.ic_status_bar_foreground)
             .build()
     }
 
