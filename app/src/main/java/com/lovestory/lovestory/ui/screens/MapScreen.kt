@@ -69,7 +69,9 @@ import com.lovestory.lovestory.graphs.CalendarStack
 import com.lovestory.lovestory.graphs.MainScreens
 import com.lovestory.lovestory.model.*
 import com.lovestory.lovestory.module.getToken
+import com.lovestory.lovestory.module.loadBitmapFromDiskCache
 import com.lovestory.lovestory.module.photo.getThumbnailForPhoto
+import com.lovestory.lovestory.module.saveBitmapToDiskCache
 import com.lovestory.lovestory.network.getGps
 import com.lovestory.lovestory.network.getPhotoTable
 import com.lovestory.lovestory.ui.components.*
@@ -198,9 +200,33 @@ fun MapScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhot
                 LaunchedEffect(null){
                     coroutineScopeMap.launch{
                         syncedPhoto.forEach{
-                            items.add(MyItem(LatLng(it.latitude, it.longitude), "Marker1", "사진",
-                                getThumbnailForPhoto(token!!, it.id)!!
-                                , "PHOTO", it.id))
+                            val cacheKey = "thumbnail_${it.id}"
+                            val cachedBitmap = loadBitmapFromDiskCache(context, cacheKey)
+                            if(cachedBitmap != null){
+                                items.add(
+                                    MyItem(
+                                        LatLng(it.latitude, it.longitude),
+                                        "Marker1",
+                                        "사진",
+                                        cachedBitmap!!,
+                                        "PHOTO",
+                                        it.id
+                                    )
+                                )
+                            }else{
+                                val getResult = getThumbnailForPhoto(token!!, it.id)
+                                items.add(
+                                    MyItem(
+                                        LatLng(it.latitude, it.longitude),
+                                        "Marker1",
+                                        "사진",
+                                        getResult!!,
+                                        "PHOTO",
+                                        it.id
+                                    )
+                                )
+                                saveBitmapToDiskCache(context, getResult!!, cacheKey)
+                            }
                     }
                 }
 

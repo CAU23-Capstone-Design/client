@@ -59,9 +59,6 @@ import com.kizitonwose.calendar.compose.HorizontalCalendar
 import com.kizitonwose.calendar.compose.rememberCalendarState
 import com.kizitonwose.calendar.core.*
 import com.lovestory.lovestory.model.*
-import com.lovestory.lovestory.module.getSavedComment
-import com.lovestory.lovestory.module.getToken
-import com.lovestory.lovestory.module.saveComment
 import com.lovestory.lovestory.resource.vitro
 import com.lovestory.lovestory.ui.components.*
 import com.lovestory.lovestory.ui.theme.LoveStoryTheme
@@ -85,6 +82,7 @@ import com.lovestory.lovestory.database.entities.SyncedPhoto
 import com.lovestory.lovestory.database.repository.SyncedPhotoRepository
 import com.lovestory.lovestory.graphs.CalendarStack
 import com.lovestory.lovestory.graphs.MainScreens
+import com.lovestory.lovestory.module.*
 import com.lovestory.lovestory.module.photo.getThumbnailForPhoto
 import com.lovestory.lovestory.network.*
 import com.lovestory.lovestory.view.SyncedPhotoView
@@ -115,9 +113,12 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
     //Log.d("세이브", "$selection, $isPopupVisible")
     //Log.d("셀렉션1", "${selection.date}")
 
-    if(isPopupVisibleSave){
-        selection = selectionSave
-        isPopupVisible = true
+    LaunchedEffect(null) {
+        if (isPopupVisibleSave) {
+            Log.d("팝업", "1")
+            selection = selectionSave
+            isPopupVisible = true
+        }
     }
 
     val onOpenDialogRequest : ()->Unit = {
@@ -501,16 +502,33 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                             LaunchedEffect(null){
                                 coroutineScopeMap.launch {
                                     syncedPhoto.forEach {
-                                        items.add(
-                                            MyItem(
-                                                LatLng(it.latitude, it.longitude),
-                                                "Marker1",
-                                                "사진",
-                                                getThumbnailForPhoto(token!!, it.id)!!,
-                                                "PHOTO",
-                                                it.id
+                                        val cacheKey = "thumbnail_${it.id}"
+                                        val cachedBitmap = loadBitmapFromDiskCache(context, cacheKey)
+                                        if(cachedBitmap != null){
+                                            items.add(
+                                                MyItem(
+                                                    LatLng(it.latitude, it.longitude),
+                                                    "Marker1",
+                                                    "사진",
+                                                    cachedBitmap!!,
+                                                    "PHOTO",
+                                                    it.id
+                                                )
                                             )
-                                        )
+                                        }else{
+                                            val getResult = getThumbnailForPhoto(token!!, it.id)
+                                            items.add(
+                                                MyItem(
+                                                    LatLng(it.latitude, it.longitude),
+                                                    "Marker1",
+                                                    "사진",
+                                                    getResult!!,
+                                                    "PHOTO",
+                                                    it.id
+                                                )
+                                            )
+                                            saveBitmapToDiskCache(context, getResult!!, cacheKey)
+                                        }
                                     }
                                     //사진 좌표와 비트맵
                                     latLngMarker.forEach {
