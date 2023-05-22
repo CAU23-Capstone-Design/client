@@ -167,7 +167,7 @@ class LocationService : Service() {
 
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val importance = NotificationManager.IMPORTANCE_LOW
+            val importance = NotificationManager.IMPORTANCE_HIGH
             val channel = NotificationChannel(CHANNEL_ID, "Lovestory", importance)
             val notificationManager: NotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(channel)
@@ -177,8 +177,10 @@ class LocationService : Service() {
     private fun createNotificationForLocationService():Notification{
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("LoveStory")
-            .setContentText("혼자")
+            .setContentText("연인을 만나 추억을 기록해보세요!")
             .setSmallIcon(R.drawable.ic_status_bar_foreground)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setOnlyAlertOnce(false)
             .build()
     }
 

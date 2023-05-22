@@ -69,23 +69,6 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-            //Manifest.permission.ACCESS_MEDIA_LOCATION,
-            val permissions = arrayOf(
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION,
-                Manifest.permission.ACCESS_BACKGROUND_LOCATION,
-                Manifest.permission.READ_MEDIA_IMAGES,
-                Manifest.permission.ACCESS_MEDIA_LOCATION,
-                Manifest.permission.POST_NOTIFICATIONS,
-            )
-            val permissionResult = ContextCompat.checkSelfPermission(applicationContext, permissions[0]) == PackageManager.PERMISSION_GRANTED
-                    && ContextCompat.checkSelfPermission(applicationContext, permissions[1]) == PackageManager.PERMISSION_GRANTED
-                    && ContextCompat.checkSelfPermission(applicationContext, permissions[2]) == PackageManager.PERMISSION_GRANTED
-                    && ContextCompat.checkSelfPermission(applicationContext, permissions[3]) == PackageManager.PERMISSION_GRANTED
-                    && ContextCompat.checkSelfPermission(applicationContext, permissions[4]) == PackageManager.PERMISSION_GRANTED
-                    && ContextCompat.checkSelfPermission(applicationContext, permissions[5]) == PackageManager.PERMISSION_GRANTED
-            Log.d("Permission Check", "$permissionResult")
-
             SideEffect {
                 systemUiController.setSystemBarsColor(
                     color = Color(0xFFF3F3F3),
@@ -98,14 +81,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = androidx.compose.material3.MaterialTheme.colorScheme.background
                 ) {
-//                    Log.d("fdgdfgdfgdfg", "$permissionResult")
-                    Log.d("Permission Check", "1 ${ContextCompat.checkSelfPermission(applicationContext, permissions[0]) == PackageManager.PERMISSION_GRANTED}")
-                    Log.d("Permission Check", "2 ${ContextCompat.checkSelfPermission(applicationContext, permissions[1]) == PackageManager.PERMISSION_GRANTED}")
-                    Log.d("Permission Check", "3 ${ContextCompat.checkSelfPermission(applicationContext, permissions[2]) == PackageManager.PERMISSION_GRANTED}")
-                    Log.d("Permission Check", "4 ${ContextCompat.checkSelfPermission(applicationContext, permissions[3]) == PackageManager.PERMISSION_GRANTED}")
-                    Log.d("Permission Check", "5 ${ContextCompat.checkSelfPermission(applicationContext, permissions[4]) == PackageManager.PERMISSION_GRANTED}")
-                    Log.d("Permission Check", "6 ${ContextCompat.checkSelfPermission(applicationContext, permissions[4]) == PackageManager.PERMISSION_GRANTED}")
-                    DialogForPermission(permissionResult)
+                    DialogForPermission()
                     RootNavigationGraph()
                 }
             }

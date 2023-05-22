@@ -154,8 +154,10 @@ class PhotoService : Service(){
     private fun createNotificationForPhotoService():Notification{
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("LoveStory")
-            .setContentText("연인을 만나서 사진 동기화를 시작합니다!")
+            .setContentText("연인을 만났네요! 사진 동기화를 시작합니다!")
             .setSmallIcon(R.drawable.ic_status_bar_foreground)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setOnlyAlertOnce(false)
             .build()
     }
 

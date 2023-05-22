@@ -114,7 +114,6 @@ fun DashBoardScreen(navHostController: NavHostController) {
     LaunchedEffect(flyingHeartAnimation){
         lottieAnimatable.animate(
             composition = flyingHeartAnimation,
-            reverseOnRepeat = true,
             iterations = LottieConstants.IterateForever,
             iteration = 4,
             continueFromPreviousAnimate = true
@@ -147,27 +146,8 @@ fun DashBoardScreen(navHostController: NavHostController) {
             Text(
                 text = "Lovestory",
                 fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-            )
-
-            Button(
-                onClick = {
-                    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-                    val uri = Uri.fromParts("package", context.packageName, null)
-                    intent.data = uri
-                    intent.putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
-                    intent.putExtra(Settings.EXTRA_SETTINGS_EMBEDDED_DEEP_LINK_INTENT_URI, Settings.ACTION_LOCATION_SOURCE_SETTINGS)
-                    context.startActivity(intent)
-                },
-                colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFEEC9C9)),
-                shape = RoundedCornerShape(25.dp),
-                content = {
-                    Icon(
-                        imageVector = Icons.Default.Settings,
-                        contentDescription = "open app setting"
-                    )
-                },
-                modifier = Modifier.align(Alignment.CenterEnd)
+                fontWeight = FontWeight.Normal,
+                fontFamily = vitro,
             )
         }
        if(isVisibleFlyingAnimation.value) {

@@ -96,11 +96,6 @@ fun CoupleSyncDialog(
 
 @Composable
 fun DialogForPermission(
-//    isDialogOpen : MutableState<Boolean>,
-//    onDismissRequest :() -> Unit,
-//    requestPermissionLauncher : ActivityResultLauncher<Array<String>>,
-//    permissions : Array<String>
-    permissionResult : Boolean
 ){
     val context = LocalContext.current
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
@@ -108,34 +103,27 @@ fun DialogForPermission(
     val isDialogOpen = remember{ mutableStateOf(true) }
     val onDismissRequest : () -> Unit = {isDialogOpen.value = false}
 
-    val requestPermissionLauncher =
-        rememberLauncherForActivityResult(
-            ActivityResultContracts.RequestMultiplePermissions()
-        ) {permissions->
-            if(permissions.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false)) {
-//                Toast.makeText(this, "정확한 위치 권한 승인", Toast.LENGTH_SHORT).show()
+    val permissions = arrayOf(
+        Manifest.permission.ACCESS_FINE_LOCATION,
+        Manifest.permission.ACCESS_COARSE_LOCATION,
+        Manifest.permission.ACCESS_BACKGROUND_LOCATION,
+        Manifest.permission.READ_MEDIA_IMAGES,
+        Manifest.permission.ACCESS_MEDIA_LOCATION,
+        Manifest.permission.POST_NOTIFICATIONS,
+    )
+    val permissionResult = ContextCompat.checkSelfPermission(context, permissions[0]) == PackageManager.PERMISSION_GRANTED
+            && ContextCompat.checkSelfPermission(context, permissions[1]) == PackageManager.PERMISSION_GRANTED
+            && ContextCompat.checkSelfPermission(context, permissions[2]) == PackageManager.PERMISSION_GRANTED
+            && ContextCompat.checkSelfPermission(context, permissions[3]) == PackageManager.PERMISSION_GRANTED
+            && ContextCompat.checkSelfPermission(context, permissions[4]) == PackageManager.PERMISSION_GRANTED
+            && ContextCompat.checkSelfPermission(context, permissions[5]) == PackageManager.PERMISSION_GRANTED
 
-            }
-            else if(permissions.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false)){
-//                Toast.makeText(this, "대략적인 위치 권한 승인", Toast.LENGTH_SHORT).show()
-            }
-            else if(permissions.getOrDefault(Manifest.permission.READ_MEDIA_IMAGES, false)){
-//                    Toast.makeText(this, " 사진 권한 승인", Toast.LENGTH_SHORT).show()
-            }
-            else if(permissions.getOrDefault(Manifest.permission.POST_NOTIFICATIONS, false)){
-//                    Toast.makeText(this, " 알람 권한 승인", Toast.LENGTH_SHORT).show()
-            }
-            else{
-//                    Toast.makeText(this, "권한 얻기 실패...", Toast.LENGTH_SHORT).show()
-//                    ActivityResultContracts.RequestMultiplePermissions()
-            }
-        }
+
     val requestBackgroundLocationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
         onResult = {
             if(it){
 //                Toast.makeText(context, " 백그라운드 권한 승인", Toast.LENGTH_SHORT).show()
-
             }else{
                 Toast.makeText(context, " 백그라운드 권한 거부", Toast.LENGTH_SHORT).show()
             }
@@ -174,7 +162,7 @@ fun DialogForPermission(
         contract = ActivityResultContracts.RequestPermission(),
         onResult = {
             if(it){
-//                Toast.makeText(context, " 사진 권한 승인", Toast.LENGTH_SHORT).show()
+//                Toast.makeText(context, " 사진 위치 권한 승인", Toast.LENGTH_SHORT).show()
                 requestNotificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
             }else{
                 Toast.makeText(context, " 사진 위치 권한 거부", Toast.LENGTH_SHORT).show()
@@ -187,7 +175,7 @@ fun DialogForPermission(
         onResult = {
             if(it){
 //                Toast.makeText(context, " 사진 권한 승인", Toast.LENGTH_SHORT).show()
-                requestNotificationPermissionLauncher.launch(Manifest.permission.ACCESS_MEDIA_LOCATION)
+                requestPhotoLocationPermissionLauncher.launch(Manifest.permission.ACCESS_MEDIA_LOCATION)
             }else{
                 Toast.makeText(context, " 사진 권한 거부", Toast.LENGTH_SHORT).show()
             }
@@ -212,7 +200,7 @@ fun DialogForPermission(
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ){
-                    Spacer(modifier = Modifier.height(25.dp))
+                    Spacer(modifier = Modifier.height(20.dp))
                     Row(modifier = Modifier
                         .padding(horizontal = 10.dp)
                         .fillMaxWidth(), horizontalArrangement = Arrangement.Start) {
@@ -228,85 +216,21 @@ fun DialogForPermission(
                         thickness = 1.dp,
                         modifier = Modifier.padding(top = 20.dp, start = 5.dp, bottom = 10.dp, end = 5.dp)
                     )
-                    Row(
-                        modifier = Modifier
-                            .padding(10.dp)
-                            .fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Start
-                    ) {
-                        Box(
-                            contentAlignment = Alignment.Center,
-                            modifier = Modifier
-                                .height(40.dp)
-                                .width(40.dp)
-                        ){
-                            Icon(
-                                painter = painterResource(com.lovestory.lovestory.R.drawable.ic_permission_media_foreground),
-                                contentDescription = "icon",
-                                tint = Color.Black
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.width(20.dp))
-                        Column() {
-                            Text(text = "사진 (필수)", fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                            Text(text = "사진 업로드 및 저장", fontSize = 14.sp)
-                        }
-
-                    }
-                    Row(
-                        modifier = Modifier
-                            .padding(10.dp)
-                            .fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Start
-                    ) {
-                        Box(
-                            contentAlignment = Alignment.Center,
-                            modifier = Modifier
-                                .height(40.dp)
-                                .width(40.dp)
-                        ){
-                            Icon(
-                                painter = painterResource(com.lovestory.lovestory.R.drawable.ic_permission_notification_foreground),
-                                contentDescription = "icon",
-                                tint = Color.Black
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.width(20.dp))
-                        Column() {
-                            Text(text = "알람 (필수)", fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                            Text(text = "커플 만남 상태 알람 전송", fontSize = 14.sp)
-                        }
-                    }
-                    Row(
-                        modifier = Modifier
-                            .padding(10.dp)
-                            .fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Start
-                    ) {
-                        Box(
-                            contentAlignment = Alignment.Center,
-                            modifier = Modifier
-                                .height(40.dp)
-                                .width(40.dp)
-                        ){
-                            Icon(
-                                painter = painterResource(com.lovestory.lovestory.R.drawable.ic_permission_location_foreground),
-                                contentDescription = "icon",
-                                tint = Color.Black
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.width(20.dp))
-                        Column() {
-                            Text(text = "위치 (필수)", fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                            Text(text = "현재 위치 자동 수신", fontSize = 14.sp)
-                        }
-                    }
+                    PermissionDialogItem(
+                        id = com.lovestory.lovestory.R.drawable.ic_permission_media_foreground,
+                        title = "사진 (필수)",
+                        description = "사진 업로드 및 저장"
+                    )
+                    PermissionDialogItem(
+                        id = com.lovestory.lovestory.R.drawable.ic_permission_notification_foreground,
+                        title = "알람 (필수)",
+                        description = "커플 만남 상태 알람 전송"
+                    )
+                    PermissionDialogItem(
+                        id = com.lovestory.lovestory.R.drawable.ic_permission_location_foreground,
+                        title = "위치 (필수)",
+                        description = "현재 위치 자동 수신"
+                    )
                     Spacer(modifier = Modifier.height(5.dp))
                     Box(
                         modifier = Modifier
@@ -325,6 +249,40 @@ fun DialogForPermission(
                     Spacer(modifier = Modifier.height(20.dp))
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun PermissionDialogItem(
+    id : Int,
+    title : String,
+    description: String
+){
+    Row(
+        modifier = Modifier
+            .padding(10.dp)
+            .fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Start
+    ) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .height(40.dp)
+                .width(40.dp)
+        ){
+            Icon(
+                painter = painterResource(id),
+                contentDescription = "icon",
+                tint = Color.Black
+            )
+        }
+
+        Spacer(modifier = Modifier.width(20.dp))
+        Column() {
+            Text(text = title, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            Text(text = description, fontSize = 14.sp)
         }
     }
 }
