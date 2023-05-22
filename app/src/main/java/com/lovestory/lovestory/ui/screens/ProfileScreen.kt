@@ -43,7 +43,7 @@ import com.lovestory.lovestory.module.checkLoginToken
 import com.lovestory.lovestory.module.deleteToken
 import com.lovestory.lovestory.module.getToken
 import com.lovestory.lovestory.network.deleteCouple
-import com.lovestory.lovestory.network.getCoupleInfo
+import com.lovestory.lovestory.network.getUsersInfo
 import kotlinx.coroutines.launch
 import java.util.*
 
@@ -52,13 +52,13 @@ fun ProfileScreen(navHostController: NavHostController) {
     val context = LocalContext.current
     val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)
     var token by remember {mutableStateOf(getToken(context))}
-    val appKey = context.getString(R.string.app_kakao_key)
     var name by remember { mutableStateOf("") }
     var gender by remember { mutableStateOf("") }
-    val coroutineScope = rememberCoroutineScope()
 
     if (token == null) {
+        Log.d("토큰","$token")
         token = getToken(context)
+        Log.d("토큰","$token")
         if (token == null){
             intent?.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
             context.startActivity(intent)
@@ -69,10 +69,10 @@ fun ProfileScreen(navHostController: NavHostController) {
     var showSyncoutDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(null){
-        val coupleInfo = getCoupleInfo(token!!)
-        if(coupleInfo.isSuccessful){
-            name = coupleInfo.body()!!.user1.name
-            gender = coupleInfo.body()!!.user1.gender
+        val coupleInfo = getUsersInfo(token!!)
+        if(coupleInfo != null){
+            name = coupleInfo.user1.name
+            gender = coupleInfo.user1.gender
         }
     }
 

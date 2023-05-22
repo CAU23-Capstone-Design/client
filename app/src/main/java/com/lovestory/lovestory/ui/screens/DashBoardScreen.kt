@@ -40,8 +40,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.startActivity
 import androidx.navigation.NavHostController
-import com.airbnb.lottie.RenderMode
-import com.airbnb.lottie.compose.*
+//import com.airbnb.lottie.RenderMode
+//import com.airbnb.lottie.compose.*
 import com.lovestory.lovestory.R
 import com.lovestory.lovestory.model.UsersOfCoupleInfo
 import com.lovestory.lovestory.module.dashboard.getCoupleInfo
