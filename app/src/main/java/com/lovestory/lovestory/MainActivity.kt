@@ -1,7 +1,6 @@
 package com.lovestory.lovestory
 
 import android.Manifest
-import android.Manifest.permission.ACCESS_BACKGROUND_LOCATION
 import android.app.ActivityManager
 import android.content.Context
 import android.content.Intent
@@ -14,34 +13,24 @@ import android.os.PowerManager
 import android.provider.Settings
 import android.util.Log
 import android.view.Window
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.ContextCompat
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.lovestory.lovestory.graphs.RootNavigationGraph
 import com.lovestory.lovestory.services.LocationService
+import com.lovestory.lovestory.ui.components.DialogForPermission
 import com.lovestory.lovestory.ui.theme.LoveStoryTheme
 import com.lovestory.lovestory.ui.theme.LoveStoryThemeForMD3
 
@@ -50,37 +39,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         requestWindowFeature(Window.FEATURE_NO_TITLE)
-
-        val requestPermissionLauncher =
-            registerForActivityResult(
-                ActivityResultContracts.RequestMultiplePermissions()
-            ) {permissions->
-                if(permissions.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false)) {
-//                Toast.makeText(this, "정확한 위치 권한 승인", Toast.LENGTH_SHORT).show()
-
-            }
-                else if(permissions.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false)){
-//                Toast.makeText(this, "대략적인 위치 권한 승인", Toast.LENGTH_SHORT).show()
-            }
-                else if(permissions.getOrDefault(Manifest.permission.READ_MEDIA_IMAGES, false)){
-//                    Toast.makeText(this, " 사진 권한 승인", Toast.LENGTH_SHORT).show()
-                }
-                else if(permissions.getOrDefault(Manifest.permission.POST_NOTIFICATIONS, false)){
-//                    Toast.makeText(this, " 알람 권한 승인", Toast.LENGTH_SHORT).show()
-                }
-                else{
-//                    Toast.makeText(this, "권한 얻기 실패...", Toast.LENGTH_SHORT).show()
-//                    ActivityResultContracts.RequestMultiplePermissions()
-                }
-            }
-
-        val permissions = arrayOf(
-            Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.ACCESS_COARSE_LOCATION,
-            Manifest.permission.READ_MEDIA_IMAGES,
-            Manifest.permission.POST_NOTIFICATIONS,
-            Manifest.permission.ACCESS_MEDIA_LOCATION,
-        )
 
         setContent {
             val systemUiController = rememberSystemUiController()
@@ -111,6 +69,22 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
+            //Manifest.permission.ACCESS_MEDIA_LOCATION,
+            val permissions = arrayOf(
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.ACCESS_BACKGROUND_LOCATION,
+                Manifest.permission.READ_MEDIA_IMAGES,
+                Manifest.permission.ACCESS_MEDIA_LOCATION,
+                Manifest.permission.POST_NOTIFICATIONS,
+            )
+            val permissionResult = ContextCompat.checkSelfPermission(applicationContext, permissions[0]) == PackageManager.PERMISSION_GRANTED
+                    && ContextCompat.checkSelfPermission(applicationContext, permissions[1]) == PackageManager.PERMISSION_GRANTED
+                    && ContextCompat.checkSelfPermission(applicationContext, permissions[2]) == PackageManager.PERMISSION_GRANTED
+                    && ContextCompat.checkSelfPermission(applicationContext, permissions[3]) == PackageManager.PERMISSION_GRANTED
+                    && ContextCompat.checkSelfPermission(applicationContext, permissions[4]) == PackageManager.PERMISSION_GRANTED
+                    && ContextCompat.checkSelfPermission(applicationContext, permissions[5]) == PackageManager.PERMISSION_GRANTED
+            Log.d("Permission Check", "$permissionResult")
 
             SideEffect {
                 systemUiController.setSystemBarsColor(
@@ -124,54 +98,14 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = androidx.compose.material3.MaterialTheme.colorScheme.background
                 ) {
-                    val isDialogOpen = remember{ mutableStateOf(true) }
-                    val onDismissRequest : () -> Unit = {isDialogOpen.value = false}
-
-                    val context = LocalContext.current
-                    val permissions = arrayOf(
-                        Manifest.permission.ACCESS_FINE_LOCATION,
-                        Manifest.permission.ACCESS_COARSE_LOCATION,
-                        Manifest.permission.READ_MEDIA_IMAGES,
-                        Manifest.permission.POST_NOTIFICATIONS,
-                        Manifest.permission.ACCESS_MEDIA_LOCATION,
-                    )
-                    val permissionResult = ContextCompat.checkSelfPermission(context, permissions[0]) == PackageManager.PERMISSION_GRANTED
-                            && ContextCompat.checkSelfPermission(context, permissions[1]) == PackageManager.PERMISSION_GRANTED
-                            && ContextCompat.checkSelfPermission(context, permissions[2]) == PackageManager.PERMISSION_GRANTED
-                            && ContextCompat.checkSelfPermission(context, permissions[3]) == PackageManager.PERMISSION_GRANTED
-                            && ContextCompat.checkSelfPermission(context, permissions[4]) == PackageManager.PERMISSION_GRANTED
-
-                    if(!permissionResult){
-                        AnimatedVisibility(visible = isDialogOpen.value, enter= fadeIn(), exit= fadeOut()) {
-                            Dialog(
-                                onDismissRequest = onDismissRequest,
-                                properties = DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = false)
-                            ) {
-                                Column(
-                                    modifier = Modifier
-                                        .width(360.dp)
-                                        .wrapContentHeight()
-                                        .clip(RoundedCornerShape(25.dp))
-                                        .background(color = Color.White),
-                                    verticalArrangement = Arrangement.Center,
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                ){
-                                    Spacer(modifier = Modifier.height(20.dp))
-                                    Text(text = "LoveStory 이용을 위한 권한 설정이 필요합니다.")
-                                    Button(onClick = {
-                                        isDialogOpen.value = false
-
-                                        requestPermissionLauncher.launch(permissions)
-                                    }) {
-                                        Text(text = "설정하기")
-                                    }
-                                    Spacer(modifier = Modifier.height(20.dp))
-                                }
-                            }
-                        }
-                    }
-
-
+//                    Log.d("fdgdfgdfgdfg", "$permissionResult")
+                    Log.d("Permission Check", "1 ${ContextCompat.checkSelfPermission(applicationContext, permissions[0]) == PackageManager.PERMISSION_GRANTED}")
+                    Log.d("Permission Check", "2 ${ContextCompat.checkSelfPermission(applicationContext, permissions[1]) == PackageManager.PERMISSION_GRANTED}")
+                    Log.d("Permission Check", "3 ${ContextCompat.checkSelfPermission(applicationContext, permissions[2]) == PackageManager.PERMISSION_GRANTED}")
+                    Log.d("Permission Check", "4 ${ContextCompat.checkSelfPermission(applicationContext, permissions[3]) == PackageManager.PERMISSION_GRANTED}")
+                    Log.d("Permission Check", "5 ${ContextCompat.checkSelfPermission(applicationContext, permissions[4]) == PackageManager.PERMISSION_GRANTED}")
+                    Log.d("Permission Check", "6 ${ContextCompat.checkSelfPermission(applicationContext, permissions[4]) == PackageManager.PERMISSION_GRANTED}")
+                    DialogForPermission(permissionResult)
                     RootNavigationGraph()
                 }
             }

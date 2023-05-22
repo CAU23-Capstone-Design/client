@@ -49,12 +49,9 @@ fun MainNavGraph(
             PhotoDetailScreenFromDeviceWithMediaPicker(navHostController = navHostController, photoId = photoId!!)
         }
         composable(GalleryStack.DetailPhotoFromServer.route+"/{photoIndex}"){
-//            val photoId = it.arguments?.getString("photoId")
             val photoIndex = it.arguments?.getString("photoIndex")!!.toInt()
-//            Log.d("naviagetion", "index : $indexForDetail")
             PhotoDetailScreenFromServer(
                 navHostController = navHostController,
-//                photoId = photoId!!,
                 syncedPhotoView= syncedPhotoView,
                 photoIndex = photoIndex
             )
