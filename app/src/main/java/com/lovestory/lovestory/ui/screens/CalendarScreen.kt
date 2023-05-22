@@ -305,6 +305,7 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                 photoExist = false
                 photoPosition = emptyList()
                 dataLoaded.value = false
+                commentSave = ""
             }, //onDismissRequest,
             properties = DialogProperties(dismissOnBackPress = true, dismissOnClickOutside = true)
         ) {
@@ -404,6 +405,7 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                             saveComment(context, coupleMemoryList)
                             isPopupVisible = false
                             isPopupVisibleSave = false
+                            commentSave = ""
                         },
                         elevation = null,
                         contentPadding = PaddingValues(0.dp),
@@ -448,6 +450,7 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                             photoExist = false
                             photoPosition = emptyList()
                             dataLoaded.value = false
+                            commentSave = ""
                         },
                         elevation = null,
                         contentPadding = PaddingValues(0.dp),
