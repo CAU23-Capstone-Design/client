@@ -14,16 +14,16 @@ fun getInfoFromImage(exifInterface: ExifInterface?):ExifInfo? {
     val latitude = convertDMSToDecimal(exifInterface?.getAttribute(androidx.exifinterface.media.ExifInterface.TAG_GPS_LATITUDE))
     val longitude = convertDMSToDecimal(exifInterface?.getAttribute(androidx.exifinterface.media.ExifInterface.TAG_GPS_LONGITUDE))
 
-    Log.e("FUNCTION-getLocationInfoFromImage", "data : $dateTaken")
-    Log.d("FUNCTION-getLocationInfoFromImage", "latitude ${latitude!!} - longitude :${longitude!!}")
+//    Log.e("FUNCTION-getLocationInfoFromImage", "data : $dateTaken")
+//    Log.d("FUNCTION-getLocationInfoFromImage", "latitude ${latitude!!} - longitude :${longitude!!}")
 
-//    return if(dateTaken != null && latitude != null && longitude != null){
-//        ExifInfo(dateTime = dateTaken, latitude = latitude, longitude = longitude)
-//    }
-//    else{
-//        null
-//    }
-    return ExifInfo(dateTime = dateTaken!!, latitude = latitude!!, longitude = longitude!!)
+    return if(dateTaken != null && latitude != null && longitude != null){
+        ExifInfo(dateTime = dateTaken, latitude = latitude, longitude = longitude)
+    }
+    else{
+        null
+    }
+//    return ExifInfo(dateTime = dateTaken!!, latitude = latitude!!, longitude = longitude!!)
 }
 
 fun convertDMSToDecimal(dms: String?): Double? {

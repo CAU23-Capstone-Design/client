@@ -13,8 +13,10 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
@@ -26,6 +28,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -45,6 +48,9 @@ import com.lovestory.lovestory.module.dashboard.getCoupleInfo
 import com.lovestory.lovestory.module.dashboard.requestUsersOfCoupleInfo
 import com.lovestory.lovestory.module.shared.getDistanceInfo
 import com.lovestory.lovestory.resource.vitro
+import com.lovestory.lovestory.ui.components.AnimateCharacter
+import com.lovestory.lovestory.ui.components.AnimateFlyHeart
+import com.lovestory.lovestory.ui.components.AnimateHeart
 import kotlinx.coroutines.*
 import java.time.LocalDate
 import java.time.Period
@@ -61,15 +67,7 @@ fun DashBoardScreen(navHostController: NavHostController) {
 
     val doubleBackToExitPressedOnce = remember { mutableStateOf(false) }
     val isVisibleFlyingAnimation = remember { mutableStateOf(false) }
-
-
-    val heartAnimation by rememberLottieComposition(
-        spec = LottieCompositionSpec.Asset("heart.json"))
-    val flyingHeartAnimation by rememberLottieComposition(
-        spec = LottieCompositionSpec.Asset("flying-heart.json"))
-    val characterAnimation by rememberLottieComposition(
-        spec = LottieCompositionSpec.Asset("love-animation.json"))
-    val lottieAnimatable = rememberLottieAnimatable()
+    val countDay = remember { mutableStateOf(0L) }
 
     val coupleInfo :MutableState<UsersOfCoupleInfo?> = remember {
         mutableStateOf(null)
@@ -78,18 +76,20 @@ fun DashBoardScreen(navHostController: NavHostController) {
         mutableStateOf(99999999)
     }
 
-
-    LaunchedEffect(coupleInfo.value){
+    LaunchedEffect(null){
         val result = getCoupleInfo(context)
         if(result == null){
             coupleInfo.value = requestUsersOfCoupleInfo(context)
             Log.d("DashBoard Screen", "${coupleInfo.value}")
         }else{
             coupleInfo.value = result
+            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+            val localDate = LocalDate.parse(coupleInfo!!.value!!.firstDate!!, formatter)
+            countDay.value = currentDate.toEpochDay() - localDate.toEpochDay()
         }
     }
 
-    LaunchedEffect(coupleDistance){
+    LaunchedEffect(null){
         val result = getDistanceInfo(context)
 
         if(result == null){
@@ -109,15 +109,6 @@ fun DashBoardScreen(navHostController: NavHostController) {
                 doubleBackToExitPressedOnce.value = false
             }
         }
-    }
-
-    LaunchedEffect(flyingHeartAnimation){
-        lottieAnimatable.animate(
-            composition = flyingHeartAnimation,
-            iterations = LottieConstants.IterateForever,
-            iteration = 4,
-            continueFromPreviousAnimate = true
-        )
     }
 
     Box(
@@ -150,21 +141,6 @@ fun DashBoardScreen(navHostController: NavHostController) {
                 fontFamily = vitro,
             )
         }
-       if(isVisibleFlyingAnimation.value) {
-            Box(modifier = Modifier
-                .height(200.dp)
-                .fillMaxWidth()
-                .padding(top = 30.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                LottieAnimation(
-                    composition = flyingHeartAnimation,
-                    progress = lottieAnimatable.progress,
-                    contentScale = ContentScale.FillHeight,
-                    renderMode = RenderMode.AUTOMATIC,
-                )
-            }
-        }
         Column(
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -172,33 +148,27 @@ fun DashBoardScreen(navHostController: NavHostController) {
                 .fillMaxSize()
                 .padding(top = 70.dp)
         ) {
+            AnimateCharacter()
+            Spacer(modifier = Modifier.height(20.dp))
             if(coupleInfo.value != null){
-                val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
-                val localDate = LocalDate.parse(coupleInfo!!.value!!.firstDate!!, formatter)
-//                val meetDate = LocalDate.parse()
-
-                val diff = Period.between(localDate, currentDate)
-                val day = diff.days
-
-                val today = Calendar.getInstance().apply {
-                    set(Calendar.HOUR_OF_DAY, 0)
-                    set(Calendar.MINUTE, 0)
-                    set(Calendar.SECOND, 0)
-                    set(Calendar.MILLISECOND, 0)
-                }.time.time
-
                 Column(
                     verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier
+                        .padding(horizontal = 20.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(Color(0xB5FFDBDB))
                 ){
                     Row(
                         horizontalArrangement = Arrangement.SpaceAround,
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .padding(horizontal = 20.dp)
                     ){
                         Text(
                             text = coupleInfo!!.value!!.user1.name,
                             fontFamily = vitro,
-                            fontSize = 20.sp
+                            fontSize = 18.sp
                         )
                         Box(modifier = Modifier
                             .height(80.dp)
@@ -206,77 +176,43 @@ fun DashBoardScreen(navHostController: NavHostController) {
                             .clickable {
                                 if (!isVisibleFlyingAnimation.value) {
                                     isVisibleFlyingAnimation.value = true
-                                    CoroutineScope(Dispatchers.Default).launch {
-                                        delay(5000)
+                                    CoroutineScope(Dispatchers.IO).launch {
+                                        delay(3000)
                                         isVisibleFlyingAnimation.value = false
                                     }
                                 }
-
                             }) {
-                            LaunchedEffect(heartAnimation){
-                                lottieAnimatable.animate(
-                                    composition = heartAnimation,
-                                    reverseOnRepeat = true,
-                                    iterations = LottieConstants.IterateForever,
-                                    iteration = 4,
-                                    continueFromPreviousAnimate = true
-                                )
-                            }
-
-                            LottieAnimation(
-                                composition = heartAnimation,
-                                progress = lottieAnimatable.progress,
-                                contentScale = ContentScale.FillHeight,
-                                renderMode = RenderMode.AUTOMATIC,
-                            )
+                            AnimateHeart()
                         }
                         Text(
                             text = coupleInfo!!.value!!.user2.name,
                             fontFamily = vitro,
-                            fontSize = 20.sp
+                            fontSize = 18.sp
                         )
                     }
-                    Spacer(modifier = Modifier.height(20.dp))
+                    Spacer(modifier = Modifier.height(10.dp))
                     Text(
-                        text = "D + $day",
+                        text = "D + ${countDay.value}",
                         fontFamily = vitro,
                         fontSize = 20.sp
                     )
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Text(
+                        text = "${coupleInfo!!.value!!.firstDate?.substring(0,10)}",
+                        fontFamily = vitro,
+                        fontSize = 16.sp
+                    )
                     Spacer(modifier = Modifier.height(20.dp))
                 }
             }
-            Box(modifier = Modifier
-                .height(250.dp)
-                .width(250.dp)) {
-
-                LaunchedEffect(characterAnimation) {
-                    lottieAnimatable.animate(
-                        composition = characterAnimation,
-//                        clipSpec = LottieClipSpec.Frame(0, 1200),
-//                        initialProgress = 0f,
-                        reverseOnRepeat = true,
-                        iterations = LottieConstants.IterateForever,
-                        iteration = 4,
-                        continueFromPreviousAnimate = true
-                    )
-                }
-
-//            val composition = rememberLottieComposition(R.raw.lottie_animation)
-                Box(
-                    modifier = Modifier.fillMaxSize()
-                ) {
-//                    LottieAnimation(composition = composition, progress = { /*TODO*/ })
-                    LottieAnimation(
-                        composition = characterAnimation,
-                        progress = lottieAnimatable.progress,
-                        contentScale = ContentScale.FillHeight,
-                        renderMode = RenderMode.AUTOMATIC,
-                    )
-                }
+            Spacer(modifier = Modifier.height(50.dp))
+            Column() {
+                Text(text = "여기에 뭘 넣으면 좋을까?!!!!!!!")
             }
         }
 
-
-
+        AnimatedVisibility(isVisibleFlyingAnimation.value , enter = fadeIn(), exit = fadeOut()){
+            AnimateFlyHeart()
+        }
     }
 }
