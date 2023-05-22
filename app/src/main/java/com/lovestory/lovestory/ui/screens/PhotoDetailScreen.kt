@@ -603,15 +603,9 @@ fun ClickPhotoDetailScreenFromServer(
                 .background(Color.Black)
                 .fillMaxSize(),
         ){
-            DetailImageFromBitmap(bitmap.value!!)
-        }
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier
-                .background(Color.Black)
-                .fillMaxSize(),
-        ){
-            DetailImageFromBitmap(bitmap.value!!)
+            if(bitmap.value != null){
+                DetailImageFromBitmap(bitmap.value!!)
+            }
         }
         Column(
             verticalArrangement = Arrangement.Top,

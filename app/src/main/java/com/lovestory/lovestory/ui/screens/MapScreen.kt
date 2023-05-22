@@ -270,9 +270,9 @@ fun MapScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhot
                         false
                     },
                     onClusterItemClick = {
-//                        navHostController.navigate(CalendarStack.ClickDetailScreen.route+"/${it.id}/${date}") {
-//                            popUpTo(CalendarStack.ClickDetailScreen.route)
-//                        }
+                        navHostController.navigate(CalendarStack.ClickDetailScreen.route+"/${it.id}/${date}") {
+                            popUpTo(CalendarStack.ClickDetailScreen.route)
+                        }
                         false
                     },
                     onClusterItemInfoWindowClick = {
