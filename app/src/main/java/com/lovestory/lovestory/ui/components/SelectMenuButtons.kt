@@ -54,3 +54,43 @@ fun SelectMenuButton(
         },
     )
 }
+
+@Composable
+fun SelectHelpButtons(items : List<String>, selectedButton : String, onClick : (String)->Unit){
+    Row(
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .background(Color(0xDAD5D2D2), shape = RoundedCornerShape(25.dp))
+            .padding(horizontal = 8.dp, vertical = 5.dp)
+    ){
+        items.forEach { item->
+            SelectHelpButton(onClick = {
+                onClick(item as String)}, buttonText = item, isSelected = item == selectedButton)
+        }
+    }
+}
+
+@Composable
+fun SelectHelpButton(
+    onClick: () -> Unit,
+    buttonText: String,
+    isSelected: Boolean,
+){
+    Button(
+        onClick = onClick,
+        colors = ButtonDefaults.textButtonColors(
+            backgroundColor =  if (isSelected) Color(0xFFFCC5C5) else Color.Transparent,
+            contentColor = Color.Black,
+            disabledContentColor = Color.Black.copy(alpha = 0f)
+        ),
+        shape = RoundedCornerShape(25.dp),
+        elevation = ButtonDefaults.elevation(defaultElevation = 0.dp),
+        modifier = Modifier
+            .wrapContentWidth()
+            .wrapContentHeight(),
+        content = {
+            Text(text = buttonText, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+        },
+    )
+}

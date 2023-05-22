@@ -91,7 +91,7 @@ interface SyncedPhotoDao {
     """)
     fun getFirstPhotoForEachYear(): LiveData<List<SyncedPhoto>>
 
-    @Query("SELECT * FROM syncedPhotos WHERE date = :targetDate")
+    @Query("SELECT * FROM syncedPhotos WHERE substr(date, 1, 10) = :targetDate")
     suspend fun getPhotosByDate(targetDate: String): List<SyncedPhoto>
 
     @Query("SELECT * FROM syncedPhotos WHERE area2 = :targetArea2")

@@ -12,6 +12,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -27,6 +28,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
@@ -35,6 +37,7 @@ import com.lovestory.lovestory.R
 import com.lovestory.lovestory.database.entities.AdditionalPhoto
 import com.lovestory.lovestory.database.entities.PhotoForSync
 import com.lovestory.lovestory.database.entities.SyncedPhoto
+import com.lovestory.lovestory.graphs.CalendarStack
 import com.lovestory.lovestory.graphs.GalleryStack
 import com.lovestory.lovestory.graphs.MainScreens
 import com.lovestory.lovestory.module.loadBitmapFromDiskCache
@@ -49,6 +52,15 @@ fun Skeleton(modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
             .background(Color.LightGray)
+            .animateContentSize()
+    )
+}
+
+@Composable
+fun SkeletonPopup(modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .background(Color.LightGray, RoundedCornerShape(12.dp))
             .animateContentSize()
     )
 }
@@ -108,7 +120,7 @@ fun ThumbnailOfPhotoFromServer(
         val screenWidth = LocalConfiguration.current.screenWidthDp.dp
         val imageWidth = (screenWidth / 3)
 //        Log.d("image width", "$imageWidth")
-        Skeleton(modifier = Modifier
+        SkeletonPopup(modifier = Modifier
             .width(imageWidth)
             .aspectRatio(1f)
             .padding(2.dp))
@@ -419,4 +431,87 @@ fun CheckableDisplayImageFromUriWithPicker(
             }
         }
     }
+}
+
+@Composable
+fun ThumbnailOfPhotoFromServerPopup(
+    index: Int,
+    token: String,
+    photoId: String,
+    photo: SyncedPhoto,
+    navHostController: NavHostController,
+    syncedPhotoView : SyncedPhotoView,
+    widthDp: Dp,
+    date: String,
+    onImageClick: () -> Unit
+) {
+    val context = LocalContext.current
+    val bitmap = remember { mutableStateOf<Bitmap?>(null) }
+    val cacheKey = "thumbnail_$photoId"
+    val indexForDetail = remember { mutableStateOf(0) }
+
+    LaunchedEffect(photo) {
+        indexForDetail.value = syncedPhotoView.calendarSyncedPhotoIndex(photo, date)
+        Log.d("인덱스","${indexForDetail.value}")
+        val cachedBitmap = loadBitmapFromDiskCache(context, cacheKey)
+        if (cachedBitmap != null) {
+//            Log.d("Thumbnail","cache에서 로드")
+            bitmap.value = cachedBitmap
+        } else {
+            val getResult = getThumbnailForPhoto(token, photoId)
+            if(getResult != null){
+                saveBitmapToDiskCache(context, getResult, cacheKey)
+                bitmap.value = getResult
+//                Log.d("Thumbnail","서버에서 로드")
+            }
+            else{
+                Log.d("COMPONENT-ThumbnailOfPhotoFromServer", "Error in transfer bitmap")
+            }
+        }
+    }
+
+    AnimatedVisibility (bitmap.value != null, enter = fadeIn(), exit = fadeOut()) {
+        DisplayImageFromBitmapPopup(index, bitmap.value!!, navHostController=navHostController, photoId = photoId, widthDp = widthDp, photoIndex = indexForDetail, date = date, onImageClick = onImageClick)
+    }
+    AnimatedVisibility(bitmap.value== null, enter = fadeIn(), exit = fadeOut()) {
+        val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+        val imageWidth = (screenWidth - 80.dp) / 3
+//        Log.d("image width", "$imageWidth")
+        SkeletonPopup(modifier = Modifier
+            .width(imageWidth)
+            .aspectRatio(1f)
+            .padding(2.dp))
+    }
+}
+
+@Composable
+fun DisplayImageFromBitmapPopup(
+    index: Int,
+    bitmap: Bitmap,
+    navHostController: NavHostController,
+    photoId: String,
+    photoIndex : MutableState<Int>,
+    widthDp: Dp,
+    date: String,
+    onImageClick: () -> Unit
+) {
+    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+    val imageWidth = (screenWidth - 80.dp) / 3
+
+    Image(
+        bitmap = bitmap.asImageBitmap(),
+        contentDescription = null,
+        modifier = Modifier
+            .width(imageWidth)
+            .aspectRatio(1f)
+            .padding(2.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .clickable {
+                onImageClick
+                navHostController.navigate(CalendarStack.DetailScreen.route+"/${photoIndex.value}/${date}") {
+                    popUpTo(CalendarStack.DetailScreen.route)
+                }
+            },
+        contentScale = ContentScale.Crop,
+    )
 }
