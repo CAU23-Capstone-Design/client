@@ -33,14 +33,11 @@ import androidx.navigation.compose.rememberNavController
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
-import com.lovestory.lovestory.graphs.RootNavigationGraph
 import com.lovestory.lovestory.resource.vitro
 import com.lovestory.lovestory.ui.theme.LoveStoryTheme
 import com.lovestory.lovestory.R
 import com.lovestory.lovestory.event.kakaoLogoutEvent
-import com.lovestory.lovestory.graphs.AuthScreen
-import com.lovestory.lovestory.graphs.Graph
-import com.lovestory.lovestory.graphs.loginNavGraph
+import com.lovestory.lovestory.graphs.*
 import com.lovestory.lovestory.model.LoginPayload
 import com.lovestory.lovestory.module.checkLoginToken
 import com.lovestory.lovestory.module.deleteToken
@@ -119,7 +116,9 @@ fun ProfileScreen(navHostController: NavHostController) {
             ) {
                 TextButton(
                     onClick = {
-                        //
+                        navHostController.navigate(ProfileStack.Help.route) {
+                            popUpTo(ProfileStack.Help.route)
+                        }
                     }
                 ){
                     Text(
@@ -133,7 +132,9 @@ fun ProfileScreen(navHostController: NavHostController) {
                 Spacer(modifier = Modifier.height(15.dp))
                 TextButton(
                     onClick = {
-                        //
+                        navHostController.navigate(ProfileStack.Privacy.route) {
+                            popUpTo(ProfileStack.Privacy.route)
+                        }
                     }
                 ){
                     Text(
@@ -206,7 +207,7 @@ fun ProfileScreen(navHostController: NavHostController) {
                             showLogoutDialog = false
                         }
                     ){
-                        Text("취소")
+                        Text("취소", color = Color.Black)
                     }
                 }
             }
@@ -247,6 +248,8 @@ fun ProfileScreen(navHostController: NavHostController) {
 //                                deleteCouple(token)
 //                            }
                             showSyncoutDialog = false
+                            intent?.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                            context.startActivity(intent)
                         }
                     ){
                         Text("확인", color = Color.Red)
@@ -256,7 +259,7 @@ fun ProfileScreen(navHostController: NavHostController) {
                             showSyncoutDialog = false
                         }
                     ){
-                        Text("취소")
+                        Text("취소", color = Color.Black)
                     }
                 }
             }

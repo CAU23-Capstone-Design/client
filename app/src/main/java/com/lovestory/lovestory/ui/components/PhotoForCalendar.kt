@@ -91,10 +91,10 @@ fun PhotoForMap(
     val syncedPhotosByDate = syncedPhotosByDate
 
     LazyColumn(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().padding(2.dp),
         //contentPadding = PaddingValues(bottom = 10.dp),
         state = allPhotoListState,
-        //verticalArrangement = Arrangement.Top
+        //horizontalAlignment = Alignment.
     ){
         syncedPhotosByDate.forEach{(date, photos)->
             items(photos.chunked(3).size) { index ->
@@ -102,7 +102,7 @@ fun PhotoForMap(
                     modifier = Modifier
                         .fillMaxWidth(),
                     horizontalArrangement = Arrangement.Start,
-                    verticalAlignment = Alignment.Top
+//                    verticalAlignment = Alignment.Top
                 ) {
                     photos.chunked(3)[index].forEach { photo ->
                         if (token != null) {

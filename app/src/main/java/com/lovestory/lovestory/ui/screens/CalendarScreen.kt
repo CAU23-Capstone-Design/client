@@ -509,7 +509,7 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                                             items.add(
                                                 MyItem(
                                                     LatLng(it.latitude, it.longitude),
-                                                    "Marker1",
+                                                    "PHOTO",
                                                     "사진",
                                                     cachedBitmap!!,
                                                     "PHOTO",
@@ -521,7 +521,7 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                                             items.add(
                                                 MyItem(
                                                     LatLng(it.latitude, it.longitude),
-                                                    "Marker1",
+                                                    "PHOTO",
                                                     "사진",
                                                     getResult!!,
                                                     "PHOTO",
@@ -536,8 +536,8 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                                         items.add(
                                             MyItem(
                                                 it,
-                                                "Marker2",
-                                                "마커",
+                                                "LOCATION",
+                                                "위치",
                                                 bitmap,
                                                 "POSITION",
                                                 "HI"
@@ -670,7 +670,7 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                                                     Image(
                                                         bitmap = bitmap.asImageBitmap(),
                                                         contentDescription = null,
-                                                        modifier = Modifier.size(60.dp)
+                                                        modifier = Modifier.size(30.dp)
                                                     )
                                                     Text(
                                                         "%,d".format(cluster.size), //이 부분 왜 2배로 나오지..?
@@ -742,7 +742,7 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                                                     Image(
                                                         bitmap = bitmap.asImageBitmap(),
                                                         contentDescription = null,
-                                                        modifier = Modifier.size(60.dp)
+                                                        modifier = Modifier.size(30.dp)
                                                     )
                                                 }
                                             }

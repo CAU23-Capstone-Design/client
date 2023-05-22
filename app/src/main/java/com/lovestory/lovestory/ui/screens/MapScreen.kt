@@ -81,7 +81,7 @@ import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 
 
-@SuppressLint("CoroutineCreationDuringComposition")
+@SuppressLint("CoroutineCreationDuringComposition", "SuspiciousIndentation")
 @OptIn(MapsComposeExperimentalApi::class)
 @Composable
 fun MapScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhotoView, date: String){
@@ -206,7 +206,7 @@ fun MapScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhot
                                 items.add(
                                     MyItem(
                                         LatLng(it.latitude, it.longitude),
-                                        "Marker1",
+                                        "PHOTO",
                                         "사진",
                                         cachedBitmap!!,
                                         "PHOTO",
@@ -218,7 +218,7 @@ fun MapScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhot
                                 items.add(
                                     MyItem(
                                         LatLng(it.latitude, it.longitude),
-                                        "Marker1",
+                                        "PHOTO",
                                         "사진",
                                         getResult!!,
                                         "PHOTO",
@@ -232,7 +232,7 @@ fun MapScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhot
 
                 //사진 좌표와 비트맵
                 latLngMarker.forEach{
-                    items.add(MyItem(it,"Marker2","마커", bitmap1, "POSITION", "HI"))
+                    items.add(MyItem(it,"LOCATION","위치", bitmap1, "POSITION", "HI"))
                 }
                 /*
                 items.forEach {
@@ -270,6 +270,9 @@ fun MapScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhot
                         false
                     },
                     onClusterItemClick = {
+//                        navHostController.navigate(CalendarStack.ClickDetailScreen.route+"/${it.id}/${date}") {
+//                            popUpTo(CalendarStack.ClickDetailScreen.route)
+//                        }
                         false
                     },
                     onClusterItemInfoWindowClick = {
@@ -324,7 +327,7 @@ fun MapScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhot
                                     Image(
                                         bitmap = bitmap1.asImageBitmap(),
                                         contentDescription = null,
-                                        modifier = Modifier.size(60.dp)
+                                        modifier = Modifier.size(30.dp)
                                     )
                                     Text(
                                         "%,d".format(cluster.size), //이 부분 왜 2배로 나오지..?
@@ -391,7 +394,7 @@ fun MapScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhot
                                     Image(
                                         bitmap = bitmap1.asImageBitmap(),
                                         contentDescription = null,
-                                        modifier = Modifier.size(60.dp)
+                                        modifier = Modifier.size(30.dp)
                                     )
                                 }
                             }
@@ -424,23 +427,24 @@ fun MapScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhot
         )
         {
             val screenWidth = LocalConfiguration.current.screenWidthDp.dp
-            val screenHeight = LocalConfiguration.current.screenHeightDp.dp
-            Column(
-                modifier = Modifier
-                    .width(screenWidth - 40.dp)
-                    .height(screenWidth)
-                    .clip(RoundedCornerShape(12.dp))
-
-                    .background(color = Color.White),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
+//            val screenHeight = LocalConfiguration.current.screenHeightDp.dp
+//            Column(
+//                modifier = Modifier
+//                    .width(screenWidth - 40.dp)
+//                    .height(screenWidth)
+//                    .clip(RoundedCornerShape(12.dp))
+//                    .background(color = Color.White),
+//                verticalArrangement = Arrangement.Center,
+//                horizontalAlignment = Alignment.CenterHorizontally,
+//            ) {
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight()
-                        .padding(20.dp)
-                        .background(color = Color.Transparent, RoundedCornerShape(12.dp)),
+                        .width(screenWidth - 80.dp)
+                        .height(screenWidth)
+//                        .fillMaxWidth()
+//                        .wrapContentHeight()
+                        //.padding(20.dp)
+                        .background(color = Color.White, RoundedCornerShape(12.dp)),
                     contentAlignment = Alignment.TopCenter
                 ) {
                     val boxWidth = remember { mutableStateOf(0) }
@@ -463,7 +467,7 @@ fun MapScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhot
                         selectDate = date
                     )
                 }
-            }
+//            }
         }
     }
 }

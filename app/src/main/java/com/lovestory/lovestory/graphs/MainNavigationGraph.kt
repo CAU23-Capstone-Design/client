@@ -67,6 +67,7 @@ fun MainNavGraph(
             val date = it.arguments?.getString("date")
             MapScreen(navHostController = navHostController, syncedPhotoView = syncedPhotoView, date = date!!)
         }
+
         composable(CalendarStack.DetailScreen.route+"/{photoIndex}/{date}"){
 //            val photoId = it.arguments?.getString("photoId")
             val photoIndex = it.arguments?.getString("photoIndex")!!.toInt()
@@ -79,14 +80,42 @@ fun MainNavGraph(
                 date = date
             )
         }
+
+        composable(CalendarStack.ClickDetailScreen.route+"/{id}/{date}"){
+//            val photoId = it.arguments?.getString("photoId")
+            val id = it.arguments?.getString("id")!!
+            val date = it.arguments?.getString("date")!!
+//            Log.d("naviagetion", "index : $indexForDetail")
+            ClickPhotoDetailScreenFromServer(
+                navHostController = navHostController,
+                syncedPhotoView= syncedPhotoView,
+                id = id,
+                date = date
+            )
+        }
+
+
+        composable(ProfileStack.Help.route){
+            HelpScreen(navHostController = navHostController)
+        }
+
+        composable(ProfileStack.Privacy.route){
+            PrivacyScreen(navHostController = navHostController)
+        }
     }
 }
 
 sealed class CalendarStack(val route: String) {
     object Map : CalendarStack(route = "Map")
-
     object DetailScreen: CalendarStack(route = "Detail")
+    object ClickDetailScreen: CalendarStack(route = "Click")
 }
+
+sealed class ProfileStack(val route: String) {
+    object Help : ProfileStack(route = "Help")
+    object Privacy: ProfileStack(route = "Privacy")
+}
+
 
 sealed class MainScreens(val route : String, val title : String, val icon : Int){
     object DashBoard : MainScreens(route = "DASHBOARD", title = "홈", icon = R.drawable.ic_home)
