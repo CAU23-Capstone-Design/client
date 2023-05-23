@@ -161,6 +161,11 @@ class SyncedPhotoView(application:Application): ViewModel() {
         return listOfSyncPhotos.value!!.indexOf(photo)
     }
 
+    fun calendarSyncedPhotoIndex(photo: SyncedPhoto, date: String):Int{
+        val filteredList = listOfSyncPhotos.value?.filter { it.date.substring(0,10) == date }
+        return filteredList!!.indexOf(photo)
+    }
+
     fun addSelectedPhotosSet(id : String){
         selectedPhotosSet.value.add(id)
     }

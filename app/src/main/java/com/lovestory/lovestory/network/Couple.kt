@@ -5,9 +5,12 @@ import com.lovestory.lovestory.model.CoupleInfo
 import com.lovestory.lovestory.api.CoupleService
 import com.lovestory.lovestory.model.LoginResponse
 import com.lovestory.lovestory.model.UsersOfCoupleInfo
+import com.lovestory.lovestory.module.CoupleInfoResponse
 import okhttp3.ResponseBody
 import retrofit2.HttpException
 import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 
 suspend fun createCouple(token : String, code : String?, meetDay : String?):Response<LoginResponse>{
     val jwt : String = "Bearer $token"
@@ -61,5 +64,27 @@ suspend fun getUsersInfo(token : String): UsersOfCoupleInfo? {
         Log.e("NETWORK-getCoupleInfo", "$e")
         Log.e("NETWORK-getCoupleInfo", "unknown error")
         null
+    }
+}
+
+suspend fun deleteCouple(token: String?):Response<LoginResponse>{
+    val jwt = "Bearer $token"
+    val retrofit = Retrofit.Builder()
+        .baseUrl("https://api.cau-lovestory.site:3000/api-docs/")
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
+
+    val apiService = retrofit.create(CoupleService::class.java)
+
+    return try{
+        val delete : LoginResponse = apiService.deleteCouple(jwtToken = jwt)
+        Response.success(delete)
+    }catch (e : HttpException){
+        Log.e("NETWORK-checkCouple", "$e")
+        Response.error(e.code(), e.response()?.errorBody())
+
+    }catch (e : Exception){
+        Log.e("NETWORK-checkCouple", "$e")
+        Response.error(500, ResponseBody.create(null, "Unknown error"))
     }
 }

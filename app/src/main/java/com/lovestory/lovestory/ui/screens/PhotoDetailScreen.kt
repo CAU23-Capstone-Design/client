@@ -3,6 +3,7 @@ package com.lovestory.lovestory.ui.screens
 import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -56,6 +57,7 @@ import com.lovestory.lovestory.module.saveBitmapToDiskCache
 import com.lovestory.lovestory.view.SyncedPhotoView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -346,6 +348,320 @@ fun PhotoDetailScreenFromServer(
                             CoroutineScope(Dispatchers.IO).launch {
                                 if (token != null) {
                                     getImageById(context = context, token = token, photo_id = syncedPhotos[pagerState.currentPage]!!.id)
+                                }
+                            }
+
+                        }) {
+                            Text(text = "원본 사진 다운로드")
+                        }
+                    }
+                }
+
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalPagerApi::class)
+@Composable
+fun CalendarPhotoDetailScreenFromServer(
+    navHostController: NavHostController,
+    syncedPhotoView: SyncedPhotoView,
+    photoIndex : Int,
+    date: String
+){
+    val syncedPhotos by syncedPhotoView.listOfSyncPhotos.observeAsState(initial = listOf())
+    var daySyncedPhoto by remember {mutableStateOf(emptyList<SyncedPhoto>())}
+
+    var isDropMenuForDetailPhoto by remember {mutableStateOf(false)}
+
+    val context = LocalContext.current
+    val systemUiController = rememberSystemUiController()
+
+    val pagerState = rememberPagerState()
+
+    LaunchedEffect(null){
+        pagerState.scrollToPage(6)
+        daySyncedPhoto = syncedPhotos.filter{ it.date.substring(0,10) == date }
+    }
+
+    SideEffect {
+        systemUiController.setSystemBarsColor(
+            color = Color.Black,
+        )
+    }
+
+    val database = PhotoDatabase.getDatabase(context)
+    val syncedPhotoDao = database.syncedPhotoDao()
+    val repository = SyncedPhotoRepository(syncedPhotoDao)
+
+    val syncedPhoto by syncedPhotoView.syncedPhoto.observeAsState(null)
+
+    val token = getToken(context)
+
+    LaunchedEffect(null){
+        if (photoIndex < 0){
+            pagerState.scrollToPage(0)
+        }
+        else{
+            pagerState.scrollToPage(photoIndex)
+        }
+    }
+
+    Box(
+        modifier = Modifier
+            .background(Color.Black)
+            .fillMaxSize(),
+    ){
+
+        HorizontalPager(
+            count = daySyncedPhoto.size,
+            state = pagerState,
+            itemSpacing = 20.dp
+        ) {index ->
+            val cacheKey = "detail_${daySyncedPhoto[index].id}"
+            val bitmap = remember { mutableStateOf<Bitmap?>(null) }
+
+            LaunchedEffect(daySyncedPhoto[index].id) {
+                val cachedBitmap = loadBitmapFromDiskCache(context, cacheKey)
+                if (cachedBitmap != null) {
+                    bitmap.value = cachedBitmap
+                } else {
+                    val getResult = getDetailPhoto(token!!, daySyncedPhoto[index].id, 20)
+                    if(getResult != null){
+                        saveBitmapToDiskCache(context, getResult, cacheKey)
+                        bitmap.value = getResult
+                    }
+                    else{
+                        Log.d("COMPONENT-detail photo", "Error in transfer bitmap")
+                    }
+                }
+
+                val photoInfo = repository.getSyncedPhotoById(daySyncedPhoto[index].id)
+                if (photoInfo != null) {
+                    syncedPhotoView.updateSyncedPhoto(photoInfo)
+                }
+            }
+            AnimatedVisibility (bitmap.value != null,enter = fadeIn(), exit = fadeOut()) {
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .background(Color.Black)
+                        .fillMaxSize(),
+                ){
+                    DetailImageFromBitmap(bitmap.value!!)
+                }
+            }
+        }
+
+
+        Column(
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.Start,
+            modifier = Modifier
+                .fillMaxWidth()
+        ){
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .background(Color(0x2A000000))
+                    .fillMaxWidth()
+                    .height(60.dp)
+                    .padding(horizontal = 20.dp)
+            ){
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ){
+                    Icon(
+                        painter = painterResource(id = R.drawable.baseline_arrow_back_24),
+                        contentDescription = null,
+                        modifier = Modifier.clickable {navHostController.popBackStack() },
+                        tint = Color.White
+                    )
+                    Spacer(modifier = Modifier.width(20.dp))
+                    AnimatedVisibility(syncedPhoto != null, enter = fadeIn(), exit = fadeOut()){
+                        Column() {
+                            val photoDate = LocalDate.parse(daySyncedPhoto[pagerState.currentPage]!!.date.substring(0, 10))
+                            val dateFormatter = DateTimeFormatter.ofPattern("yyyy년 M월 d일 (E)", Locale.getDefault())
+                            val formattedDate = photoDate.format(dateFormatter)
+
+                            Text(text = daySyncedPhoto[pagerState.currentPage]!!.area1+" "+daySyncedPhoto[pagerState.currentPage]!!.area2+" "+daySyncedPhoto[pagerState.currentPage]!!.area3, color = Color.White)
+                            Text(text = formattedDate, color = Color.White)
+                        }
+                    }
+
+                }
+
+                Box(){
+                    Icon(
+                        painter = painterResource(id = R.drawable.baseline_more_vert_24),
+                        contentDescription = null,
+                        modifier = Modifier.clickable {isDropMenuForDetailPhoto = true},
+                        tint = Color.White
+                    )
+                    DropdownMenu(
+                        expanded = isDropMenuForDetailPhoto,
+                        onDismissRequest = { isDropMenuForDetailPhoto = false },
+                        modifier = Modifier.wrapContentSize()
+                    ) {
+                        DropdownMenuItem(onClick = {
+                            isDropMenuForDetailPhoto= false
+                            CoroutineScope(Dispatchers.IO).launch {
+                                if (token != null) {
+                                    getImageById(context = context, token = token, photo_id = daySyncedPhoto[pagerState.currentPage]!!.id)
+                                }
+                            }
+
+                        }) {
+                            Text(text = "원본 사진 다운로드")
+                        }
+                    }
+                }
+
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalPagerApi::class)
+@Composable
+fun ClickPhotoDetailScreenFromServer(
+    navHostController: NavHostController,
+    syncedPhotoView: SyncedPhotoView,
+    id: String,
+    date: String
+){
+    val syncedPhotos by syncedPhotoView.listOfSyncPhotos.observeAsState(initial = listOf())
+    var daySyncedPhoto by remember {mutableStateOf(emptyList<SyncedPhoto>())}
+
+    var isDropMenuForDetailPhoto by remember {mutableStateOf(false)}
+
+    val context = LocalContext.current
+    val systemUiController = rememberSystemUiController()
+
+    val pagerState = rememberPagerState()
+
+    LaunchedEffect(null){
+        pagerState.scrollToPage(6)
+        daySyncedPhoto = syncedPhotos.filter{ it.date.substring(0,10) == date }
+    }
+
+    SideEffect {
+        systemUiController.setSystemBarsColor(
+            color = Color.Black,
+        )
+    }
+
+    val database = PhotoDatabase.getDatabase(context)
+    val syncedPhotoDao = database.syncedPhotoDao()
+    val repository = SyncedPhotoRepository(syncedPhotoDao)
+
+    val syncedPhoto by syncedPhotoView.syncedPhoto.observeAsState(null)
+
+    val token = getToken(context)
+
+    BackHandler(enabled = true) {
+        navHostController.popBackStack()
+    }
+
+    LaunchedEffect(null){
+        pagerState.scrollToPage(0)
+    }
+
+    Box(
+        modifier = Modifier
+            .background(Color.Black)
+            .fillMaxSize(),
+    ){
+        val cacheKey = "detail_$id"
+        val bitmap = remember { mutableStateOf<Bitmap?>(null) }
+
+        LaunchedEffect(null) {
+            val cachedBitmap = loadBitmapFromDiskCache(context, cacheKey)
+            if (cachedBitmap != null) {
+                bitmap.value = cachedBitmap
+            } else {
+                val getResult = getDetailPhoto(token!!, id, 20)
+                if(getResult != null){
+                    saveBitmapToDiskCache(context, getResult, cacheKey)
+                    bitmap.value = getResult
+                }
+                else{
+                    Log.d("COMPONENT-detail photo", "Error in transfer bitmap")
+                }
+            }
+//
+//            val photoInfo = repository.getSyncedPhotoById(myItem.id)
+//            if (photoInfo != null) {
+//                syncedPhotoView.updateSyncedPhoto(photoInfo)
+//            }
+        }
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .background(Color.Black)
+                .fillMaxSize(),
+        ){
+            if(bitmap.value != null){
+                DetailImageFromBitmap(bitmap.value!!)
+            }
+        }
+        Column(
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.Start,
+            modifier = Modifier
+                .fillMaxWidth()
+        ){
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .background(Color(0x2A000000))
+                    .fillMaxWidth()
+                    .height(60.dp)
+                    .padding(horizontal = 20.dp)
+            ){
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ){
+                    Icon(
+                        painter = painterResource(id = R.drawable.baseline_arrow_back_24),
+                        contentDescription = null,
+                        modifier = Modifier.clickable {navHostController.popBackStack() },
+                        tint = Color.White
+                    )
+                    Spacer(modifier = Modifier.width(20.dp))
+                    AnimatedVisibility(syncedPhoto != null, enter = fadeIn(), exit = fadeOut()){
+                        Column() {
+                            val photoDate = LocalDate.parse(daySyncedPhoto[pagerState.currentPage]!!.date.substring(0, 10))
+                            val dateFormatter = DateTimeFormatter.ofPattern("yyyy년 M월 d일 (E)", Locale.getDefault())
+                            val formattedDate = photoDate.format(dateFormatter)
+
+                            Text(text = daySyncedPhoto[pagerState.currentPage]!!.area1+" "+daySyncedPhoto[pagerState.currentPage]!!.area2+" "+daySyncedPhoto[pagerState.currentPage]!!.area3, color = Color.White)
+                            Text(text = formattedDate, color = Color.White)
+                        }
+                    }
+
+                }
+
+                Box(){
+                    Icon(
+                        painter = painterResource(id = R.drawable.baseline_more_vert_24),
+                        contentDescription = null,
+                        modifier = Modifier.clickable {isDropMenuForDetailPhoto = true},
+                        tint = Color.White
+                    )
+                    DropdownMenu(
+                        expanded = isDropMenuForDetailPhoto,
+                        onDismissRequest = { isDropMenuForDetailPhoto = false },
+                        modifier = Modifier.wrapContentSize()
+                    ) {
+                        DropdownMenuItem(onClick = {
+                            isDropMenuForDetailPhoto= false
+                            CoroutineScope(Dispatchers.IO).launch {
+                                if (token != null) {
+                                    getImageById(context = context, token = token, photo_id = daySyncedPhoto[pagerState.currentPage]!!.id)
                                 }
                             }
 

@@ -9,4 +9,5 @@
     <color name="white">#FFFFFFFF</color>
     <color name="splash_background">#FFFAFAFA</color>
     <color name="navigation_color">#FFF3F3F3</color>
+    <color name="ls_pink">#CEFFB6B6</color>
 </resources>

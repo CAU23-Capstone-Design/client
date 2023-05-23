@@ -22,6 +22,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.math.BigInteger
 import java.security.MessageDigest
+import org.apache.commons.codec.binary.Hex
+import org.apache.commons.codec.digest.DigestUtils
 
 class PhotoService : Service(){
     private lateinit var contentObserver: ContentObserver
@@ -193,4 +195,5 @@ class PhotoService : Service(){
     }
 
 }
+
 

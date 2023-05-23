@@ -19,26 +19,34 @@ fun MainNavGraph(
     photoForSyncView: PhotoForSyncView,
     syncedPhotoView : SyncedPhotoView,
     imageSyncView : ImageSyncView
-){
+) {
 //    val allPhotos by photoForSyncView.listOfPhotoForSync.observeAsState(initial = listOf())
 
-    NavHost(navController = navHostController, startDestination =MainScreens.DashBoard.route, route = Graph.MAIN){
-        composable(MainScreens.DashBoard.route){
+    NavHost(
+        navController = navHostController,
+        startDestination = MainScreens.DashBoard.route,
+        route = Graph.MAIN
+    ) {
+        composable(MainScreens.DashBoard.route) {
             DashBoardScreen(navHostController = navHostController)
         }
-        composable(MainScreens.Gallery.route){
+        composable(MainScreens.Gallery.route) {
             GalleryScreen(
                 navHostController = navHostController,
-                syncedPhotoView = syncedPhotoView)
+                syncedPhotoView = syncedPhotoView
+            )
         }
-        composable(MainScreens.Calendar.route){
-            CalendarScreen(navHostController = navHostController)
+        composable(MainScreens.Calendar.route) {
+            CalendarScreen(navHostController = navHostController, syncedPhotoView = syncedPhotoView)
         }
-        composable(MainScreens.Profile.route){
+        composable(MainScreens.Profile.route) {
             ProfileScreen(navHostController = navHostController)
         }
-        composable(GalleryStack.PhotoSync.route){
-            PhotoSyncScreen(navHostController = navHostController, photoForSyncView = photoForSyncView)
+        composable(GalleryStack.PhotoSync.route) {
+            PhotoSyncScreen(
+                navHostController = navHostController,
+                photoForSyncView = photoForSyncView
+            )
         }
         composable(GalleryStack.DetailPhotoFromDevice.route+"/{photoId}"){
             val photoId = it.arguments?.getString("photoId")
@@ -56,7 +64,57 @@ fun MainNavGraph(
                 photoIndex = photoIndex
             )
         }
+        composable(CalendarStack.Map.route + "/{date}") {
+            val date = it.arguments?.getString("date")
+            MapScreen(navHostController = navHostController, syncedPhotoView = syncedPhotoView, date = date!!)
+        }
+
+        composable(CalendarStack.DetailScreen.route+"/{photoIndex}/{date}"){
+//            val photoId = it.arguments?.getString("photoId")
+            val photoIndex = it.arguments?.getString("photoIndex")!!.toInt()
+            val date = it.arguments?.getString("date")!!
+//            Log.d("naviagetion", "index : $indexForDetail")
+            CalendarPhotoDetailScreenFromServer(
+                navHostController = navHostController,
+                syncedPhotoView= syncedPhotoView,
+                photoIndex = photoIndex,
+                date = date
+            )
+        }
+
+        composable(CalendarStack.ClickDetailScreen.route+"/{id}/{date}"){
+//            val photoId = it.arguments?.getString("photoId")
+            val id = it.arguments?.getString("id")!!
+            val date = it.arguments?.getString("date")!!
+//            Log.d("naviagetion", "index : $indexForDetail")
+            ClickPhotoDetailScreenFromServer(
+                navHostController = navHostController,
+                syncedPhotoView= syncedPhotoView,
+                id = id,
+                date = date
+            )
+        }
+
+
+        composable(ProfileStack.Help.route){
+            HelpScreen(navHostController = navHostController)
+        }
+
+        composable(ProfileStack.Privacy.route){
+            PrivacyScreen(navHostController = navHostController)
+        }
     }
+}
+
+sealed class CalendarStack(val route: String) {
+    object Map : CalendarStack(route = "Map")
+    object DetailScreen: CalendarStack(route = "Detail")
+    object ClickDetailScreen: CalendarStack(route = "Click")
+}
+
+sealed class ProfileStack(val route: String) {
+    object Help : ProfileStack(route = "Help")
+    object Privacy: ProfileStack(route = "Privacy")
 }
 
 
@@ -65,6 +123,7 @@ sealed class MainScreens(val route : String, val title : String, val icon : Int)
     object Gallery : MainScreens(route = "GALLERY", title = "갤러리", icon = R.drawable.ic_gallery)
     object Calendar : MainScreens(route = "CALENDAR", title = "캘린더", icon = R.drawable.ic_calendar)
     object Profile : MainScreens(route = "PROFILE", title= "프로필", icon = R.drawable.ic_setting)
+    //object Map : MainScreens(route = "MAP", title = "MAP", icon = R.drawable.ic_option)
 }
 
 sealed class GalleryStack(val route : String){
