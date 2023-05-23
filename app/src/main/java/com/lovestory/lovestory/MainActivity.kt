@@ -1,10 +1,8 @@
 package com.lovestory.lovestory
 
-import android.Manifest
 import android.app.ActivityManager
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.net.Uri
 import android.os.Build
@@ -15,25 +13,18 @@ import android.util.Log
 import android.view.Window
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.core.content.ContextCompat
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.lovestory.lovestory.graphs.RootNavigationGraph
 import com.lovestory.lovestory.services.LocationService
 import com.lovestory.lovestory.ui.components.DialogForPermission
-import com.lovestory.lovestory.ui.screens.CalendarScreen
 import com.lovestory.lovestory.ui.theme.LoveStoryTheme
-import com.kakao.sdk.common.util.Utility
 import com.lovestory.lovestory.ui.theme.LoveStoryThemeForMD3
 
 
@@ -87,10 +78,6 @@ class MainActivity : ComponentActivity() {
                     RootNavigationGraph()
                 }
             }
-
-
-
-            //CalendarScreen(navHostController = navController)
         }
     }
 

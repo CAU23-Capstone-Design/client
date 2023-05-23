@@ -1,11 +1,9 @@
 package com.lovestory.lovestory.ui.components
 
 import android.Manifest
-import android.content.Context
 import android.content.pm.PackageManager
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -37,8 +35,6 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavHostController
-import com.kizitonwose.calendar.core.CalendarDay
-import com.lovestory.lovestory.model.CoupleMemory
 import com.maxkeppeker.sheets.core.models.base.SheetState
 import java.time.LocalDate
 
@@ -53,54 +49,6 @@ fun InputMeetDayDialog(
         properties = properties,
     ) {
         content()
-    }
-}
-
-@Composable
-fun CalendarDialog(
-    selection: CalendarDay, // pass selected couple memory object
-    //coupleMemoryList: List<CoupleMemory>,
-    //onMemoryUpdated: (CoupleMemory) -> Unit,
-    //onCommentChanged: (String) -> Unit,
-    //editedComment: String,
-    //editedcomment: String,
-    onDismissRequest : ()-> Unit,
-    properties: DialogProperties = DialogProperties(),
-    content : @Composable () -> Unit,
-){
-    Dialog(
-        onDismissRequest = onDismissRequest,
-        properties = properties,
-    ) {
-        Box(
-            modifier = Modifier
-                .background(Color.Transparent)
-        ) {
-            content()
-        }
-        //content()
-        //if (selectedMemory != null) {
-        //    onMemoryUpdated(selectedMemory.copy(comment = editedComment))
-    //  }
-    }
-}
-
-@Composable
-fun MapDialog(
-    onDismissRequest : ()-> Unit,
-    properties: DialogProperties = DialogProperties(),
-    content : @Composable () -> Unit,
-){
-    Dialog(
-        onDismissRequest = onDismissRequest,
-        properties = properties,
-    ) {
-        Box(
-            modifier = Modifier
-                .background(Color.Transparent)
-        ) {
-            content()
-        }
     }
 }
 
@@ -172,7 +120,6 @@ fun DialogForPermission(
         contract = ActivityResultContracts.RequestPermission(),
         onResult = {
             if(it){
-//                Toast.makeText(context, " 백그라운드 권한 승인", Toast.LENGTH_SHORT).show()
             }else{
                 Toast.makeText(context, " 백그라운드 권한 거부", Toast.LENGTH_SHORT).show()
             }
@@ -183,7 +130,6 @@ fun DialogForPermission(
         contract = ActivityResultContracts.RequestMultiplePermissions(),
         onResult = {permissions->
             if(permissions.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false)) {
-//                Toast.makeText(context, "정확한 위치 권한 승인", Toast.LENGTH_SHORT).show()
                 requestBackgroundLocationPermissionLauncher.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
             }
             else if(permissions.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false)){
@@ -196,7 +142,6 @@ fun DialogForPermission(
         contract = ActivityResultContracts.RequestPermission(),
         onResult = {
             if(it){
-//                Toast.makeText(context, " 알람 권한 승인", Toast.LENGTH_SHORT).show()
                 requestLocationPermissionLauncher.launch(arrayOf<String>(
                     Manifest.permission.ACCESS_FINE_LOCATION,
                     Manifest.permission.ACCESS_COARSE_LOCATION
@@ -211,7 +156,6 @@ fun DialogForPermission(
         contract = ActivityResultContracts.RequestPermission(),
         onResult = {
             if(it){
-//                Toast.makeText(context, " 사진 위치 권한 승인", Toast.LENGTH_SHORT).show()
                 requestNotificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
             }else{
                 Toast.makeText(context, " 사진 위치 권한 거부", Toast.LENGTH_SHORT).show()
@@ -223,7 +167,6 @@ fun DialogForPermission(
         contract = ActivityResultContracts.RequestPermission(),
         onResult = {
             if(it){
-//                Toast.makeText(context, " 사진 권한 승인", Toast.LENGTH_SHORT).show()
                 requestPhotoLocationPermissionLauncher.launch(Manifest.permission.ACCESS_MEDIA_LOCATION)
             }else{
                 Toast.makeText(context, " 사진 권한 거부", Toast.LENGTH_SHORT).show()
@@ -286,7 +229,6 @@ fun DialogForPermission(
                             .border(2.dp, Color.Black, CircleShape)
                             .clickable {
                                 isDialogOpen.value = false
-//                                requestPermissionLauncher.launch(permissions)
                                 requestPhotoPermissionLauncher.launch(Manifest.permission.READ_MEDIA_IMAGES)
 
                             }
@@ -337,15 +279,39 @@ fun PermissionDialogItem(
 }
 
 @Composable
-fun ProgressBarDialog(
+fun CalendarDialog(
     onDismissRequest : ()-> Unit,
     properties: DialogProperties = DialogProperties(),
-    content : @Composable () -> Unit
+    content : @Composable () -> Unit,
 ){
     Dialog(
         onDismissRequest = onDismissRequest,
         properties = properties,
     ) {
-        content()
+        Box(
+            modifier = Modifier
+                .background(Color.Transparent)
+        ) {
+            content()
+        }
+    }
+}
+
+@Composable
+fun MapDialog(
+    onDismissRequest : ()-> Unit,
+    properties: DialogProperties = DialogProperties(),
+    content : @Composable () -> Unit,
+){
+    Dialog(
+        onDismissRequest = onDismissRequest,
+        properties = properties,
+    ) {
+        Box(
+            modifier = Modifier
+                .background(Color.Transparent)
+        ) {
+            content()
+        }
     }
 }

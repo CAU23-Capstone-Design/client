@@ -32,9 +32,7 @@ import androidx.core.view.doOnAttach
 import androidx.core.view.doOnDetach
 import com.google.maps.android.compose.ComposeUiViewRenderer
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.android.awaitFrame
 import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.LaunchedEffect
@@ -44,25 +42,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
-import androidx.compose.ui.platform.LocalContext
-import com.google.maps.android.collections.MarkerManager
 import com.google.maps.android.compose.InputHandler
 import com.google.maps.android.compose.MapEffect
 import com.google.maps.android.compose.currentCameraPositionState
 import com.google.maps.android.compose.rememberComposeUiViewRenderer
 import com.google.maps.android.compose.rememberReattachClickListenersHandle
 import kotlinx.coroutines.launch
-import androidx.annotation.RestrictTo
-import androidx.compose.runtime.ComposeNode
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import com.google.android.gms.maps.model.Circle
-import com.google.android.gms.maps.model.GroundOverlay
-import com.google.android.gms.maps.model.Marker
-import com.google.android.gms.maps.model.Polygon
-import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener
-import com.google.android.gms.maps.model.Polyline
 
 @Composable
 @GoogleMapComposable

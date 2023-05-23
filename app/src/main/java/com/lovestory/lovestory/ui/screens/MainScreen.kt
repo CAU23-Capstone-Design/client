@@ -36,8 +36,6 @@ fun MainScreen(navHostController: NavHostController = rememberNavController()) {
     lateinit var photoForSyncView: PhotoForSyncView
     lateinit var syncedPhotoView: SyncedPhotoView
 
-    lateinit var imageSyncView: ImageSyncView
-
     owner?.let {
         photoForSyncView = viewModel(
             it,
@@ -49,12 +47,6 @@ fun MainScreen(navHostController: NavHostController = rememberNavController()) {
             it,
             "SyncedPhotoViewModel",
             SyncedPhotoViewFactory(LocalContext.current.applicationContext as Application)
-        )
-
-        imageSyncView= viewModel(
-            it,
-            "ImageSyncViewModel",
-            ImageSyncViewFactory()
         )
     }
 
@@ -88,7 +80,6 @@ fun MainScreen(navHostController: NavHostController = rememberNavController()) {
             navHostController = navHostController,
             photoForSyncView = photoForSyncView,
             syncedPhotoView =  syncedPhotoView,
-            imageSyncView = imageSyncView
         )
     }
 }

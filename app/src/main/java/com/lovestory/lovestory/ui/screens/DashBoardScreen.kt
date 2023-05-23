@@ -1,48 +1,27 @@
 package com.lovestory.lovestory.ui.screens
 
 import android.app.Activity
-import android.content.Intent
-import android.net.Uri
-import android.provider.Settings
 import android.util.Log
-import android.widget.Space
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
-import androidx.browser.customtabs.CustomTabsClient.getPackageName
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Icon
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat.startActivity
 import androidx.navigation.NavHostController
-//import com.airbnb.lottie.RenderMode
-//import com.airbnb.lottie.compose.*
-import com.lovestory.lovestory.R
 import com.lovestory.lovestory.model.UsersOfCoupleInfo
 import com.lovestory.lovestory.module.dashboard.getCoupleInfo
 import com.lovestory.lovestory.module.dashboard.requestUsersOfCoupleInfo
@@ -53,10 +32,7 @@ import com.lovestory.lovestory.ui.components.AnimateFlyHeart
 import com.lovestory.lovestory.ui.components.AnimateHeart
 import kotlinx.coroutines.*
 import java.time.LocalDate
-import java.time.Period
 import java.time.format.DateTimeFormatter
-import java.util.*
-import kotlin.system.exitProcess
 
 
 @Composable

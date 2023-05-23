@@ -79,22 +79,18 @@ fun ThumbnailOfPhotoFromServer(
     val context = LocalContext.current
     val bitmap = remember { mutableStateOf<Bitmap?>(null) }
     val indexForDetail = remember { mutableStateOf(0) }
-//    val cacheKey = "lovestory_ca"+photoId
-//    lateinit var bitmapOfThumbnail : Bitmap
     val cacheKey = "thumbnail_${photo.id}"
 
     LaunchedEffect(photo) {
         indexForDetail.value = syncedPhotoView.getAllSyncedPhotoIndex(photo)
         val cachedBitmap = loadBitmapFromDiskCache(context, cacheKey)
         if (cachedBitmap != null) {
-//            Log.d("Thumbnail","cache에서 로드")
             bitmap.value = cachedBitmap
         } else {
             val getResult = getThumbnailForPhoto(token, photo.id)
             if(getResult != null){
                 saveBitmapToDiskCache(context, getResult, cacheKey)
                 bitmap.value = getResult
-//                Log.d("Thumbnail","서버에서 로드")
             }
             else{
                 Log.d("COMPONENT-ThumbnailOfPhotoFromServer", "Error in transfer bitmap")
@@ -119,7 +115,6 @@ fun ThumbnailOfPhotoFromServer(
     AnimatedVisibility(bitmap.value== null, enter = fadeIn(), exit = fadeOut()) {
         val screenWidth = LocalConfiguration.current.screenWidthDp.dp
         val imageWidth = (screenWidth / 3)
-//        Log.d("image width", "$imageWidth")
         SkeletonPopup(modifier = Modifier
             .width(imageWidth)
             .aspectRatio(1f)
@@ -274,7 +269,6 @@ fun CheckableDisplayImageFromUri(navHostController :NavHostController,
         .data(data = imageInfo.imageUrl)
         .build()
     )
-
 
     Box{
         Image(

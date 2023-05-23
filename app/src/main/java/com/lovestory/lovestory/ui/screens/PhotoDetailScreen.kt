@@ -150,7 +150,6 @@ fun PhotoDetailScreenFromDeviceWithMediaPicker(navHostController: NavHostControl
         CoroutineScope(Dispatchers.IO).launch {
             photoInfo.value = repository.getAdditionalPhotoById(photoId)!!
         }
-
     }
 
     SideEffect {
@@ -292,7 +291,6 @@ fun PhotoDetailScreenFromServer(
             }
         }
 
-
         Column(
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.Start,
@@ -356,7 +354,6 @@ fun PhotoDetailScreenFromServer(
                         }
                     }
                 }
-
             }
         }
     }
@@ -591,11 +588,6 @@ fun ClickPhotoDetailScreenFromServer(
                     Log.d("COMPONENT-detail photo", "Error in transfer bitmap")
                 }
             }
-//
-//            val photoInfo = repository.getSyncedPhotoById(myItem.id)
-//            if (photoInfo != null) {
-//                syncedPhotoView.updateSyncedPhoto(photoInfo)
-//            }
         }
         Box(
             contentAlignment = Alignment.Center,

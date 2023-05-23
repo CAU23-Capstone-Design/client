@@ -22,15 +22,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.lovestory.lovestory.R
-import com.lovestory.lovestory.module.checkExistNeedPhotoForSync
 import com.lovestory.lovestory.module.getToken
-import com.lovestory.lovestory.ui.components.SelectHelpButtons
 import com.lovestory.lovestory.ui.components.SelectMenuButtons
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.time.LocalDate
 
 @Composable
 fun HelpScreen(navHostController: NavHostController){
@@ -109,7 +102,7 @@ fun HelpScreen(navHostController: NavHostController){
                     contentAlignment = Alignment.Center,
                     modifier = Modifier.weight(1f)
                 ) {
-                    SelectHelpButtons(
+                    SelectMenuButtons(
                         items = items,
                         selectedButton = selectedButton,
                         onClick = {

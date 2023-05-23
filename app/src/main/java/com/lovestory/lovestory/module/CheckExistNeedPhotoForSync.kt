@@ -10,7 +10,6 @@ import com.lovestory.lovestory.database.repository.PhotoForSyncRepository
 import com.lovestory.lovestory.database.repository.SyncedPhotoRepository
 import com.lovestory.lovestory.model.PhotoInfo
 import com.lovestory.lovestory.network.getPhotoTable
-import com.lovestory.lovestory.view.ImageSyncView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
