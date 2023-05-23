@@ -180,7 +180,6 @@ class LocationService : Service() {
             .setContentText("연인을 만나 추억을 기록해보세요!")
             .setSmallIcon(R.drawable.ic_status_bar_foreground)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setOnlyAlertOnce(false)
             .build()
     }
 
