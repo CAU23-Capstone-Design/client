@@ -17,6 +17,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -270,8 +271,10 @@ fun MapScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhot
                         false
                     },
                     onClusterItemClick = {
-                        navHostController.navigate(CalendarStack.ClickDetailScreen.route+"/${it.id}/${date}") {
-                            popUpTo(CalendarStack.ClickDetailScreen.route)
+                        if(it.itemType == "PHOTO"){
+                            navHostController.navigate(CalendarStack.ClickDetailScreen.route+"/${it.id}/${date}") {
+                                popUpTo(CalendarStack.ClickDetailScreen.route)
+                            }
                         }
                         false
                     },
@@ -283,7 +286,9 @@ fun MapScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhot
                         val size = 50.dp
                         val density = LocalDensity.current.density
                         val scaledSize = (size * density).toInt()
-                        val scaledBitmap = Bitmap.createScaledBitmap(bitmap1, scaledSize, scaledSize, false)!!.asImageBitmap()
+                        val scaledBitmap =
+                            Bitmap.createScaledBitmap(bitmap1, scaledSize, scaledSize, false)!!
+                                .asImageBitmap()
                         var scaledBitmap1 by remember { mutableStateOf<ImageBitmap?>(null) }
 
                         val clusterItems = cluster.items.toList()
@@ -293,7 +298,7 @@ fun MapScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhot
 
                         // Set the cluster icon based on the presence of a photoClusterItem
                         if (photoClusterItem != null) {
-                            scaledBitmap1 = photoClusterItem.icon.let{
+                            scaledBitmap1 = photoClusterItem.icon.let {
                                 Bitmap.createScaledBitmap(it!!, scaledSize, scaledSize, false)
                             }!!.asImageBitmap()
                             Surface(
@@ -318,28 +323,24 @@ fun MapScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhot
                             }
                         } else {
                             Surface(
-                                shape = RoundedCornerShape(percent = 10),
-                                contentColor = Color.Transparent,
-                                border = BorderStroke(1.dp, Color.White),
-                                elevation = 10.dp
+                                shape = CutCornerShape(12.dp),
+                                color = Color.Transparent,
+                                contentColor = Color.Red,
                             ) {
-                                Box(contentAlignment = Alignment.Center) {
-                                    Image(
-                                        bitmap = bitmap1.asImageBitmap(),
-                                        contentDescription = null,
-                                        modifier = Modifier.size(30.dp)
-                                    )
-                                    Text(
-                                        "%,d".format(cluster.size), //이 부분 왜 2배로 나오지..?
-                                        fontSize = 16.sp,
-                                        fontWeight = FontWeight.Black,
-                                        textAlign = TextAlign.Center
-                                    )
-                                }
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_permission_location_foreground),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(60.dp),
+                                    tint = Color.Red
+                                )
+//                                Text(
+//                                    "%,d".format(cluster.size), //이 부분 왜 2배로 나오지..?
+//                                    fontSize = 16.sp,
+//                                    fontWeight = FontWeight.Black,
+//                                    textAlign = TextAlign.Center
+//                                )
                             }
                         }
-
-
                     },
                     // Optional: Custom rendering for non-clustered items
                     clusterItemContent = { item ->
@@ -385,18 +386,16 @@ fun MapScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhot
                             }
                         } else {
                             Surface(
-                                shape = RoundedCornerShape(percent = 10),
-                                contentColor = Color.Transparent,
-                                border = BorderStroke(1.dp, Color.White),
-                                elevation = 10.dp
+                                shape = CutCornerShape(12.dp),
+                                color = Color.Transparent,
+                                contentColor = Color.Red,
                             ) {
-                                Box(contentAlignment = Alignment.Center) {
-                                    Image(
-                                        bitmap = bitmap1.asImageBitmap(),
-                                        contentDescription = null,
-                                        modifier = Modifier.size(30.dp)
-                                    )
-                                }
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_permission_location_foreground),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(60.dp),
+                                    tint = Color.Red
+                                )
                             }
                         }
                     }

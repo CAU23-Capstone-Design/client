@@ -17,6 +17,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.*
@@ -37,6 +38,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -664,28 +666,24 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                                             }
                                         } else {
                                             Surface(
-                                                shape = RoundedCornerShape(percent = 10),
-                                                contentColor = Color.Transparent,
-                                                border = BorderStroke(1.dp, Color.White),
-                                                elevation = 10.dp
+                                                shape = CutCornerShape(12.dp),
+                                                color = Color.Transparent,
+                                                contentColor = Color.Red,
                                             ) {
-                                                Box(contentAlignment = Alignment.Center) {
-                                                    Image(
-                                                        bitmap = bitmap.asImageBitmap(),
-                                                        contentDescription = null,
-                                                        modifier = Modifier.size(30.dp)
-                                                    )
-                                                    Text(
-                                                        "%,d".format(cluster.size), //이 부분 왜 2배로 나오지..?
-                                                        fontSize = 16.sp,
-                                                        fontWeight = FontWeight.Black,
-                                                        textAlign = TextAlign.Center
-                                                    )
-                                                }
+                                                Icon(
+                                                    painter = painterResource(id = R.drawable.ic_permission_location_foreground),
+                                                    contentDescription = null,
+                                                    modifier = Modifier.size(60.dp),
+                                                    tint = Color.Red
+                                                )
+//                                Text(
+//                                    "%,d".format(cluster.size), //이 부분 왜 2배로 나오지..?
+//                                    fontSize = 16.sp,
+//                                    fontWeight = FontWeight.Black,
+//                                    textAlign = TextAlign.Center
+//                                )
                                             }
                                         }
-
-
                                     },
                                     // Optional: Custom rendering for non-clustered items
                                     clusterItemContent = { item ->
@@ -736,18 +734,22 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                                             }
                                         } else {
                                             Surface(
-                                                shape = RoundedCornerShape(percent = 10),
-                                                contentColor = Color.Transparent,
-                                                border = BorderStroke(1.dp, Color.White),
-                                                elevation = 10.dp
+                                                shape = CutCornerShape(12.dp),
+                                                color = Color.Transparent,
+                                                contentColor = Color.Red,
                                             ) {
-                                                Box(contentAlignment = Alignment.Center) {
-                                                    Image(
-                                                        bitmap = bitmap.asImageBitmap(),
-                                                        contentDescription = null,
-                                                        modifier = Modifier.size(30.dp)
-                                                    )
-                                                }
+                                                Icon(
+                                                    painter = painterResource(id = R.drawable.ic_permission_location_foreground),
+                                                    contentDescription = null,
+                                                    modifier = Modifier.size(60.dp),
+                                                    tint = Color.Red
+                                                )
+//                                Text(
+//                                    "%,d".format(cluster.size), //이 부분 왜 2배로 나오지..?
+//                                    fontSize = 16.sp,
+//                                    fontWeight = FontWeight.Black,
+//                                    textAlign = TextAlign.Center
+//                                )
                                             }
                                         }
                                     }
@@ -760,7 +762,7 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .aspectRatio(2f)
+                                .aspectRatio(1.7f)
                                 .padding(start = 20.dp, end = 20.dp)
                                 .background(color = Color.Transparent, RoundedCornerShape(12.dp))
                         ) {
