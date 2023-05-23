@@ -39,9 +39,7 @@ import com.lovestory.lovestory.R
 import com.lovestory.lovestory.event.kakaoLogoutEvent
 import com.lovestory.lovestory.graphs.*
 import com.lovestory.lovestory.model.LoginPayload
-import com.lovestory.lovestory.module.checkLoginToken
-import com.lovestory.lovestory.module.deleteToken
-import com.lovestory.lovestory.module.getToken
+import com.lovestory.lovestory.module.*
 import com.lovestory.lovestory.network.deleteCouple
 import com.lovestory.lovestory.network.getUsersInfo
 import kotlinx.coroutines.launch
@@ -56,9 +54,7 @@ fun ProfileScreen(navHostController: NavHostController) {
     var gender by remember { mutableStateOf("") }
 
     if (token == null) {
-        Log.d("토큰","$token")
         token = getToken(context)
-        Log.d("토큰","$token")
         if (token == null){
             intent?.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
             context.startActivity(intent)
@@ -68,14 +64,6 @@ fun ProfileScreen(navHostController: NavHostController) {
     var showLogoutDialog by remember { mutableStateOf(false) }
     var showSyncoutDialog by remember { mutableStateOf(false) }
 
-    LaunchedEffect(null){
-        val coupleInfo = getUsersInfo(token!!)
-        if(coupleInfo != null){
-            name = coupleInfo.user1.name
-            gender = coupleInfo.user1.gender
-        }
-    }
-
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -83,10 +71,15 @@ fun ProfileScreen(navHostController: NavHostController) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            val bitmap = if (gender == "male"){
+            val chunks: List<String> = token!!.split(".")
+            val decoder: Base64.Decoder = Base64.getUrlDecoder()
+            val payload = String(decoder.decode(chunks[1]))
+            val payloadJSON : JsonObject = JsonParser.parseString(payload).asJsonObject
+            val data = Gson().fromJson(payloadJSON, LoginPayload::class.java)
+            val bitmap = if (data.user.gender == "male"){
                 val drawable = ContextCompat.getDrawable(context, R.drawable.img_male)
                 (drawable as BitmapDrawable).bitmap
-            } else if(gender == "W"){
+            } else if(data.user.gender == "W"){
                 val drawable = ContextCompat.getDrawable(context, R.drawable.img_female)
                 (drawable as BitmapDrawable).bitmap
             } else{
@@ -102,7 +95,7 @@ fun ProfileScreen(navHostController: NavHostController) {
                     .clip(CircleShape)
             )
             Spacer(modifier = Modifier.height(25.dp))
-            Text(text = name,
+            Text(text = data.user.name,
                 style = TextStyle(
                     color = Color.Black,
                     fontSize = 25.sp,
