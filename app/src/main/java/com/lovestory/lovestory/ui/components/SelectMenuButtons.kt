@@ -47,10 +47,10 @@ fun SelectMenuButton(
         shape = RoundedCornerShape(25.dp),
         elevation = ButtonDefaults.elevation(defaultElevation = 0.dp),
         modifier = Modifier
-            .width(70.dp)
+            .width(60.dp)
             .height(40.dp),
         content = {
-            Text(text = buttonText, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            Text(text = buttonText, fontWeight = FontWeight.Bold, fontSize = 14.sp)
         },
     )
 }

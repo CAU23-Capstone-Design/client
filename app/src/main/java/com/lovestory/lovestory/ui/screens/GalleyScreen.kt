@@ -305,7 +305,7 @@ fun GalleryScreen(navHostController: NavHostController, syncedPhotoView : Synced
                             setSelectedButton(item)
                         })
 
-                    Spacer(modifier = Modifier.weight(1f))
+                    Spacer(modifier = Modifier.weight(0.5f))
 
                     Button(
                         onClick = {
@@ -315,8 +315,8 @@ fun GalleryScreen(navHostController: NavHostController, syncedPhotoView : Synced
                         },
                         colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFFCC5C5)),
                         modifier = Modifier
-                            .height(55.dp)
-                            .width(55.dp),
+                            .height(50.dp)
+                            .width(50.dp),
                         shape = RoundedCornerShape(40.dp),
                         content = {
                             Icon(
