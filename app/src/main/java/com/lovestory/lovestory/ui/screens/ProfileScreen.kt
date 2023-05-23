@@ -188,8 +188,8 @@ fun ProfileScreen(navHostController: NavHostController) {
                     TextButton(
                         onClick = {
                             //kakaoLogoutEvent(appKey = appKey, context = context)
-                            deleteToken(context = context)
                             token = null
+                            deleteToken(context = context)
                             showLogoutDialog = false
                         }
                     ){
