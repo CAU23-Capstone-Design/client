@@ -53,119 +53,128 @@ fun ProfileScreen(navHostController: NavHostController) {
     var name by remember { mutableStateOf("") }
     var gender by remember { mutableStateOf("") }
 
-    if (token == null) {
-        token = getToken(context)
-        if (token == null){
+    LaunchedEffect(token){
+        if(token == null){
+            deleteToken(context = context)
             intent?.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
             context.startActivity(intent)
         }
     }
 
+//    if (token == null) {
+//        token = getToken(context)
+//        if (token == null){
+//            intent?.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+//            context.startActivity(intent)
+//        }
+//    }
+
     var showLogoutDialog by remember { mutableStateOf(false) }
     var showSyncoutDialog by remember { mutableStateOf(false) }
-
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally
+    if(token != null){
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
         ) {
-            val chunks: List<String> = token!!.split(".")
-            val decoder: Base64.Decoder = Base64.getUrlDecoder()
-            val payload = String(decoder.decode(chunks[1]))
-            val payloadJSON : JsonObject = JsonParser.parseString(payload).asJsonObject
-            val data = Gson().fromJson(payloadJSON, LoginPayload::class.java)
-            val bitmap = if (data.user.gender == "male"){
-                val drawable = ContextCompat.getDrawable(context, R.drawable.img_male)
-                (drawable as BitmapDrawable).bitmap
-            } else if(data.user.gender == "W"){
-                val drawable = ContextCompat.getDrawable(context, R.drawable.img_female)
-                (drawable as BitmapDrawable).bitmap
-            } else{
-                val drawable = ContextCompat.getDrawable(context, R.drawable.img_human)
-                (drawable as BitmapDrawable).bitmap
-            }
-
-            Image(
-                bitmap = bitmap!!.asImageBitmap(),
-                contentDescription = null,
-                modifier = Modifier
-                    .size(100.dp)
-                    .clip(CircleShape)
-            )
-            Spacer(modifier = Modifier.height(25.dp))
-            Text(text = data.user.name,
-                style = TextStyle(
-                    color = Color.Black,
-                    fontSize = 25.sp,
-                    //fontWeight = FontWeight.Bold
-                ),
-            )
-            Spacer(modifier = Modifier.height(50.dp))
             Column(
-                modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                TextButton(
-                    onClick = {
-                        navHostController.navigate(ProfileStack.Help.route) {
-                            popUpTo(ProfileStack.Help.route)
+                val chunks: List<String> = token!!.split(".")
+                val decoder: Base64.Decoder = Base64.getUrlDecoder()
+                val payload = String(decoder.decode(chunks[1]))
+                val payloadJSON : JsonObject = JsonParser.parseString(payload).asJsonObject
+                val data = Gson().fromJson(payloadJSON, LoginPayload::class.java)
+                val bitmap = if (data.user.gender == "male"){
+                    val drawable = ContextCompat.getDrawable(context, R.drawable.img_male)
+                    (drawable as BitmapDrawable).bitmap
+                } else if(data.user.gender == "W"){
+                    val drawable = ContextCompat.getDrawable(context, R.drawable.img_female)
+                    (drawable as BitmapDrawable).bitmap
+                } else{
+                    val drawable = ContextCompat.getDrawable(context, R.drawable.img_human)
+                    (drawable as BitmapDrawable).bitmap
+                }
+
+                Image(
+                    bitmap = bitmap!!.asImageBitmap(),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(100.dp)
+                        .clip(CircleShape)
+                )
+                Spacer(modifier = Modifier.height(25.dp))
+                Text(text = data.user.name,
+                    style = TextStyle(
+                        color = Color.Black,
+                        fontSize = 25.sp,
+                        //fontWeight = FontWeight.Bold
+                    ),
+                )
+                Spacer(modifier = Modifier.height(50.dp))
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    TextButton(
+                        onClick = {
+                            navHostController.navigate(ProfileStack.Help.route) {
+                                popUpTo(ProfileStack.Help.route)
+                            }
                         }
-                    }
-                ){
-                    Text(
-                        text = "사용 가이드",
-                        style = TextStyle(
-                            color = Color.Black,
-                            fontSize = 20.sp
+                    ){
+                        Text(
+                            text = "사용 가이드",
+                            style = TextStyle(
+                                color = Color.Black,
+                                fontSize = 20.sp
+                            )
                         )
-                    )
-                }
-                Spacer(modifier = Modifier.height(15.dp))
-                TextButton(
-                    onClick = {
-                        navHostController.navigate(ProfileStack.Privacy.route) {
-                            popUpTo(ProfileStack.Privacy.route)
+                    }
+                    Spacer(modifier = Modifier.height(15.dp))
+                    TextButton(
+                        onClick = {
+                            navHostController.navigate(ProfileStack.Privacy.route) {
+                                popUpTo(ProfileStack.Privacy.route)
+                            }
                         }
-                    }
-                ){
-                    Text(
-                        text = "개인정보 수집",
-                        style = TextStyle(
-                            color = Color.Black,
-                            fontSize = 20.sp
+                    ){
+                        Text(
+                            text = "개인정보 수집",
+                            style = TextStyle(
+                                color = Color.Black,
+                                fontSize = 20.sp
+                            )
                         )
-                    )
-                }
-                Spacer(modifier = Modifier.height(15.dp))
-                TextButton(
-                    onClick = {
-                        showLogoutDialog = true
                     }
-                ){
-                    Text(
-                        text = "로그아웃",
-                        style = TextStyle(
-                            color = Color.Black,
-                            fontSize = 20.sp
+                    Spacer(modifier = Modifier.height(15.dp))
+                    TextButton(
+                        onClick = {
+                            showLogoutDialog = true
+                        }
+                    ){
+                        Text(
+                            text = "로그아웃",
+                            style = TextStyle(
+                                color = Color.Black,
+                                fontSize = 20.sp
+                            )
                         )
-                    )
-                }
-                Spacer(modifier = Modifier.height(15.dp))
-                TextButton(
-                    onClick = {
-                        showSyncoutDialog = true
                     }
-                ){
-                    Text(text = "상대방과 연결 끊기",
-                        style = TextStyle(
-                            color = Color.Black,
-                            fontSize = 20.sp)
-                    )
+                    Spacer(modifier = Modifier.height(15.dp))
+                    TextButton(
+                        onClick = {
+                            showSyncoutDialog = true
+                        }
+                    ){
+                        Text(text = "상대방과 연결 끊기",
+                            style = TextStyle(
+                                color = Color.Black,
+                                fontSize = 20.sp)
+                        )
+                    }
                 }
+                Spacer(modifier = Modifier.height(200.dp))
             }
-            Spacer(modifier = Modifier.height(200.dp))
         }
     }
 
@@ -188,7 +197,6 @@ fun ProfileScreen(navHostController: NavHostController) {
                     TextButton(
                         onClick = {
                             //kakaoLogoutEvent(appKey = appKey, context = context)
-                            deleteToken(context = context)
                             token = null
                             showLogoutDialog = false
                         }
