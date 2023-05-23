@@ -4,7 +4,6 @@ import com.lovestory.lovestory.model.CoupleInfo
 import com.lovestory.lovestory.model.LoginResponse
 import com.lovestory.lovestory.model.UsersOfCoupleInfo
 import retrofit2.Response
-import com.lovestory.lovestory.module.CoupleInfoResponse
 import retrofit2.http.*
 
 

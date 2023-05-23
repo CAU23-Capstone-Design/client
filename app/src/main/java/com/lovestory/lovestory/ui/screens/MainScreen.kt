@@ -14,7 +14,7 @@ import androidx.navigation.compose.rememberNavController
 import com.lovestory.lovestory.database.PhotoDatabase
 import com.lovestory.lovestory.database.repository.AdditionalPhotoRepository
 import com.lovestory.lovestory.graphs.MainNavGraph
-import com.lovestory.lovestory.module.getLocationPermission
+//import com.lovestory.lovestory.module.getLocationPermission
 import com.lovestory.lovestory.services.*
 import com.lovestory.lovestory.ui.components.BottomNaviagtionBar
 import com.lovestory.lovestory.view.*

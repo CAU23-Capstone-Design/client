@@ -1,20 +1,12 @@
 package com.lovestory.lovestory.ui.screens
 
 import android.annotation.SuppressLint
-import android.content.Context
-import android.content.res.Resources
 import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.Paint
-import android.graphics.Rect
 import android.graphics.drawable.BitmapDrawable
-import android.net.Uri
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CutCornerShape
@@ -36,11 +28,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.*
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -48,37 +38,25 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.ContextCompat
-import androidx.core.view.drawToBitmap
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.LifecycleOwner
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
-import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
-import com.google.maps.android.clustering.Cluster
-import com.google.maps.android.clustering.ClusterManager
-import com.google.maps.android.clustering.view.DefaultClusterRenderer
 import com.lovestory.lovestory.R
 import com.lovestory.lovestory.database.PhotoDatabase
 import com.lovestory.lovestory.database.entities.SyncedPhoto
 import com.lovestory.lovestory.database.repository.SyncedPhotoRepository
 import com.lovestory.lovestory.graphs.CalendarStack
-import com.lovestory.lovestory.graphs.MainScreens
 import com.lovestory.lovestory.model.*
 import com.lovestory.lovestory.module.getToken
 import com.lovestory.lovestory.module.loadBitmapFromDiskCache
 import com.lovestory.lovestory.module.photo.getThumbnailForPhoto
 import com.lovestory.lovestory.module.saveBitmapToDiskCache
 import com.lovestory.lovestory.network.getGps
-import com.lovestory.lovestory.network.getPhotoTable
 import com.lovestory.lovestory.ui.components.*
 import com.lovestory.lovestory.view.SyncedPhotoView
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 
 
@@ -93,10 +71,7 @@ fun MapScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhot
     var latLngMarker by remember { mutableStateOf(emptyList<LatLng>()) }
     val items = remember{ mutableStateListOf<MyItem>() }
     val items_google = remember{ mutableStateListOf<MyItem>() }
-//    var viewPosition = LatLng(37.503735330931136, 126.95615523253305)
-//    var cameraPositionState = rememberCameraPositionState {
-//        position = CameraPosition.fromLatLngZoom(viewPosition!!, 18f)
-//    }
+
     lateinit var repository : SyncedPhotoRepository
     var photoDate by remember { mutableStateOf(emptyList<String>()) }
     var photoPosition by remember { mutableStateOf(emptyList<LatLng>()) }

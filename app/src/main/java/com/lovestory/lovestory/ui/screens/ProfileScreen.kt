@@ -36,13 +36,9 @@ import com.google.gson.JsonParser
 import com.lovestory.lovestory.resource.vitro
 import com.lovestory.lovestory.ui.theme.LoveStoryTheme
 import com.lovestory.lovestory.R
-import com.lovestory.lovestory.event.kakaoLogoutEvent
 import com.lovestory.lovestory.graphs.*
 import com.lovestory.lovestory.model.LoginPayload
 import com.lovestory.lovestory.module.*
-import com.lovestory.lovestory.network.deleteCouple
-import com.lovestory.lovestory.network.getUsersInfo
-import kotlinx.coroutines.launch
 import java.util.*
 
 @Composable

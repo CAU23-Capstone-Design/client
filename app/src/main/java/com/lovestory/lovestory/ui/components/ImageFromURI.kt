@@ -115,7 +115,7 @@ fun ThumbnailOfPhotoFromServer(
     AnimatedVisibility(bitmap.value== null, enter = fadeIn(), exit = fadeOut()) {
         val screenWidth = LocalConfiguration.current.screenWidthDp.dp
         val imageWidth = (screenWidth / 3)
-        SkeletonPopup(modifier = Modifier
+        Skeleton(modifier = Modifier
             .width(imageWidth)
             .aspectRatio(1f)
             .padding(2.dp))

@@ -282,7 +282,7 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
         }
 
         CalendarDialog(
-            selection = selection,
+//            selection = selection,
             onDismissRequest = {
                 if(existingMemory != null) {
                     coupleMemoryList.find{ it.date == selection.date }?.comment = editedcomment
@@ -575,8 +575,8 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                                     )
                                 )
                             }
-                            val themedContext = ContextThemeWrapper(context, R.style.Theme_AppCompat)
-                            val squareTextView = SquareTextView(themedContext)
+//                            val themedContext = ContextThemeWrapper(context, R.style.Theme_AppCompat)
+//                            val squareTextView = SquareTextView(themedContext)
                             GoogleMap(
                                 modifier = Modifier
                                     .fillMaxWidth()
