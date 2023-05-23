@@ -39,6 +39,7 @@ import com.lovestory.lovestory.R
 import com.lovestory.lovestory.graphs.*
 import com.lovestory.lovestory.model.LoginPayload
 import com.lovestory.lovestory.module.*
+import com.lovestory.lovestory.services.LocationService
 import java.util.*
 
 @Composable
@@ -195,6 +196,10 @@ fun ProfileScreen(navHostController: NavHostController) {
                             //kakaoLogoutEvent(appKey = appKey, context = context)
                             token = null
                             showLogoutDialog = false
+                            val locationServiceIntent = Intent(context, LocationService::class.java)
+                            context.stopService(locationServiceIntent)
+                            intent?.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                            context.startActivity(intent)
                         }
                     ){
                         Text("확인", color = Color.Red)

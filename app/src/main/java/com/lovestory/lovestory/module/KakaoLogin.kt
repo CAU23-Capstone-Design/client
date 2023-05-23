@@ -1,6 +1,7 @@
 package com.lovestory.lovestory.module
 
 import android.content.Context
+import android.content.Intent
 import android.util.Log
 import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.NavHostController
@@ -90,7 +91,10 @@ fun checkLoginToken(context : Context, token : String, navHostController: NavHos
             checkExistNeedPhotoForSync(context)
         }
         navHostController.navigate(route = Graph.MAIN){
+            val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)
             navHostController.popBackStack()
+            intent?.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            context.startActivity(intent)
         }
     }else{
         Log.d("Route to CoupleSync", "route to coupleSync : $data")

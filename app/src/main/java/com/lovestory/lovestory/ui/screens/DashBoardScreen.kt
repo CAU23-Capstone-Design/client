@@ -174,7 +174,7 @@ fun DashBoardScreen(navHostController: NavHostController) {
                     )
                     Spacer(modifier = Modifier.height(10.dp))
                     Text(
-                        text = "${coupleInfo!!.value!!.firstDate?.substring(0,10)}",
+                        text = "From. ${coupleInfo!!.value!!.firstDate?.substring(0,10)}",
                         fontFamily = vitro,
                         fontSize = 16.sp
                     )

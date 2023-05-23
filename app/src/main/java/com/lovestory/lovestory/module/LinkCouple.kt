@@ -1,6 +1,7 @@
 package com.lovestory.lovestory.module
 
 import android.content.Context
+import android.content.Intent
 import android.widget.Toast
 import androidx.navigation.NavHostController
 import com.lovestory.lovestory.graphs.Graph
@@ -21,7 +22,10 @@ fun linkCouple(context : Context, navHostController: NavHostController, code : S
                     saveToken(context = context, it)
                 }
                 navHostController.navigate(route = Graph.MAIN){
+                    val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)
                     navHostController.popBackStack()
+                    intent?.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                    context.startActivity(intent)
                 }
             }
             else{

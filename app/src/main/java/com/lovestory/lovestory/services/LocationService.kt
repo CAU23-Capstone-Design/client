@@ -49,6 +49,7 @@ class LocationService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
+        Log.d(locationLogName, "위치 서비스 종료")
         handlerThread.quitSafely()
     }
 
