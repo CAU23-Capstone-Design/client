@@ -5,6 +5,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyGridState
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -31,7 +34,7 @@ fun PhotoForCalendar(
     token: String?,
     navHostController: NavHostController,
     syncedPhotoView : SyncedPhotoView,
-    allPhotoListState: LazyListState,
+    allPhotoListState: LazyGridState,
     widthDp: Dp,
     selectDate: String,
     isPopupVisibleSave: Boolean,
@@ -39,39 +42,27 @@ fun PhotoForCalendar(
 ){
     val syncedPhotosByDate = syncedPhotosByDate
 
-    LazyColumn(
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(3),
         modifier = Modifier.fillMaxWidth(),
-        //contentPadding = PaddingValues(bottom = 10.dp),
+        contentPadding = PaddingValues(bottom = 10.dp),
         state = allPhotoListState
     ){
         syncedPhotosByDate.forEach{(date, photos)->
-            items(photos.chunked(3).size) { index ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Start
-                ) {
-                    photos.chunked(3)[index].forEach { photo ->
-                        if (token != null) {
-                            Box(
-                                modifier = Modifier.fillMaxHeight().background(color = Color.Transparent, RoundedCornerShape(12.dp))
-                            ) {
-                                ThumbnailOfPhotoFromServerPopup(
-                                    index = photos.indexOf(photo),
-                                    token = token,
-                                    photo = photo,
-                                    syncedPhotoView = syncedPhotoView,
-                                    photoId = photo.id,
-                                    navHostController = navHostController,
-                                    widthDp = widthDp,
-                                    date = selectDate,
-                                    onImageClick = {
-                                    //    onPopupVisibilityChange(true) // Call the callback with the desired value
-                                    }
-                                )
-                            }
+            items(photos.size) { index ->
+                if (token != null) {
+                    ThumbnailOfPhotoFromServerPopup(
+                        index = photos.indexOf(photos[index]),
+                        token = token,
+                        photo = photos[index],
+                        syncedPhotoView = syncedPhotoView,
+                        photoId = photos[index].id,
+                        navHostController = navHostController,
+                        widthDp = widthDp,
+                        date = selectDate,
+                        onImageClick = {
                         }
-                    }
+                    )
                 }
             }
         }
@@ -92,9 +83,9 @@ fun PhotoForMap(
 
     LazyColumn(
         modifier = Modifier.fillMaxWidth().padding(2.dp),
-        //contentPadding = PaddingValues(bottom = 10.dp),
+        contentPadding = PaddingValues(bottom = 10.dp),
         state = allPhotoListState,
-        //horizontalAlignment = Alignment.
+//        horizontalAlignment = Alignment.
     ){
         syncedPhotosByDate.forEach{(date, photos)->
             items(photos.chunked(3).size) { index ->

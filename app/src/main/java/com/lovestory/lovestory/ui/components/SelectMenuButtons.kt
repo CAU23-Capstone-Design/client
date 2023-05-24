@@ -21,8 +21,8 @@ fun SelectMenuButtons(items : List<String>, selectedButton : String, onClick : (
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
-            .background(Color(0xDAD5D2D2), shape = RoundedCornerShape(25.dp))
-            .padding(horizontal = 8.dp, vertical = 5.dp)
+            .background(Color(0xDAD5D2D2), shape = RoundedCornerShape(23.dp))
+            .padding(horizontal = 8.dp, vertical = 2.dp)
     ){
         items.forEach { item->
             SelectMenuButton(onClick = {

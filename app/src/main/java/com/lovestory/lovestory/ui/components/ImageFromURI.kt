@@ -57,15 +57,6 @@ fun Skeleton(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun SkeletonPopup(modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier
-            .background(Color.LightGray, RoundedCornerShape(12.dp))
-            .animateContentSize()
-    )
-}
-
-@Composable
 fun ThumbnailOfPhotoFromServer(
     index: Int,
     token: String,
@@ -446,17 +437,14 @@ fun ThumbnailOfPhotoFromServerPopup(
 
     LaunchedEffect(photo) {
         indexForDetail.value = syncedPhotoView.calendarSyncedPhotoIndex(photo, date)
-        Log.d("인덱스","${indexForDetail.value}")
         val cachedBitmap = loadBitmapFromDiskCache(context, cacheKey)
         if (cachedBitmap != null) {
-//            Log.d("Thumbnail","cache에서 로드")
             bitmap.value = cachedBitmap
         } else {
             val getResult = getThumbnailForPhoto(token, photoId)
             if(getResult != null){
                 saveBitmapToDiskCache(context, getResult, cacheKey)
                 bitmap.value = getResult
-//                Log.d("Thumbnail","서버에서 로드")
             }
             else{
                 Log.d("COMPONENT-ThumbnailOfPhotoFromServer", "Error in transfer bitmap")
@@ -470,11 +458,13 @@ fun ThumbnailOfPhotoFromServerPopup(
     AnimatedVisibility(bitmap.value== null, enter = fadeIn(), exit = fadeOut()) {
         val screenWidth = LocalConfiguration.current.screenWidthDp.dp
         val imageWidth = (screenWidth - 80.dp) / 3
-//        Log.d("image width", "$imageWidth")
-        SkeletonPopup(modifier = Modifier
+
+        Skeleton(modifier = Modifier
             .width(imageWidth)
             .aspectRatio(1f)
-            .padding(2.dp))
+            .padding(2.dp)
+            .background(Color.LightGray, RoundedCornerShape(12.dp))
+        )
     }
 }
 

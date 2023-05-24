@@ -102,93 +102,113 @@ fun DashBoardScreen(navHostController: NavHostController) {
                     coupleDistance.value = result
                 }
             })
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier
-                .background(Color(0xBBF3F3F3))
-                .fillMaxWidth()
-                .height(60.dp)
-                .padding(horizontal = 20.dp)
-        ){
-            Text(
-                text = "Lovestory",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Normal,
-                fontFamily = vitro,
-            )
-        }
-        Column(
-            verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(top = 70.dp)
-        ) {
-            AnimateCharacter()
-            Spacer(modifier = Modifier.height(20.dp))
-            if(coupleInfo.value != null){
-                Column(
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier
-                        .padding(horizontal = 20.dp)
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(Color(0xB5FFDBDB))
-                ){
-                    Row(
-                        horizontalArrangement = Arrangement.SpaceAround,
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .padding(horizontal = 20.dp)
-                    ){
-                        Text(
-                            text = coupleInfo!!.value!!.user1.name,
-                            fontFamily = vitro,
-                            fontSize = 18.sp
-                        )
-                        Box(modifier = Modifier
-                            .height(80.dp)
-                            .width(80.dp)
-                            .clickable {
-                                if (!isVisibleFlyingAnimation.value) {
-                                    isVisibleFlyingAnimation.value = true
-                                    CoroutineScope(Dispatchers.IO).launch {
-                                        delay(3000)
-                                        isVisibleFlyingAnimation.value = false
-                                    }
-                                }
-                            }) {
-                            AnimateHeart()
-                        }
-                        Text(
-                            text = coupleInfo!!.value!!.user2.name,
-                            fontFamily = vitro,
-                            fontSize = 18.sp
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(10.dp))
-                    Text(
-                        text = "D + ${countDay.value}",
-                        fontFamily = vitro,
-                        fontSize = 20.sp
-                    )
-                    Spacer(modifier = Modifier.height(10.dp))
-                    Text(
-                        text = "From. ${coupleInfo!!.value!!.firstDate?.substring(0,10)}",
-                        fontFamily = vitro,
-                        fontSize = 16.sp
-                    )
-                    Spacer(modifier = Modifier.height(20.dp))
-                }
-            }
-            Spacer(modifier = Modifier.height(50.dp))
-            Column() {
-                Text(text = "여기에 뭘 넣으면 좋을까?!!!!!!!")
-            }
-        }
+        
+        HeaderOfDashBoard()
+
+        ContentOfDashBoard(
+            coupleInfo = coupleInfo,
+            isVisibleFlyingAnimation = isVisibleFlyingAnimation,
+            countDay = countDay
+        )
 
         AnimatedVisibility(isVisibleFlyingAnimation.value , enter = fadeIn(), exit = fadeOut()){
             AnimateFlyHeart()
+        }
+    }
+}
+
+@Composable
+fun HeaderOfDashBoard(){
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .background(Color(0xBBF3F3F3))
+            .fillMaxWidth()
+            .height(60.dp)
+            .padding(horizontal = 20.dp)
+    ){
+        Text(
+            text = "Lovestory",
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Normal,
+            fontFamily = vitro,
+        )
+    }
+}
+
+@Composable
+fun ContentOfDashBoard(
+    coupleInfo : MutableState<UsersOfCoupleInfo?>,
+    isVisibleFlyingAnimation : MutableState<Boolean>,
+    countDay : MutableState<Long>
+){
+    Column(
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(top = 70.dp)
+    ) {
+        AnimateCharacter()
+        Spacer(modifier = Modifier.height(20.dp))
+        if(coupleInfo.value != null){
+            Column(
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .padding(horizontal = 20.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(Color(0xB5FFDBDB))
+            ){
+                Row(
+                    horizontalArrangement = Arrangement.SpaceAround,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .padding(horizontal = 20.dp)
+                ){
+                    Text(
+                        text = coupleInfo!!.value!!.user1.name,
+                        fontFamily = vitro,
+                        fontSize = 18.sp
+                    )
+                    Box(modifier = Modifier
+                        .height(80.dp)
+                        .width(80.dp)
+                        .clickable {
+                            if (!isVisibleFlyingAnimation.value) {
+                                isVisibleFlyingAnimation.value = true
+                                CoroutineScope(Dispatchers.IO).launch {
+                                    delay(3000)
+                                    isVisibleFlyingAnimation.value = false
+                                }
+                            }
+                        }) {
+                        AnimateHeart()
+                    }
+                    Text(
+                        text = coupleInfo!!.value!!.user2.name,
+                        fontFamily = vitro,
+                        fontSize = 18.sp
+                    )
+                }
+                Spacer(modifier = Modifier.height(10.dp))
+                Text(
+                    text = "D + ${countDay.value}",
+                    fontFamily = vitro,
+                    fontSize = 20.sp
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                Text(
+                    text = "From. ${coupleInfo!!.value!!.firstDate?.substring(0,10)}",
+                    fontFamily = vitro,
+                    fontSize = 16.sp
+                )
+                Spacer(modifier = Modifier.height(20.dp))
+            }
+        }
+        Spacer(modifier = Modifier.height(50.dp))
+        Column() {
+            Text(text = "여기에 뭘 넣으면 좋을까?!!!!!!!")
         }
     }
 }

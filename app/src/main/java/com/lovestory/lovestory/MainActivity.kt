@@ -26,7 +26,6 @@ import com.lovestory.lovestory.module.StartService
 import com.lovestory.lovestory.services.LocationService
 import com.lovestory.lovestory.ui.components.DialogForPermission
 import com.lovestory.lovestory.ui.theme.LoveStoryTheme
-import com.lovestory.lovestory.ui.theme.LoveStoryThemeForMD3
 
 
 class MainActivity : ComponentActivity() {
@@ -60,7 +59,7 @@ class MainActivity : ComponentActivity() {
                 )
             }
 
-            LoveStoryThemeForMD3() {
+            LoveStoryTheme() {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = androidx.compose.material3.MaterialTheme.colorScheme.background

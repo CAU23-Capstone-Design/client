@@ -1,7 +1,6 @@
 package com.lovestory.lovestory.ui.screens
 
-import android.app.Activity
-import android.util.Log
+import android.content.Context
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
@@ -30,7 +29,6 @@ import com.lovestory.lovestory.graphs.MainScreens
 import com.lovestory.lovestory.module.checkExistNeedPhotoForSync
 import com.lovestory.lovestory.R
 import com.lovestory.lovestory.module.getToken
-import com.lovestory.lovestory.module.photo.deletePhotosByIds
 import com.lovestory.lovestory.ui.components.*
 import com.lovestory.lovestory.view.SyncedPhotoView
 import kotlinx.coroutines.*
@@ -183,151 +181,197 @@ fun GalleryScreen(navHostController: NavHostController, syncedPhotoView : Synced
                     .height(60.dp)
                     .padding(horizontal = 20.dp)
             ) {
-                AnimatedVisibility(
-                    visible = !isPressedPhotoMode.value,
-                    enter = fadeIn(),
-                    exit = fadeOut()) {
-                    Row(
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                    ) {
-                        Text(
-                            text = "갤러리",
-                            fontSize = 22.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-
-                        Row() {
-                            Icon(
-                                painter = painterResource(id = R.drawable.baseline_sync_24),
-                                contentDescription = "sync photo",
-                                modifier = Modifier.clickable {
-                                    Toast.makeText(context,"사진 동기화를 시작합니다.", Toast.LENGTH_SHORT).show()
-                                    CoroutineScope(Dispatchers.IO).launch {
-                                        checkExistNeedPhotoForSync(context)
-                                        withContext(Dispatchers.Main) {
-                                            Toast.makeText(context, "사진 동기화가 완료되었습니다.", Toast.LENGTH_SHORT).show()
-                                        }
-                                    }
-                                }
-                            )
-                            
-                            Spacer(modifier = Modifier.width(20.dp))
-
-                            Box() {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.baseline_more_vert_24),
-                                    contentDescription = null,
-                                    modifier = Modifier.clickable {isDropMenuForGalleryScreen.value = true},
-                                    tint = Color.Black
-                                )
-                                DropdownMenu(
-                                    expanded = isDropMenuForGalleryScreen.value,
-                                    onDismissRequest = { isDropMenuForGalleryScreen.value = false },
-                                    modifier = Modifier.wrapContentSize()
-                                ) {
-                                    DropdownMenuItem(
-                                        onClick = {
-                                            isDropMenuForGalleryScreen.value = false
-                                            isPressedPhotoMode.value = true
-                                        },
-                                    ) {
-                                        Box(
-                                            contentAlignment = Alignment.Center,
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                        ) {
-                                            Text(text = "사진  삭제" ,textAlign = TextAlign.Center)
-                                        }
-
-                                    }
-                                }
-                            }
-                        }
-                    }
+                AnimatedVisibility( visible = !isPressedPhotoMode.value, enter = fadeIn(), exit = fadeOut()) {
+                    HeaderForGallery(
+                        context = context,
+                        isDropMenuForGalleryScreen = isDropMenuForGalleryScreen,
+                        isPressedPhotoMode = isPressedPhotoMode,
+                        selectedButton = selectedButton,
+                    )
                 }
                 AnimatedVisibility(visible = isPressedPhotoMode.value, enter = fadeIn(), exit = fadeOut()){
-                    Row(
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                    ){
-                        Box() {
-                            Text(
-                                text = "취소",
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.Bold,
-                                modifier = Modifier.clickable {
-                                    syncedPhotoView.clearSelectedPhotosSet()
-                                    isPressedPhotoMode.value = false
-                                    countSelectedPhotos.value = 0
-                                }
-                            )
-                        }
-                        Box() {
-                            Text(
-                                text = "${countSelectedPhotos.value}장의 사진 삭제",
-                                fontSize = 18.sp,
-                                color = Color.Red,
-                                fontWeight = FontWeight.Bold,
-                                modifier = Modifier.clickable {
-                                    if(countSelectedPhotos.value >0){
-                                        showDeleteSyncedPhotoDialog.value = true
-                                    }
-                                    else{
-                                        Toast
-                                            .makeText(context, "선택된 사진이 없습니다.", Toast.LENGTH_SHORT)
-                                            .show()
-                                    }
-                                }
-                            )
-                        }
-                    }
-                }
-            }
-
-            // floating bar Section
-            Spacer(modifier = Modifier.weight(1f))
-            AnimatedVisibility(visible = !isPressedPhotoMode.value, enter= fadeIn(), exit = fadeOut()) {
-                Row(
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(start = 10.dp, end=10.dp,bottom = 80.dp)
-                ) {
-                    SelectMenuButtons(
-                        items = items,
-                        selectedButton = selectedButton,
-                        onClick ={ item : String ->
-                            isPressedPhotoMode.value = false
-                            setSelectedButton(item)
-                        })
-
-                    Spacer(modifier = Modifier.weight(0.5f))
-
-                    Button(
-                        onClick = {
-                            navHostController.navigate(GalleryStack.PhotoSync.route) {
-                                popUpTo(MainScreens.Gallery.route)
-                            }
-                        },
-                        colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFFCC5C5)),
-                        modifier = Modifier
-                            .height(50.dp)
-                            .width(50.dp),
-                        shape = RoundedCornerShape(40.dp),
-                        content = {
-                            Icon(
-                                painter = painterResource(id = R.drawable.baseline_upload_24),
-                                contentDescription = "upload photo"
-                            )
-                        }
+                    HeaderForDeletePhoto(
+                        context = context,
+                        syncedPhotoView = syncedPhotoView,
+                        isPressedPhotoMode = isPressedPhotoMode,
+                        countSelectedPhotos = countSelectedPhotos,
+                        showDeleteSyncedPhotoDialog = showDeleteSyncedPhotoDialog
                     )
                 }
             }
 
+            Spacer(modifier = Modifier.weight(1f))
+            AnimatedVisibility(visible = !isPressedPhotoMode.value, enter= fadeIn(), exit = fadeOut()) {
+                FloatingSection(
+                    items = items,
+                    selectedButton = selectedButton,
+                    isPressedPhotoMode = isPressedPhotoMode,
+                    setSelectedButton = setSelectedButton,
+                    navHostController = navHostController
+                )
+            }
+
+        }
+    }
+}
+
+@Composable
+fun FloatingSection(
+    items : List<String>,
+    selectedButton : String,
+    isPressedPhotoMode: MutableState<Boolean>,
+    setSelectedButton: (String) -> Unit,
+    navHostController: NavHostController
+){
+    Row(
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.padding(start = 10.dp, end=10.dp,bottom = 80.dp)
+    ) {
+        SelectMenuButtons(
+            items = items,
+            selectedButton = selectedButton,
+            onClick ={ item : String ->
+                isPressedPhotoMode.value = false
+                setSelectedButton(item)
+            })
+
+        Spacer(modifier = Modifier.weight(0.5f))
+
+        Button(
+            onClick = {
+                navHostController.navigate(GalleryStack.PhotoSync.route) {
+                    popUpTo(MainScreens.Gallery.route)
+                }
+            },
+            colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFFCC5C5)),
+            modifier = Modifier
+                .height(50.dp)
+                .width(50.dp),
+            shape = RoundedCornerShape(40.dp),
+            content = {
+                Icon(
+                    painter = painterResource(id = R.drawable.baseline_upload_24),
+                    contentDescription = "upload photo"
+                )
+            }
+        )
+    }
+}
+
+@Composable
+fun HeaderForGallery(
+    context: Context,
+    isDropMenuForGalleryScreen : MutableState<Boolean>,
+    isPressedPhotoMode : MutableState<Boolean>,
+    selectedButton : String
+){
+    Row(
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+    ) {
+        Text(
+            text = "갤러리",
+            fontSize = 22.sp,
+            fontWeight = FontWeight.Bold
+        )
+
+        AnimatedVisibility(visible = selectedButton == "전체", enter = fadeIn(), exit = fadeOut()) {
+            Row() {
+                Icon(
+                    painter = painterResource(id = R.drawable.baseline_sync_24),
+                    contentDescription = "sync photo",
+                    modifier = Modifier.clickable {
+                        Toast.makeText(context,"사진 동기화를 시작합니다.", Toast.LENGTH_SHORT).show()
+                        CoroutineScope(Dispatchers.IO).launch {
+                            checkExistNeedPhotoForSync(context)
+                            withContext(Dispatchers.Main) {
+                                Toast.makeText(context, "사진 동기화가 완료되었습니다.", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    }
+                )
+
+                Spacer(modifier = Modifier.width(20.dp))
+
+                Box() {
+                    Icon(
+                        painter = painterResource(id = R.drawable.baseline_more_vert_24),
+                        contentDescription = null,
+                        modifier = Modifier.clickable {isDropMenuForGalleryScreen.value = true},
+                        tint = Color.Black
+                    )
+                    DropdownMenu(
+                        expanded = isDropMenuForGalleryScreen.value,
+                        onDismissRequest = { isDropMenuForGalleryScreen.value = false },
+                        modifier = Modifier.wrapContentSize()
+                    ) {
+                        DropdownMenuItem(
+                            onClick = {
+                                isDropMenuForGalleryScreen.value = false
+                                isPressedPhotoMode.value = true
+                            },
+                        ) {
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                            ) {
+                                Text(text = "사진  삭제" ,textAlign = TextAlign.Center)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun HeaderForDeletePhoto(
+    context : Context,
+    syncedPhotoView : SyncedPhotoView,
+    isPressedPhotoMode : MutableState<Boolean>,
+    countSelectedPhotos :  MutableState<Int>,
+    showDeleteSyncedPhotoDialog : MutableState<Boolean>
+){
+    Row(
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+    ){
+        Box() {
+            Text(
+                text = "취소",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.clickable {
+                    syncedPhotoView.clearSelectedPhotosSet()
+                    isPressedPhotoMode.value = false
+                    countSelectedPhotos.value = 0
+                }
+            )
+        }
+        Box() {
+            Text(
+                text = "${countSelectedPhotos.value}장의 사진 삭제",
+                fontSize = 18.sp,
+                color = Color.Red,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.clickable {
+                    if(countSelectedPhotos.value >0){
+                        showDeleteSyncedPhotoDialog.value = true
+                    }
+                    else{
+                        Toast
+                            .makeText(context, "선택된 사진이 없습니다.", Toast.LENGTH_SHORT)
+                            .show()
+                    }
+                }
+            )
         }
     }
 }

@@ -32,22 +32,6 @@ private val LightColorPalette = lightColors(
     */
 )
 
-private val LightColors = lightColorScheme(
-    primary = Purple200,
-    onPrimary = Purple700,
-    primaryContainer = Teal200,
-    onPrimaryContainer = Teal200,
-// ..
-)
-
-private val DarkColors = darkColorScheme(
-    primary = Purple200,
-    onPrimary = Purple700,
-    primaryContainer = Teal200,
-    onPrimaryContainer = Teal200,
-// ..
-)
-
 @Composable
 fun LoveStoryTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
     val colors = if (darkTheme) {
@@ -59,23 +43,6 @@ fun LoveStoryTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composa
         colors = colors,
         typography = Typography,
         shapes = Shapes,
-        content = content
-    )
-}
-
-@Composable
-fun LoveStoryThemeForMD3(
-    useDarkTheme: Boolean = isSystemInDarkTheme(),
-    content: @Composable () -> Unit
-) {
-    val colorScheme =
-        if (!useDarkTheme) {
-            LightColors
-        } else {
-            DarkColors
-        }
-    androidx.compose.material3.MaterialTheme(
-        colorScheme = colorScheme,
         content = content
     )
 }
