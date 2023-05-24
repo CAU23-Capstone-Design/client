@@ -79,7 +79,6 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Polyline
 import com.google.android.gms.maps.model.PolylineOptions
 import com.google.maps.android.compose.*
-import com.google.maps.android.ui.SquareTextView
 import com.lovestory.lovestory.R
 import com.lovestory.lovestory.database.PhotoDatabase
 import com.lovestory.lovestory.database.entities.SyncedPhoto
@@ -575,8 +574,8 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                                     )
                                 )
                             }
-                            val themedContext = ContextThemeWrapper(context, R.style.Theme_AppCompat)
-                            val squareTextView = SquareTextView(themedContext)
+//                            val themedContext = ContextThemeWrapper(context, R.style.Theme_AppCompat)
+//                            val squareTextView = SquareTextView(themedContext)
                             GoogleMap(
                                 modifier = Modifier
                                     .fillMaxWidth()
