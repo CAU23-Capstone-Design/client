@@ -41,11 +41,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.*
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -436,6 +438,8 @@ fun MapScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhot
 //                verticalArrangement = Arrangement.Center,
 //                horizontalAlignment = Alignment.CenterHorizontally,
 //            ) {
+            val boxWidth = remember { mutableStateOf(Dp.Unspecified) }
+            val dens = LocalDensity.current
                 Box(
                     modifier = Modifier
                         .width(screenWidth - 80.dp)
@@ -443,10 +447,13 @@ fun MapScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhot
 //                        .fillMaxWidth()
 //                        .wrapContentHeight()
                         //.padding(20.dp)
-                        .background(color = Color.White, RoundedCornerShape(12.dp)),
+                        .background(color = Color.White, RoundedCornerShape(12.dp))
+                        .onSizeChanged {
+                            boxWidth.value = it.width.toDp(dens)
+                            Log.d("MapBoxWidth", "Width of the first Box: ${boxWidth.value}")
+                        },
                     contentAlignment = Alignment.TopCenter
                 ) {
-                    val boxWidth = remember { mutableStateOf(0) }
                     val popupWidthDp = with(LocalDensity.current) {
                         LocalContext.current.resources.displayMetrics.widthPixels.dp
                     }
@@ -462,7 +469,7 @@ fun MapScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhot
                         syncedPhotoView = syncedPhotoView,
                         navHostController = navHostController,
                         allPhotoListState = allPhotoListState,
-                        widthDp = boxWidth.value.dp,
+                        widthDp = (boxWidth.value - 4.dp),
                         selectDate = date
                     )
                 }

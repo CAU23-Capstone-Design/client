@@ -35,6 +35,8 @@ class SyncedPhotoView(application:Application): ViewModel() {
     lateinit var sizeOfMonthSyncedPhotos : LiveData<List<List<Int>>>
     lateinit var cumOfMonthSyncedPhotos : LiveData<List<List<Int>>>
 
+    //lateinit var uniqueDates : LiveData<List<String>>
+
     private val _syncedPhoto = MutableLiveData<SyncedPhoto?>()
     val syncedPhoto: LiveData<SyncedPhoto?> = _syncedPhoto
 
@@ -49,6 +51,8 @@ class SyncedPhotoView(application:Application): ViewModel() {
         dayListOfSyncedPhotos = syncedPhotoRepository.getDaySyncedPhotos
         monthListOfSyncedPhotos = syncedPhotoRepository.getMonthSyncedPhotos
         yearListOfSyncedPhotos = syncedPhotoRepository.getYearSyncedPhotos
+
+        //uniqueDates = syncedPhotoRepository.getUniqueDates
 
         groupedSyncedPhotosByDate = Transformations.map(listOfSyncPhotos) { syncedPhotos ->
             syncedPhotos.groupBy { it.date.substring(0, 10) }

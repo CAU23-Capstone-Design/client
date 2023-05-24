@@ -475,7 +475,7 @@ fun ThumbnailOfPhotoFromServerPopup(
     }
     AnimatedVisibility(bitmap.value== null, enter = fadeIn(), exit = fadeOut()) {
         val screenWidth = LocalConfiguration.current.screenWidthDp.dp
-        val imageWidth = (screenWidth - 80.dp) / 3
+        val imageWidth = widthDp / 3
 //        Log.d("image width", "$imageWidth")
         SkeletonPopup(modifier = Modifier
             .width(imageWidth)
@@ -496,7 +496,7 @@ fun DisplayImageFromBitmapPopup(
     onImageClick: () -> Unit
 ) {
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
-    val imageWidth = (screenWidth - 80.dp) / 3
+    val imageWidth = widthDp / 3
 
     Image(
         bitmap = bitmap.asImageBitmap(),

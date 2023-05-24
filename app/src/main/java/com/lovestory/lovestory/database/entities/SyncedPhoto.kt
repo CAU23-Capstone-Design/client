@@ -103,4 +103,6 @@ interface SyncedPhotoDao {
     @Query("SELECT * FROM syncedPhotos WHERE photo_id = :id")
     suspend fun getPhotoById(id: String): SyncedPhoto?
 
+//    @Query("SELECT DISTINCT substr(date, 1, 10) FROM syncedPhotos")
+//    fun getUniqueDates(): LiveData<List<String>>
 }
