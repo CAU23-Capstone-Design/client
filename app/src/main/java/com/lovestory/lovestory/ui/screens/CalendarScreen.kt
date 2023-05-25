@@ -99,6 +99,7 @@ import kotlin.math.roundToInt
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.unit.Dp
+import com.google.maps.android.clustering.ClusterManager
 
 @OptIn(MapsComposeExperimentalApi::class)
 @SuppressLint("CoroutineCreationDuringComposition", "SuspiciousIndentation")
@@ -637,161 +638,26 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                                     },
                                     uiSettings = uiSettings
                                 ) {
-                                    Clustering(
-                                        items = items,
-                                        // Optional: Handle clicks on clusters, cluster items, and cluster item info windows
-                                        onClusterClick = {
-                                            false
-                                        },
-                                        onClusterItemClick = {
-                                            false
-                                        },
-                                        onClusterItemInfoWindowClick = {
-                                            false
-                                        },
-                                        // Optional: Custom rendering for clusters
-                                        clusterContent = { cluster ->
-                                            val size = 50.dp
-                                            val density = LocalDensity.current.density
-                                            val scaledSize = (size * density).toInt()
-                                            val scaledBitmap = Bitmap.createScaledBitmap(
-                                                bitmap,
-                                                scaledSize,
-                                                scaledSize,
-                                                false
-                                            )!!.asImageBitmap()
-                                            var scaledBitmap1 by remember {
-                                                mutableStateOf<ImageBitmap?>(
-                                                    null
-                                                )
-                                            }
-
-                                            val clusterItems = cluster.items.toList()
-
-                                            // Check if there is a clusterItem with itemType "PHOTO"
-                                            val photoClusterItem =
-                                                clusterItems.find { it.itemType == "PHOTO" }
-
-                                            // Set the cluster icon based on the presence of a photoClusterItem
-                                            if (photoClusterItem != null) {
-                                                scaledBitmap1 = photoClusterItem.icon.let {
-                                                    Bitmap.createScaledBitmap(
-                                                        it!!,
-                                                        scaledSize,
-                                                        scaledSize,
-                                                        false
-                                                    )
-                                                }!!.asImageBitmap()
-                                                Surface(
-                                                    shape = RoundedCornerShape(percent = 10),
-                                                    contentColor = Color.White,
-                                                    border = BorderStroke(1.dp, Color.White),
-                                                    elevation = 10.dp
-                                                ) {
-                                                    Box(contentAlignment = Alignment.Center) {
-                                                        Image(
-                                                            bitmap = scaledBitmap1!!,
-                                                            contentDescription = null,
-                                                            modifier = Modifier.size(60.dp)
-                                                        )
-                                                        Text(
-                                                            "%,d".format(cluster.size), //이 부분 왜 2배로 나오지..?
-                                                            fontSize = 16.sp,
-                                                            fontWeight = FontWeight.Black,
-                                                            textAlign = TextAlign.Center
-                                                        )
-                                                    }
-                                                }
-                                            } else {
-                                                Surface(
-                                                    shape = CutCornerShape(12.dp),
-                                                    color = Color.Transparent,
-                                                    contentColor = Color.Red,
-                                                ) {
-                                                    Icon(
-                                                        painter = painterResource(id = R.drawable.ic_permission_location_foreground),
-                                                        contentDescription = null,
-                                                        modifier = Modifier.size(60.dp),
-                                                        tint = Color.Red
-                                                    )
-//                                Text(
-//                                    "%,d".format(cluster.size), //이 부분 왜 2배로 나오지..?
-//                                    fontSize = 16.sp,
-//                                    fontWeight = FontWeight.Black,
-//                                    textAlign = TextAlign.Center
-//                                )
-                                                }
-                                            }
-                                        },
-                                        // Optional: Custom rendering for non-clustered items
-                                        clusterItemContent = { item ->
-//                        val drawable = ContextCompat.getDrawable(context, R.drawable.img)
-//                        val bitmap = com.lovestory.lovestory.ui.components.VectorToBitmap(
-//                            vectorResId = R.drawable.ic_marker
-//                        ).asImageBitmap()
-//                        val size = 50.dp
-//                        val scaledBitmap = item.icon.let {
-//                            val density = LocalDensity.current.density
-//                            val scaledSize = (size * density).toInt()
-//                            Bitmap.createScaledBitmap(it, scaledSize, scaledSize, false)
-//                        }!!.asImageBitmap()
-//                        val size = 50.dp
-//                        val density = LocalDensity.current.density
-//                        val scaledSize = (size * density).toInt()
-//                        val scaledSize2 = ((size/2) * density).toInt()
-//                        val scaledBitmap = if(item.icon != bitmap1){
-//                            Bitmap.createScaledBitmap(item.icon, scaledSize, scaledSize, false)!!.asImageBitmap()
-//                        }else{
-//                            Bitmap.createScaledBitmap(bitmap1, scaledSize2, scaledSize2, false)!!.asImageBitmap()
-//                        }
-                                            val size = 50.dp
-                                            val density = LocalDensity.current.density
-                                            val scaledSize = (size * density).toInt()
-                                            if (item.itemType == "PHOTO") {
-                                                val scaledBitmap1 = item.icon.let {
-                                                    Bitmap.createScaledBitmap(
-                                                        it!!,
-                                                        scaledSize,
-                                                        scaledSize,
-                                                        false
-                                                    )
-                                                }!!.asImageBitmap()
-                                                Surface(
-                                                    shape = RoundedCornerShape(percent = 10),
-                                                    contentColor = Color.White,
-                                                    border = BorderStroke(1.dp, Color.White),
-                                                    elevation = 10.dp
-                                                ) {
-                                                    Box(contentAlignment = Alignment.Center) {
-                                                        Image(
-                                                            bitmap = scaledBitmap1,
-                                                            contentDescription = null,
-                                                            modifier = Modifier.size(60.dp)
-                                                        )
-                                                    }
-                                                }
-                                            } else {
-                                                Surface(
-                                                    shape = CutCornerShape(12.dp),
-                                                    color = Color.Transparent,
-                                                    contentColor = Color.Red,
-                                                ) {
-                                                    Icon(
-                                                        painter = painterResource(id = R.drawable.ic_permission_location_foreground),
-                                                        contentDescription = null,
-                                                        modifier = Modifier.size(60.dp),
-                                                        tint = Color.Red
-                                                    )
-//                                Text(
-//                                    "%,d".format(cluster.size), //이 부분 왜 2배로 나오지..?
-//                                    fontSize = 16.sp,
-//                                    fontWeight = FontWeight.Black,
-//                                    textAlign = TextAlign.Center
-//                                )
-                                                }
-                                            }
+                                    var clusterManager by remember { mutableStateOf<ClusterManager<MyItem>?>(null) }
+                                    MapEffect(items) { map ->
+                                        if (clusterManager == null) {
+                                            clusterManager = ClusterManager<MyItem>(context, map)
                                         }
-                                    )
+                                        clusterManager?.addItems(items)
+                                        clusterManager?.renderer = MarkerClusterRender(context,map,clusterManager!!) {
+                                        }
+                                        clusterManager?.setOnClusterClickListener {
+                                            false
+                                        }
+                                        clusterManager?.setOnClusterItemClickListener {
+                                            false
+                                        }
+                                    }
+                                    LaunchedEffect(key1 = cameraPositionState.isMoving) {
+                                        if (!cameraPositionState.isMoving) {
+                                            clusterManager?.onCameraIdle()
+                                        }
+                                    }
                                 }
                             }else{
                                 //스켈레톤 추가
@@ -870,6 +736,7 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                             modifier = Modifier.align(Alignment.Center)
                         )
                     }
+                    Spacer(modifier = Modifier.height(40.dp))
                 }
             }
         }

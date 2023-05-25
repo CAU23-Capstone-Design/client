@@ -1,63 +1,53 @@
 package com.lovestory.lovestory.ui.screens
 
 import android.annotation.SuppressLint
+import android.content.Context
+import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
+import android.util.Log
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CutCornerShape
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
-import com.google.android.gms.maps.model.*
-import com.google.maps.android.clustering.ClusterItem
-import com.google.maps.android.compose.*
-import com.lovestory.lovestory.ui.theme.LoveStoryTheme
-import com.google.maps.android.compose.clustering.Clustering
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.*
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.ContextCompat
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
-import com.google.android.gms.maps.model.CameraPosition
-import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.model.*
+import com.google.maps.android.clustering.Cluster
+import com.google.maps.android.clustering.ClusterItem
+import com.google.maps.android.clustering.ClusterManager
+import com.google.maps.android.clustering.ClusterManager.OnClusterClickListener
+import com.google.maps.android.clustering.view.DefaultClusterRenderer
+import com.google.maps.android.compose.*
 import com.lovestory.lovestory.R
 import com.lovestory.lovestory.database.PhotoDatabase
 import com.lovestory.lovestory.database.entities.SyncedPhoto
 import com.lovestory.lovestory.database.repository.SyncedPhotoRepository
 import com.lovestory.lovestory.graphs.CalendarStack
 import com.lovestory.lovestory.model.*
-import com.lovestory.lovestory.module.getToken
-import com.lovestory.lovestory.module.loadBitmapFromDiskCache
+import com.lovestory.lovestory.module.*
 import com.lovestory.lovestory.module.photo.getThumbnailForPhoto
-import com.lovestory.lovestory.module.saveBitmapToDiskCache
 import com.lovestory.lovestory.network.getGps
 import com.lovestory.lovestory.ui.components.*
+import com.lovestory.lovestory.ui.theme.LoveStoryTheme
 import com.lovestory.lovestory.view.SyncedPhotoView
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
@@ -74,7 +64,10 @@ fun MapScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhot
     var latLngMarker by remember { mutableStateOf(emptyList<LatLng>()) }
     val items = remember{ mutableStateListOf<MyItem>() }
     val items_google = remember{ mutableStateListOf<MyItem>() }
-
+//    var viewPosition = LatLng(37.503735330931136, 126.95615523253305)
+//    var cameraPositionState = rememberCameraPositionState {
+//        position = CameraPosition.fromLatLngZoom(viewPosition!!, 18f)
+//    }
     lateinit var repository : SyncedPhotoRepository
     var photoDate by remember { mutableStateOf(emptyList<String>()) }
     var photoPosition by remember { mutableStateOf(emptyList<LatLng>()) }
@@ -226,6 +219,54 @@ fun MapScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhot
                 modifier = Modifier.fillMaxSize(),
                 cameraPositionState = cameraPositionState,
             ) {
+                var clusterManager by remember { mutableStateOf<ClusterManager<MyItem>?>(null) }
+                MapEffect(items) { map ->
+                    if (clusterManager == null) {
+                        clusterManager = ClusterManager<MyItem>(context, map)
+//                        clusterManager = ClusterManager<MyItem>(context,map).apply{
+//                            renderer = CustomClusterRenderer(context, map, this)
+//                        }
+                    }
+                    clusterManager?.addItems(items)
+                    clusterManager?.renderer = MarkerClusterRender(context,map,clusterManager!!) {
+                        /*
+                        clusterManager?.renderer?.setOnClusterClickListener {
+                            itemPopup = it.items.filter{it.itemType == "PHOTO"}
+                            isPopupVisible = true
+                            false
+                        }
+                        clusterManager?.renderer?.setOnClusterItemClickListener{
+                            if(it.itemType == "PHOTO"){
+                                navHostController.navigate(CalendarStack.ClickDetailScreen.route+"/${it.id}/${date}") {
+                                    popUpTo(CalendarStack.ClickDetailScreen.route)
+                                }
+                            }
+                            false
+                        }
+                         */
+                    }
+                    clusterManager?.setOnClusterClickListener {
+                        itemPopup = it.items.filter{it.itemType == "PHOTO"}
+                        if(itemPopup.isNotEmpty()){
+                            isPopupVisible = true
+                        }
+                        false
+                    }
+                    clusterManager?.setOnClusterItemClickListener {
+                        if(it.itemType == "PHOTO"){
+                            navHostController.navigate(CalendarStack.ClickDetailScreen.route+"/${it.id}/${date}") {
+                                popUpTo(CalendarStack.ClickDetailScreen.route)
+                            }
+                        }
+                        false
+                    }
+                }
+                LaunchedEffect(key1 = cameraPositionState.isMoving) {
+                    if (!cameraPositionState.isMoving) {
+                        clusterManager?.onCameraIdle()
+                    }
+                }
+                /*
                 Clustering(
                     items = items,
                     // Optional: Handle clicks on clusters, cluster items, and cluster item info windows
@@ -297,6 +338,12 @@ fun MapScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhot
                                     modifier = Modifier.size(60.dp),
                                     tint = Color.Red
                                 )
+//                                Text(
+//                                    "%,d".format(cluster.size), //이 부분 왜 2배로 나오지..?
+//                                    fontSize = 16.sp,
+//                                    fontWeight = FontWeight.Black,
+//                                    textAlign = TextAlign.Center
+//                                )
                             }
                         }
                     },
@@ -339,6 +386,8 @@ fun MapScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhot
                         }
                     }
                 )
+
+                 */
             }
         }
 
@@ -360,7 +409,10 @@ fun MapScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhot
 
     if(isPopupVisible){
         MapDialog(
-            onDismissRequest = { isPopupVisible = false },
+            onDismissRequest = {
+                isPopupVisible = false
+                itemPopup = emptyList()
+            },
             properties = DialogProperties(dismissOnBackPress = true, dismissOnClickOutside = true)
         )
         {
@@ -387,17 +439,20 @@ fun MapScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhot
                         .background(color = Color.White, RoundedCornerShape(12.dp))
                         .onSizeChanged {
                             boxWidth.value = it.width.toDp(dens)
-//                            Log.d("MapBoxWidth", "Width of the first Box: ${boxWidth.value}")
+                            Log.d("MapBoxWidth", "Width of the first Box: ${boxWidth.value}")
                         },
                     contentAlignment = Alignment.TopCenter
                 ) {
                     val popupWidthDp = with(LocalDensity.current) {
                         LocalContext.current.resources.displayMetrics.widthPixels.dp
                     }
-                    val filteredSyncedPhotos = syncedPhotosByDate
-                        .filter { (date, photos) ->
-                            photos.any { photo -> itemPopup.any { myItem -> myItem.id == photo.id } }
+                    val filteredSyncedPhotos = syncedPhotosByDate.mapValues { (_, photos) ->
+                        photos.filter { synced ->
+                            itemPopup.any { item ->
+                                synced.id == item.id
+                            }
                         }
+                    }
 
                     //isPopupVisibleSave = true
                     PhotoForMap(
@@ -410,6 +465,7 @@ fun MapScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhot
                         selectDate = date
                     )
                 }
+//            }
         }
     }
 }
@@ -431,6 +487,167 @@ data class MyItem(
 
     override fun getSnippet(): String =
         itemSnippet
+}
+
+class MarkerClusterRender<T : MyItem>(
+    var context: Context,
+    var googleMap: GoogleMap,
+    clusterManager: ClusterManager<T>,
+    var onInfoWindowClick: (MyItem) -> Unit,
+) :
+    DefaultClusterRenderer<T>(context, googleMap, clusterManager) {
+
+    private var clusterMap: HashMap<String, Marker> = hashMapOf()
+
+    override fun shouldRenderAsCluster(cluster: Cluster<T>): Boolean {
+        return cluster.size > 1
+    }
+
+    override fun getBucket(cluster: Cluster<T>): Int {
+        return cluster.size
+    }
+
+    override fun getClusterText(bucket: Int): String {
+        return super.getClusterText(bucket).replace("+", "")
+    }
+
+    override fun setOnClusterClickListener(listener: ClusterManager.OnClusterClickListener<T>?) {
+        super.setOnClusterClickListener(listener)
+    }
+
+    override fun onBeforeClusterRendered(cluster: Cluster<T>, markerOptions: MarkerOptions) {
+        super.onBeforeClusterRendered(cluster, markerOptions)
+
+        val clusterItems = cluster.items.toList()
+
+        // Check if there is a clusterItem with itemType "PHOTO"
+        val photoClusterItem = clusterItems.find { it.itemType == "PHOTO" }
+
+        // Set the cluster icon based on the presence of a photoClusterItem
+        if (photoClusterItem != null) {
+            // Set the cluster icon as the icon of the first photoClusterItem
+            markerOptions.icon(clusterIcon(context, photoClusterItem.icon, getBucket(cluster)))//BitmapDescriptorFactory.fromBitmap(photoClusterItem.icon))
+        } else {
+            // Set the default cluster icon
+            markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
+            //markerOptions.icon(getDescriptorForCluster(cluster))
+        }
+    }
+
+    override fun onClusterUpdated(cluster: Cluster<T>, marker: Marker) {
+        super.onClusterUpdated(cluster, marker)
+
+        val clusterItems = cluster.items.toList()
+
+        // Check if there is a clusterItem with itemType "PHOTO"
+        val photoClusterItem = clusterItems.find { it.itemType == "PHOTO" }
+
+        // Set the cluster icon based on the presence of a photoClusterItem
+        if (photoClusterItem != null) {
+            // Set the cluster icon as the icon of the first photoClusterItem
+            marker.setIcon(clusterIcon(context, photoClusterItem.icon, getBucket(cluster)))
+        } else {
+            // Set the default cluster icon
+            marker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
+            //markerOptions.icon(getDescriptorForCluster(cluster))
+        }
+    }
+
+    override fun onClustersChanged(clusters: Set<Cluster<T>>) {
+        super.onClustersChanged(clusters)
+
+        for (cluster in clusters) {
+            val clusterItems = cluster.items.toList()
+            val photoClusterItem = clusterItems.find { it.itemType == "PHOTO" }
+
+            for (clusterItem in clusterItems) {
+                val marker = getMarker(clusterItem)
+                if (marker != null) {
+                    if (photoClusterItem != null && clusterItem == photoClusterItem) {
+                        marker.setIcon(clusterIcon(context, photoClusterItem.icon, getBucket(cluster)))
+                    } else {
+                        marker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
+                    }
+                }
+            }
+        }
+    }
+
+    override fun onClusterItemRendered(clusterItem: T, marker: Marker) {
+        super.onClusterItemRendered(clusterItem, marker)
+        clusterMap[(clusterItem as MyItem).itemTitle] = marker
+
+        setMarker((clusterItem as MyItem), marker)
+    }
+
+    override fun onBeforeClusterItemRendered(item: T, markerOptions: MarkerOptions) {
+        super.onBeforeClusterItemRendered(item, markerOptions)
+
+        val myItem = item as MyItem
+
+        if(myItem.itemType == "PHOTO") {
+            val markerIcon = myItem.icon
+            val desiredSize = 60.dp // Set the desired size for the icon
+            val density = Resources.getSystem().displayMetrics.density
+            val scaledBitmap = Bitmap.createScaledBitmap(
+                markerIcon,
+                (desiredSize.value * density).toInt(),
+                (desiredSize.value * density).toInt(),
+                false
+            )
+            markerOptions.anchor(0.5f, 1f)
+            markerOptions.icon(BitmapDescriptorFactory.fromBitmap(scaledBitmap))
+            markerOptions.title(myItem.itemTitle)
+            markerOptions.snippet(myItem.itemSnippet)
+        }else{
+            markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
+            markerOptions.title(myItem.itemTitle)
+            markerOptions.snippet(myItem.itemSnippet)
+        }
+
+//        val myItem = item as MyItem
+//        // Customize the markerOptions for individual items (not part of a cluster)
+//        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
+//        markerOptions.title(myItem.itemTitle) ///        markerOptions.snippet(myItem.itemSnippet)
+    }
+
+    private fun setMarker(poi: MyItem, marker: Marker?) {
+        val markerColor = BitmapDescriptorFactory.HUE_RED
+//        marker?.let {
+//            it.tag = poi
+//            it.showInfoWindow()
+//            changeMarkerColor(it, markerColor)
+//        }
+        googleMap.setOnInfoWindowClickListener {
+            onInfoWindowClick(it.tag as MyItem)
+        }
+    }
+
+    fun getClusterMarker(itemId: String): Marker? {
+        return if (clusterMap.containsKey(itemId)) clusterMap[itemId]
+        else null
+    }
+
+    fun showRouteInfoWindow(key: String) {
+        getClusterMarker(key)?.showInfoWindow()
+    }
+
+    fun changeMarkerColor(marker: Marker, color: Float) {
+        try {
+            marker.setIcon(BitmapDescriptorFactory.defaultMarker(color));
+        } catch (ex: IllegalArgumentException) {
+            ex.printStackTrace()
+        } catch (ex: Exception) {
+            ex.printStackTrace()
+        }
+    }
+
+    private fun clusterIcon(context: Context, bitmap : Bitmap, size: Int): BitmapDescriptor {
+        // Customize your ClusterView. The cluster gives you its size (cluster.size) and its items within it (cluster.items)
+        // Use that to customize the cluster appearance.
+        val clusterView = ClusterView(context, bitmap, size)
+        return BitmapDescriptorFactory.fromBitmap(clusterView.toBitmap(250, 250))
+    }
 }
 
 @Preview
