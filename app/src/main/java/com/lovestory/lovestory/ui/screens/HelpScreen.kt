@@ -29,9 +29,9 @@ import com.lovestory.lovestory.ui.components.SelectMenuButtons
 fun HelpScreen(navHostController: NavHostController){
     val context = LocalContext.current
     val token = getToken(context)
-    val (selectedButton, setSelectedButton) = remember { mutableStateOf("대시보드") }
+    val (selectedButton, setSelectedButton) = remember { mutableStateOf("갤러리") }
     val items = listOf<String>(
-        "대시보드", "갤러리", "캘린더", "프로필"
+        "갤러리", "캘린더"
     )
 
     Box(
@@ -40,10 +40,10 @@ fun HelpScreen(navHostController: NavHostController){
             .fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        AnimatedVisibility(visible = selectedButton =="대시보드",
-        ){
-            Text("대시보드 설명")
-        }
+//        AnimatedVisibility(visible = selectedButton =="대시보드",
+//        ){
+//            Text("대시보드 설명")
+//        }
         AnimatedVisibility(visible = selectedButton =="갤러리",
         ){
             Text("갤러리 설명")
@@ -52,10 +52,10 @@ fun HelpScreen(navHostController: NavHostController){
         ){
             Text("캘린더 설명")
         }
-        AnimatedVisibility(visible = selectedButton =="프로필",
-        ){
-            Text("프로필 설명")
-        }
+//        AnimatedVisibility(visible = selectedButton =="프로필",
+//        ){
+//            Text("프로필 설명")
+//        }
 
         Column(
             verticalArrangement = Arrangement.Top,

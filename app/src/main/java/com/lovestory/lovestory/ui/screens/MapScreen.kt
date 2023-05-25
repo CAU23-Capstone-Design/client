@@ -1,6 +1,8 @@
 package com.lovestory.lovestory.ui.screens
 
 import android.annotation.SuppressLint
+import android.content.Context
+import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.util.Log
@@ -30,8 +32,6 @@ import androidx.core.content.ContextCompat
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
-import androidx.compose.ui.window.DialogProperties
-import androidx.core.content.ContextCompat
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
@@ -232,21 +232,6 @@ fun MapScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhot
                     }
                     clusterManager?.addItems(items)
                     clusterManager?.renderer = MarkerClusterRender(context,map,clusterManager!!) {
-                        /*
-                        clusterManager?.renderer?.setOnClusterClickListener {
-                            itemPopup = it.items.filter{it.itemType == "PHOTO"}
-                            isPopupVisible = true
-                            false
-                        }
-                        clusterManager?.renderer?.setOnClusterItemClickListener{
-                            if(it.itemType == "PHOTO"){
-                                navHostController.navigate(CalendarStack.ClickDetailScreen.route+"/${it.id}/${date}") {
-                                    popUpTo(CalendarStack.ClickDetailScreen.route)
-                                }
-                            }
-                            false
-                        }
-                         */
                     }
                     clusterManager?.setOnClusterClickListener {
                         itemPopup = it.items.filter{it.itemType == "PHOTO"}

@@ -63,24 +63,21 @@ suspend fun getUsersInfo(token : String): UsersOfCoupleInfo? {
     }
 }
 
-suspend fun deleteCouple(token: String?):Response<LoginResponse>{
+suspend fun deleteCouple(token: String?):ResponseBody?{
     val jwt = "Bearer $token"
-    val retrofit = Retrofit.Builder()
-        .baseUrl("https://api.cau-lovestory.site:3000/api-docs/")
-        .addConverterFactory(GsonConverterFactory.create())
-        .build()
-
-    val apiService = retrofit.create(CoupleService::class.java)
+    val apiService : CoupleService = createApiService()
 
     return try{
-        val delete : LoginResponse = apiService.deleteCouple(jwtToken = jwt)
-        Response.success(delete)
+        val delete : Response<ResponseBody> = apiService.deleteCouple(jwtToken = jwt)
+        delete.body()
     }catch (e : HttpException){
         Log.e("NETWORK-checkCouple", "$e")
-        Response.error(e.code(), e.response()?.errorBody())
+//        Response.error(e.code(), e.response()?.errorBody())
+        null
 
     }catch (e : Exception){
         Log.e("NETWORK-checkCouple", "$e")
-        Response.error(500, ResponseBody.create(null, "Unknown error"))
+//        Response.error(500, ResponseBody.create(null, "Unknown error"))
+        null
     }
 }

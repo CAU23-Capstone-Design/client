@@ -39,7 +39,9 @@ import com.lovestory.lovestory.R
 import com.lovestory.lovestory.graphs.*
 import com.lovestory.lovestory.model.LoginPayload
 import com.lovestory.lovestory.module.*
+import com.lovestory.lovestory.network.deleteCouple
 import com.lovestory.lovestory.services.LocationService
+import kotlinx.coroutines.launch
 import java.util.*
 
 @Composable
@@ -49,12 +51,21 @@ fun ProfileScreen(navHostController: NavHostController) {
     var token by remember {mutableStateOf(getToken(context))}
     var name by remember { mutableStateOf("") }
     var gender by remember { mutableStateOf("") }
+    var byeBye by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(token){
         if(token == null){
             deleteToken(context = context)
             intent?.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
             context.startActivity(intent)
+        }
+    }
+
+    LaunchedEffect(byeBye){
+        if(byeBye){
+            deleteCouple(token)
+            token = null
         }
     }
 
@@ -246,10 +257,10 @@ fun ProfileScreen(navHostController: NavHostController) {
                 ){
                     TextButton(
                         onClick = {
-//                            coroutineScope.launch{
-//                                deleteCouple(token)
-//                            }
+                            byeBye = true
                             showSyncoutDialog = false
+                            val locationServiceIntent = Intent(context, LocationService::class.java)
+                            context.stopService(locationServiceIntent)
                             intent?.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
                             context.startActivity(intent)
                         }
