@@ -387,7 +387,7 @@ fun MapScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhot
                         .background(color = Color.White, RoundedCornerShape(12.dp))
                         .onSizeChanged {
                             boxWidth.value = it.width.toDp(dens)
-                            Log.d("MapBoxWidth", "Width of the first Box: ${boxWidth.value}")
+//                            Log.d("MapBoxWidth", "Width of the first Box: ${boxWidth.value}")
                         },
                     contentAlignment = Alignment.TopCenter
                 ) {

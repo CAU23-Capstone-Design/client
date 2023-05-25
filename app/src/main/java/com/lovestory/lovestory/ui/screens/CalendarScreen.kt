@@ -16,6 +16,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CutCornerShape
@@ -170,7 +171,8 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
     var photoExist by remember { mutableStateOf(false) }
 
     val syncedPhotosByDate by syncedPhotoView.groupedSyncedPhotosByDate.observeAsState(initial = mapOf())
-    val allPhotoListState = rememberLazyListState()
+    val allPhotoListState = rememberLazyGridState()
+
     var syncedPhotos by remember { mutableStateOf(emptyList<SyncedPhoto>()) }
 
     var syncedPhoto by remember { mutableStateOf(emptyList<SyncedPhoto>()) }
@@ -303,7 +305,7 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
         }
 
         CalendarDialog(
-            selection = selection,
+//            selection = selection,
             onDismissRequest = {
                 if(existingMemory != null) {
                     coupleMemoryList.find{ it.date == selection.date }?.comment = editedcomment
