@@ -16,6 +16,8 @@ class SyncedPhotoRepository(private val syncedPhotoDao: SyncedPhotoDao) {
     val getMonthSyncedPhotos : LiveData<List<SyncedPhoto>> = syncedPhotoDao.getFirstPhotoForEachMonth()
     val getYearSyncedPhotos : LiveData<List<SyncedPhoto>> = syncedPhotoDao.getFirstPhotoForEachYear()
 
+    //val getUniqueDates : LiveData<List<String>> = syncedPhotoDao.getUniqueDates()
+
 //    val listOfGetAllSyncedPhoto :List<SyncedPhoto> = withContext(Dispatchers.IO){syncedPhotoDao.listOfGetAll()}
     suspend fun listOfGetAllSyncedPhoto():List<SyncedPhoto>{return withContext(Dispatchers.IO){syncedPhotoDao.listOfGetAll()}}
 
