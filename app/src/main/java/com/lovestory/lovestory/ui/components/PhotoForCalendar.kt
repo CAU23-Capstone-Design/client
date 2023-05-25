@@ -80,6 +80,7 @@ fun PhotoForMap(
     selectDate: String
 ){
     val syncedPhotosByDate = syncedPhotosByDate
+    Log.d("클러스터2","$syncedPhotosByDate")
 
     LazyColumn(
         modifier = Modifier.fillMaxWidth().padding(2.dp),
