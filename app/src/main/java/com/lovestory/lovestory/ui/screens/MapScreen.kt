@@ -204,7 +204,7 @@ fun MapScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhot
 
                 //사진 좌표와 비트맵
                 latLngMarker.forEach{
-                    items.add(MyItem(it,"LOCATION","위치", bitmap1, "POSITION", "HI"))
+                    items.add(MyItem(it,"LOCATION","${it.latitude}, ${it.longitude}", bitmap1, "POSITION", "HI"))
                 }
                 /*
                 items.forEach {
@@ -417,25 +417,12 @@ fun MapScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhot
         )
         {
             val screenWidth = LocalConfiguration.current.screenWidthDp.dp
-//            val screenHeight = LocalConfiguration.current.screenHeightDp.dp
-//            Column(
-//                modifier = Modifier
-//                    .width(screenWidth - 40.dp)
-//                    .height(screenWidth)
-//                    .clip(RoundedCornerShape(12.dp))
-//                    .background(color = Color.White),
-//                verticalArrangement = Arrangement.Center,
-//                horizontalAlignment = Alignment.CenterHorizontally,
-//            ) {
             val boxWidth = remember { mutableStateOf(Dp.Unspecified) }
             val dens = LocalDensity.current
                 Box(
                     modifier = Modifier
                         .width(screenWidth - 80.dp)
                         .height(screenWidth)
-//                        .fillMaxWidth()
-//                        .wrapContentHeight()
-                        //.padding(20.dp)
                         .background(color = Color.White, RoundedCornerShape(12.dp))
                         .onSizeChanged {
                             boxWidth.value = it.width.toDp(dens)
@@ -504,6 +491,7 @@ class MarkerClusterRender<T : MyItem>(
     }
 
     override fun getBucket(cluster: Cluster<T>): Int {
+        cluster.items.removeAll { it.itemType == "POSITION" }
         return cluster.size
     }
 
