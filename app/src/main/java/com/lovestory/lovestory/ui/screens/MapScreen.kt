@@ -14,6 +14,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -24,8 +26,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.ContextCompat
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
@@ -64,10 +70,7 @@ fun MapScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhot
     var latLngMarker by remember { mutableStateOf(emptyList<LatLng>()) }
     val items = remember{ mutableStateListOf<MyItem>() }
     val items_google = remember{ mutableStateListOf<MyItem>() }
-//    var viewPosition = LatLng(37.503735330931136, 126.95615523253305)
-//    var cameraPositionState = rememberCameraPositionState {
-//        position = CameraPosition.fromLatLngZoom(viewPosition!!, 18f)
-//    }
+
     lateinit var repository : SyncedPhotoRepository
     var photoDate by remember { mutableStateOf(emptyList<String>()) }
     var photoPosition by remember { mutableStateOf(emptyList<LatLng>()) }
@@ -204,7 +207,7 @@ fun MapScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhot
 
                 //사진 좌표와 비트맵
                 latLngMarker.forEach{
-                    items.add(MyItem(it,"LOCATION","위치", bitmap1, "POSITION", "HI"))
+                    items.add(MyItem(it,"LOCATION","${it.latitude}, ${it.longitude}", bitmap1, "POSITION", "HI"))
                 }
                 /*
                 items.forEach {
@@ -229,21 +232,6 @@ fun MapScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhot
                     }
                     clusterManager?.addItems(items)
                     clusterManager?.renderer = MarkerClusterRender(context,map,clusterManager!!) {
-                        /*
-                        clusterManager?.renderer?.setOnClusterClickListener {
-                            itemPopup = it.items.filter{it.itemType == "PHOTO"}
-                            isPopupVisible = true
-                            false
-                        }
-                        clusterManager?.renderer?.setOnClusterItemClickListener{
-                            if(it.itemType == "PHOTO"){
-                                navHostController.navigate(CalendarStack.ClickDetailScreen.route+"/${it.id}/${date}") {
-                                    popUpTo(CalendarStack.ClickDetailScreen.route)
-                                }
-                            }
-                            false
-                        }
-                         */
                     }
                     clusterManager?.setOnClusterClickListener {
                         itemPopup = it.items.filter{it.itemType == "PHOTO"}
@@ -338,12 +326,6 @@ fun MapScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhot
                                     modifier = Modifier.size(60.dp),
                                     tint = Color.Red
                                 )
-//                                Text(
-//                                    "%,d".format(cluster.size), //이 부분 왜 2배로 나오지..?
-//                                    fontSize = 16.sp,
-//                                    fontWeight = FontWeight.Black,
-//                                    textAlign = TextAlign.Center
-//                                )
                             }
                         }
                     },
@@ -417,29 +399,16 @@ fun MapScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhot
         )
         {
             val screenWidth = LocalConfiguration.current.screenWidthDp.dp
-//            val screenHeight = LocalConfiguration.current.screenHeightDp.dp
-//            Column(
-//                modifier = Modifier
-//                    .width(screenWidth - 40.dp)
-//                    .height(screenWidth)
-//                    .clip(RoundedCornerShape(12.dp))
-//                    .background(color = Color.White),
-//                verticalArrangement = Arrangement.Center,
-//                horizontalAlignment = Alignment.CenterHorizontally,
-//            ) {
             val boxWidth = remember { mutableStateOf(Dp.Unspecified) }
             val dens = LocalDensity.current
                 Box(
                     modifier = Modifier
                         .width(screenWidth - 80.dp)
                         .height(screenWidth)
-//                        .fillMaxWidth()
-//                        .wrapContentHeight()
-                        //.padding(20.dp)
                         .background(color = Color.White, RoundedCornerShape(12.dp))
                         .onSizeChanged {
                             boxWidth.value = it.width.toDp(dens)
-                            Log.d("MapBoxWidth", "Width of the first Box: ${boxWidth.value}")
+//                            Log.d("MapBoxWidth", "Width of the first Box: ${boxWidth.value}")
                         },
                     contentAlignment = Alignment.TopCenter
                 ) {
@@ -465,7 +434,6 @@ fun MapScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhot
                         selectDate = date
                     )
                 }
-//            }
         }
     }
 }
@@ -504,6 +472,7 @@ class MarkerClusterRender<T : MyItem>(
     }
 
     override fun getBucket(cluster: Cluster<T>): Int {
+        cluster.items.removeAll { it.itemType == "POSITION" }
         return cluster.size
     }
 

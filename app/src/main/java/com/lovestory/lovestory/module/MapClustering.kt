@@ -6,8 +6,8 @@ import android.content.res.Resources
 import android.graphics.*
 import android.util.TypedValue
 import android.view.View
-import androidx.compose.ui.unit.dp
 import androidx.core.view.drawToBitmap
+import com.lovestory.lovestory.ui.components.toInt
 
 fun View.toBitmap(width: Int, height: Int): Bitmap {
     measure(
@@ -29,6 +29,7 @@ class ClusterView(context: Context, private val bitmap: Bitmap, private val valu
         isFakeBoldText = true
     }
 
+
     private val backgroundPaint: Paint = Paint().apply {
         color = Color.WHITE // Set the background color
         style = Paint.Style.FILL
@@ -37,7 +38,7 @@ class ClusterView(context: Context, private val bitmap: Bitmap, private val valu
     private val borderPaint: Paint = Paint().apply {
         color = Color.WHITE // Set the border color
         style = Paint.Style.STROKE
-        strokeWidth = 2f.toPx() // Set the border width (1dp converted to pixels)
+        strokeWidth = 1f.toPx() // Set the border width (1dp converted to pixels)
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -117,4 +118,9 @@ fun Int.toPx(): Int {
         this.toFloat(),
         Resources.getSystem().displayMetrics
     ).toInt()
+}
+
+fun ConvertDptoPx(context: Context, dp: Int):Int{
+    val density = context.resources.displayMetrics.density
+    return Math.round(dp.toFloat() * density)
 }
