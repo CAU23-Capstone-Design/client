@@ -6,7 +6,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.lovestory.lovestory.database.entities.*
 
-@Database(entities = [SyncedPhoto::class, PhotoForSync::class, AdditionalPhoto::class], version = 1)
+@Database(entities = [SyncedPhoto::class, PhotoForSync::class, AdditionalPhoto::class], version = 2)
 abstract class PhotoDatabase : RoomDatabase(){
     abstract fun syncedPhotoDao(): SyncedPhotoDao
     abstract fun photoForSyncDao(): PhotoForSyncDao
@@ -23,7 +23,7 @@ abstract class PhotoDatabase : RoomDatabase(){
                     context.applicationContext,
                     PhotoDatabase::class.java,
                     "photo_database"
-                ).build()
+                ).fallbackToDestructiveMigration().build()
                 INSTANCE = instance
                 instance
             }

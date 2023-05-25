@@ -21,6 +21,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.lovestory.lovestory.database.PhotoDatabase
+import com.lovestory.lovestory.database.entities.SyncedPhotoDao
+import com.lovestory.lovestory.database.repository.SyncedPhotoRepository
 import com.lovestory.lovestory.graphs.RootNavigationGraph
 import com.lovestory.lovestory.module.StartService
 import com.lovestory.lovestory.services.LocationService
@@ -29,18 +32,23 @@ import com.lovestory.lovestory.ui.theme.LoveStoryTheme
 
 
 class MainActivity : ComponentActivity() {
+    lateinit var database: PhotoDatabase
+//    lateinit var repository : SyncedPhotoRepository
+//    lateinit var dao: SyncedPhotoDao
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         requestWindowFeature(Window.FEATURE_NO_TITLE)
+        database = PhotoDatabase.getDatabase(this)
 
         setContent {
             val systemUiController = rememberSystemUiController()
             val useDarkIcons = MaterialTheme.colors.isLight
 
-            val lm = getSystemService(Context.LOCATION_SERVICE) as LocationManager
-            if(!lm.isLocationEnabled){
-//                intent.action = Settings.
-            }
+//            val lm = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+//            if(!lm.isLocationEnabled){
+////                intent.action = Settings.
+//            }
 
             val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
             if (!pm.isIgnoringBatteryOptimizations(packageName)){

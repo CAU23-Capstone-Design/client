@@ -13,6 +13,8 @@ import com.lovestory.lovestory.database.repository.AdditionalPhotoRepository
 import com.lovestory.lovestory.database.repository.PhotoForSyncRepository
 
 class PhotoForSyncView(application : Application) : ViewModel() {
+
+
     lateinit var listOfPhotoForSync : LiveData<List<PhotoForSync>>
     lateinit var listOfAdditionPhotosForSync : LiveData<List<AdditionalPhoto>>
 

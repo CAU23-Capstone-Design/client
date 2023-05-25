@@ -17,7 +17,7 @@ class AdditionalPhotoRepository(private val additionalPhotoDao: AdditionalPhotoD
     fun insertAdditionalPhoto(item : AdditionalPhoto){coroutineScope.launch { additionalPhotoDao.insertPhoto(item) }}
     fun deleteAdditionalPhoto(item : AdditionalPhoto){coroutineScope.launch { additionalPhotoDao.deletePhoto(item) }}
 
-    fun deleteAllAdditionalPhoto(){additionalPhotoDao.deleteAll()}
+    fun deleteAllAdditionalPhoto(){coroutineScope.launch { additionalPhotoDao.deleteAll() }}
 
     fun getAdditionalPhotoById(id : String): AdditionalPhoto?{
        Log.d("Respository","${additionalPhotoDao.getPhotoById(id)}")

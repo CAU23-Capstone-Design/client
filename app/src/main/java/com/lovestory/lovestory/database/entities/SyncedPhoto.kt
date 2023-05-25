@@ -45,7 +45,7 @@ interface SyncedPhotoDao {
     @Query("SELECT * FROM syncedPhotos")
     fun listOfGetAll(): List<SyncedPhoto>
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(syncedPhoto: SyncedPhoto)
 
     @Insert

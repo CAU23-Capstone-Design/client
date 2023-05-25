@@ -36,12 +36,12 @@ interface AdditionalPhotoDao{
     @Query("SELECT * FROM additionalPhoto WHERE photo_id = :id")
     fun getPhotoById(id : String): AdditionalPhoto?
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertPhoto(photo: AdditionalPhoto)
 
     @Delete
     fun deletePhoto(photo: AdditionalPhoto)
 
     @Query("DELETE FROM additionalPhoto")
-    fun deleteAll()
+    suspend fun deleteAll()
 }

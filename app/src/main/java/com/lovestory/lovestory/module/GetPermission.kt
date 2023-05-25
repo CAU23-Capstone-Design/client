@@ -81,7 +81,6 @@ fun getPermissionLauncher(context : Context): ManagedActivityResultLauncher<Stri
                 if(!isGrantedBackgroundPermission){
                     isAskBackgroundPermissionDialog.value = true
                 }
-//                requestBackgroundLocationPermissionLauncher.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
             }
             else if(permissions.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false)){
                 Toast.makeText(context, "대략적인 위치 권한 승인", Toast.LENGTH_SHORT).show()

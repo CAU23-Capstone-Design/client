@@ -16,15 +16,17 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 suspend fun checkExistNeedPhotoForSync(context : Context){
+    lateinit var database: PhotoDatabase
     lateinit var repository : SyncedPhotoRepository
+    lateinit var dao: SyncedPhotoDao
     val token = getToken(context)
 
     CoroutineScope(Dispatchers.IO).launch {
         val response = getPhotoTable(token!!)
         if(response.isSuccessful){
-            val photoDatabase = PhotoDatabase.getDatabase(context)
-            val photoDao = photoDatabase.syncedPhotoDao()
-            repository = SyncedPhotoRepository(photoDao)
+            database = PhotoDatabase.getDatabase(context)
+            dao = database.syncedPhotoDao()
+            repository = SyncedPhotoRepository(dao)
 
             val syncedPhotos = repository.listOfGetAllSyncedPhoto()
 //            Log.d("MODULE-checkExistNeedPhotoForSync", "$syncedPhotos")

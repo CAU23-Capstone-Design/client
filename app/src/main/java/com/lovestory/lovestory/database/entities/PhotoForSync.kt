@@ -36,7 +36,7 @@ interface PhotoForSyncDao {
     @Query("SELECT * FROM photoForSync WHERE photo_id = :id")
     suspend fun getPhotoById(id: String): PhotoForSync?
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertPhoto(photo: PhotoForSync)
 
     @Delete

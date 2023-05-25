@@ -28,10 +28,6 @@ import kotlinx.coroutines.launch
 fun MainScreen(navHostController: NavHostController = rememberNavController()) {
     val context = LocalContext.current
 
-//    getLocationPermission()
-//    getMediaPermission()
-//    val photoDatabase = PhotoDatabase.getDatabase(context)
-
     val owner = LocalViewModelStoreOwner.current
     lateinit var photoForSyncView: PhotoForSyncView
     lateinit var syncedPhotoView: SyncedPhotoView
@@ -50,26 +46,13 @@ fun MainScreen(navHostController: NavHostController = rememberNavController()) {
         )
     }
 
-
-
     LaunchedEffect(key1 = null){
-//        val locationIntent = Intent(context, LocationService::class.java)
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//            if (!isServiceRunning(context, LocationService::class.java)){
-//                context.startForegroundService(locationIntent)
-//            }
-//        } else {
-//            if (!isServiceRunning(context, LocationService::class.java)){
-//                context.startService(locationIntent)
-//            }
-//        }
         CoroutineScope(Dispatchers.IO).launch {
             val database = PhotoDatabase.getDatabase(context)
             val additionalPhotoDao = database.additionalPhotoDao()
             val additionalPhotoRepository = AdditionalPhotoRepository(additionalPhotoDao)
             additionalPhotoRepository.deleteAllAdditionalPhoto()
         }
-
     }
 
     Scaffold(
