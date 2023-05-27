@@ -7,7 +7,6 @@ import android.graphics.*
 import android.util.TypedValue
 import android.view.View
 import androidx.core.view.drawToBitmap
-import com.lovestory.lovestory.ui.components.toInt
 
 fun View.toBitmap(width: Int, height: Int): Bitmap {
     measure(
@@ -23,7 +22,7 @@ fun View.toBitmap(width: Int, height: Int): Bitmap {
 @SuppressLint("ViewConstructor")
 class ClusterView(context: Context, private val bitmap: Bitmap, private val value: Int) : View(context) {
     private val textPaint: Paint = Paint().apply {
-        textSize = 72f // Adjust the text size as needed
+        textSize = 16f.spToPx(context).toFloat() // Adjust the text size as needed
         color = Color.WHITE // Set the text color
         textAlign = Paint.Align.CENTER
         isFakeBoldText = true
@@ -38,7 +37,7 @@ class ClusterView(context: Context, private val bitmap: Bitmap, private val valu
     private val borderPaint: Paint = Paint().apply {
         color = Color.WHITE // Set the border color
         style = Paint.Style.STROKE
-        strokeWidth = 1f.toPx() // Set the border width (1dp converted to pixels)
+        strokeWidth = 1.dpToPx(context).toFloat() // Set the border width (1dp converted to pixels)
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -46,7 +45,7 @@ class ClusterView(context: Context, private val bitmap: Bitmap, private val valu
 
         val centerX = width / 2f
         val centerY = height / 2f
-        val bitmapSize = 100.toPx().toFloat()
+        val bitmapSize = 50.dpToPx(context).toFloat()
 
         // Draw the background
         val backgroundRect = RectF(0f, 0f, width.toFloat(), height.toFloat())
@@ -104,23 +103,26 @@ class ClusterView(context: Context, private val bitmap: Bitmap, private val valu
      */
 }
 
-fun Float.toPx(): Float {
-    return TypedValue.applyDimension(
-        TypedValue.COMPLEX_UNIT_DIP,
-        this,
-        Resources.getSystem().displayMetrics
-    )
-}
-
-fun Int.toPx(): Int {
+fun Int.dpToPx(context: Context): Int {
     return TypedValue.applyDimension(
         TypedValue.COMPLEX_UNIT_DIP,
         this.toFloat(),
-        Resources.getSystem().displayMetrics
+        context.resources.displayMetrics
     ).toInt()
 }
 
-fun ConvertDptoPx(context: Context, dp: Int):Int{
-    val density = context.resources.displayMetrics.density
-    return Math.round(dp.toFloat() * density)
+fun Float.spToPx(context: Context): Float {
+    return TypedValue.applyDimension(
+        TypedValue.COMPLEX_UNIT_SP,
+        this,
+        context.resources.displayMetrics
+    )
+}
+
+fun Float.dpToPx(context: Context): Float {
+    return TypedValue.applyDimension(
+        TypedValue.COMPLEX_UNIT_DIP,
+        this,
+        context.resources.displayMetrics
+    )
 }

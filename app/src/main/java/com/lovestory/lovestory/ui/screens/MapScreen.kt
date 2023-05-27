@@ -615,7 +615,7 @@ class MarkerClusterRender<T : MyItem>(
         // Customize your ClusterView. The cluster gives you its size (cluster.size) and its items within it (cluster.items)
         // Use that to customize the cluster appearance.
         val clusterView = ClusterView(context, bitmap, size)
-        return BitmapDescriptorFactory.fromBitmap(clusterView.toBitmap(250, 250))
+        return BitmapDescriptorFactory.fromBitmap(clusterView.toBitmap(50.dpToPx(context), 50.dpToPx(context)))
     }
 }
 
