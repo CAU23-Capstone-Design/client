@@ -546,8 +546,14 @@ class MarkerClusterRender<T : MyItem>(
         super.onClusterItemRendered(clusterItem, marker)
         clusterMap[(clusterItem as MyItem).itemTitle] = marker
 
-        setMarker((clusterItem as MyItem), marker)
+        //setMarker((clusterItem as MyItem), marker)
     }
+
+//    override fun onClusterItemUpdated(item: T, marker: Marker) {
+//        super.onClusterItemUpdated(item, marker)
+//
+//
+//    }
 
     override fun onBeforeClusterItemRendered(item: T, markerOptions: MarkerOptions) {
         super.onBeforeClusterItemRendered(item, markerOptions)
@@ -565,7 +571,7 @@ class MarkerClusterRender<T : MyItem>(
                 false
             )
             markerOptions.anchor(0.5f, 1f)
-            markerOptions.icon(BitmapDescriptorFactory.fromBitmap(scaledBitmap))
+            markerOptions.icon(markerIcon(context, myItem.icon))
             markerOptions.title(myItem.itemTitle)
             markerOptions.snippet(myItem.itemSnippet)
         }else{
@@ -592,7 +598,7 @@ class MarkerClusterRender<T : MyItem>(
         }
     }
 
-    fun getClusterMarker(itemId: String): Marker? {
+    private fun getClusterMarker(itemId: String): Marker? {
         return if (clusterMap.containsKey(itemId)) clusterMap[itemId]
         else null
     }
@@ -616,6 +622,13 @@ class MarkerClusterRender<T : MyItem>(
         // Use that to customize the cluster appearance.
         val clusterView = ClusterView(context, bitmap, size)
         return BitmapDescriptorFactory.fromBitmap(clusterView.toBitmap(50.dpToPx(context), 50.dpToPx(context)))
+    }
+
+    private fun markerIcon(context: Context, bitmap : Bitmap): BitmapDescriptor {
+        // Customize your ClusterView. The cluster gives you its size (cluster.size) and its items within it (cluster.items)
+        // Use that to customize the cluster appearance.
+        val markerView = MarkerView(context, bitmap)
+        return BitmapDescriptorFactory.fromBitmap(markerView.toBitmap(50.dpToPx(context), 50.dpToPx(context)))
     }
 }
 

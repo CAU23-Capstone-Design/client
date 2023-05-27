@@ -103,6 +103,44 @@ class ClusterView(context: Context, private val bitmap: Bitmap, private val valu
      */
 }
 
+@SuppressLint("ViewConstructor")
+class MarkerView(context: Context, private val bitmap: Bitmap) : View(context) {
+    private val backgroundPaint: Paint = Paint().apply {
+        color = Color.WHITE // Set the background color
+        style = Paint.Style.FILL
+    }
+
+    private val borderPaint: Paint = Paint().apply {
+        color = Color.WHITE // Set the border color
+        style = Paint.Style.STROKE
+        strokeWidth = 1.dpToPx(context).toFloat() // Set the border width (1dp converted to pixels)
+    }
+
+    override fun onDraw(canvas: Canvas) {
+        super.onDraw(canvas)
+
+        val centerX = width / 2f
+        val centerY = height / 2f
+        val bitmapSize = 50.dpToPx(context).toFloat()
+
+        // Draw the background
+        val backgroundRect = RectF(0f, 0f, width.toFloat(), height.toFloat())
+        canvas.drawRect(backgroundRect, backgroundPaint)
+
+        // Draw the bitmap in the center
+        val bitmapRect = RectF(
+            centerX - bitmapSize / 2f,
+            centerY - bitmapSize / 2f,
+            centerX + bitmapSize / 2f,
+            centerY + bitmapSize / 2f
+        )
+        canvas.drawBitmap(bitmap, null, bitmapRect, null)
+
+        // Draw the border
+        canvas.drawRect(backgroundRect, borderPaint)
+    }
+}
+
 fun Int.dpToPx(context: Context): Int {
     return TypedValue.applyDimension(
         TypedValue.COMPLEX_UNIT_DIP,
