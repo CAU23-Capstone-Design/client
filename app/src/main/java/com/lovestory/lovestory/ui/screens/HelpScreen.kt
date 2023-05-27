@@ -4,6 +4,7 @@ import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -46,11 +47,19 @@ fun HelpScreen(navHostController: NavHostController){
 //        }
         AnimatedVisibility(visible = selectedButton =="갤러리",
         ){
-            Text("갤러리 설명")
+            Box(modifier = Modifier
+                .fillMaxSize()
+                .padding(top = 60.dp)){
+                Image(painter = painterResource(id = R.drawable.img_helpgallery), contentDescription = null, modifier = Modifier.fillMaxSize())
+            }
         }
         AnimatedVisibility(visible = selectedButton =="캘린더",
         ){
-            Text("캘린더 설명")
+            Box(modifier = Modifier
+                .fillMaxSize()
+                .padding(top = 60.dp)){
+                Image(painter = painterResource(id = R.drawable.img_helpcalendar), contentDescription = null, modifier = Modifier.fillMaxSize())
+            }
         }
 //        AnimatedVisibility(visible = selectedButton =="프로필",
 //        ){
