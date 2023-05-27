@@ -154,6 +154,7 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
     var photoPosition by remember { mutableStateOf(emptyList<LatLng>()) }
     val dataLoaded = remember { mutableStateOf(false) }
     val meetDate = remember { mutableStateListOf<String>() }
+    val meetDateAfterLoad = remember { mutableStateListOf<String>() }
 
     val context = LocalContext.current
     val token = getToken(context)
@@ -227,15 +228,14 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                 uniqueDate.add(synced.date.substring(0, 10))
             }
         }
-        uniqueDate.forEach{
-            Log.d("유니크","$it")
-        }
+
+        meetDateAfterLoad.addAll(meetDate)
     }
 
     LaunchedEffect(visibleMonth.yearMonth){
         val meetDay = getDay(token!!, monthToString(visibleMonth.yearMonth))
         meetDay.body()?.forEach{
-            meetDate.add(intmonthToString(visibleMonth.yearMonth, it))
+            meetDateAfterLoad.add(intmonthToString(visibleMonth.yearMonth, it))
         }
     }
 
@@ -279,7 +279,7 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                     isPopupVisible = isPopupVisible,
                     isSelected = selection == day,
                     onOpenDialogRequest = onOpenDialogRequest,
-                    meetDate = meetDate,
+                    meetDate = meetDateAfterLoad,
                 ) { clicked ->
                     selection = clicked
                 }
@@ -293,7 +293,7 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
 //                dialogContent = true
 //            }
 //        }
-        dialogContent = meetDate.contains(dateToString(selection.date))
+        dialogContent = meetDateAfterLoad.contains(dateToString(selection.date))
 
         var editedcomment by remember { mutableStateOf("") }
         if(isPopupVisibleSave){
@@ -321,7 +321,7 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                         coroutineScope.launch{
                             val put : Response<Any> = putComment(token!!, dateToString(selection.date), editedcomment)
                             saveComment(context, coupleMemoryList)
-                            meetDate.add(dateToString(selection.date))
+                            meetDateAfterLoad.add(dateToString(selection.date))
                         }
                     }
                 }
@@ -379,10 +379,12 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                 coupleMemoryList = convertToCoupleMemoryList(stringMemoryList)
                 saveComment(context, coupleMemoryList)
                 coupleMemoryList.forEach {
-                    if (!meetDate.contains(dateToString(it.date))) {
-                        meetDate.add(dateToString(it.date))
+                    if (!meetDateAfterLoad.contains(dateToString(it.date))) {
+                        meetDateAfterLoad.add(dateToString(it.date))
                     }
                 }
+
+
             }
 
             val screenWidth = LocalConfiguration.current.screenWidthDp.dp
@@ -434,7 +436,7 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                                 coupleMemoryList = coupleMemoryList.filterNot { it.date == date }
                                 val delete: Any = deleteComment(token!!, dateToString(selection.date))
                                 if(!photoDate.contains(dateToString(date))){
-                                    meetDate.remove(dateToString(date))
+                                    meetDateAfterLoad.remove(dateToString(date))
                                 }
                             }
                             saveComment(context, coupleMemoryList)
@@ -473,7 +475,7 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                                     coroutineScope.launch{
                                         val put : Response<Any> = putComment(token!!, dateToString(selection.date), editedcomment)
                                         saveComment(context, coupleMemoryList)
-                                        meetDate.add(dateToString(selection.date))
+                                        meetDateAfterLoad.add(dateToString(selection.date))
                                     }
                                 }
                             }
