@@ -72,12 +72,10 @@ suspend fun deleteCouple(token: String?):ResponseBody?{
         delete.body()
     }catch (e : HttpException){
         Log.e("NETWORK-checkCouple", "$e")
-//        Response.error(e.code(), e.response()?.errorBody())
         null
 
     }catch (e : Exception){
         Log.e("NETWORK-checkCouple", "$e")
-//        Response.error(500, ResponseBody.create(null, "Unknown error"))
         null
     }
 }

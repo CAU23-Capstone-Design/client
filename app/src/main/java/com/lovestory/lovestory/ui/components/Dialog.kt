@@ -1,6 +1,8 @@
 package com.lovestory.lovestory.ui.components
 
 import android.Manifest
+import android.content.Context
+import android.content.Intent
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -11,9 +13,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Divider
-import androidx.compose.material.Icon
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
@@ -32,8 +32,10 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavHostController
+import com.lovestory.lovestory.module.deleteToken
 import com.lovestory.lovestory.module.getPermissionLauncher
 import com.lovestory.lovestory.module.getResultPermissionCheck
+import com.lovestory.lovestory.services.LocationService
 import com.maxkeppeker.sheets.core.models.base.SheetState
 import java.time.LocalDate
 

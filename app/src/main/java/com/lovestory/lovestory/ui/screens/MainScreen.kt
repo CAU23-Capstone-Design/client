@@ -14,18 +14,21 @@ import androidx.navigation.compose.rememberNavController
 import com.lovestory.lovestory.database.PhotoDatabase
 import com.lovestory.lovestory.database.repository.AdditionalPhotoRepository
 import com.lovestory.lovestory.graphs.MainNavGraph
-//import com.lovestory.lovestory.module.getLocationPermission
+import com.lovestory.lovestory.model.UserForLoginPayload
 import com.lovestory.lovestory.services.*
 import com.lovestory.lovestory.ui.components.BottomNaviagtionBar
 import com.lovestory.lovestory.view.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
-fun MainScreen(navHostController: NavHostController = rememberNavController()) {
+fun MainScreen(
+    navHostController: NavHostController = rememberNavController(),
+    userData : UserForLoginPayload = UserForLoginPayload(
+        id = "unknown", name = "unknown", birthday = "1900-01-01", gender="M", code = "unknown")
+) {
     val context = LocalContext.current
 
     val owner = LocalViewModelStoreOwner.current
@@ -63,6 +66,7 @@ fun MainScreen(navHostController: NavHostController = rememberNavController()) {
             navHostController = navHostController,
             photoForSyncView = photoForSyncView,
             syncedPhotoView =  syncedPhotoView,
+            userData = userData
         )
     }
 }
