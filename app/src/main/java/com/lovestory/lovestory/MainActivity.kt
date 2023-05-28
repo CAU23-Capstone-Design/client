@@ -33,8 +33,6 @@ import com.lovestory.lovestory.ui.theme.LoveStoryTheme
 
 class MainActivity : ComponentActivity() {
     lateinit var database: PhotoDatabase
-//    lateinit var repository : SyncedPhotoRepository
-//    lateinit var dao: SyncedPhotoDao
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,11 +42,6 @@ class MainActivity : ComponentActivity() {
         setContent {
             val systemUiController = rememberSystemUiController()
             val useDarkIcons = MaterialTheme.colors.isLight
-
-//            val lm = getSystemService(Context.LOCATION_SERVICE) as LocationManager
-//            if(!lm.isLocationEnabled){
-////                intent.action = Settings.
-//            }
 
             val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
             if (!pm.isIgnoringBatteryOptimizations(packageName)){

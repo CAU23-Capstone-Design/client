@@ -93,10 +93,10 @@ fun ProfileScreen(navHostController: NavHostController) {
                 val payloadJSON : JsonObject = JsonParser.parseString(payload).asJsonObject
                 val data = Gson().fromJson(payloadJSON, LoginPayload::class.java)
                 val bitmap = if (data.user.gender == "male"){
-                    val drawable = ContextCompat.getDrawable(context, R.drawable.img_male)
+                    val drawable = ContextCompat.getDrawable(context, R.mipmap.ic_male_char_foreground)
                     (drawable as BitmapDrawable).bitmap
                 } else if(data.user.gender == "W"){
-                    val drawable = ContextCompat.getDrawable(context, R.drawable.img_female)
+                    val drawable = ContextCompat.getDrawable(context, R.mipmap.ic_female_char_foreground)
                     (drawable as BitmapDrawable).bitmap
                 } else{
                     val drawable = ContextCompat.getDrawable(context, R.drawable.img_human)
@@ -277,14 +277,5 @@ fun ProfileScreen(navHostController: NavHostController) {
                 }
             }
         )
-    }
-}
-
-@Preview(showSystemUi = true)
-@Composable
-fun DefaultPreview3() {
-    val navController = rememberNavController()
-    LoveStoryTheme {
-        ProfileScreen(navHostController = navController)
     }
 }
