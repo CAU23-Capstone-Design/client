@@ -37,8 +37,8 @@ fun ProfileScreen(
     val userName = remember { mutableStateOf("") }
     val userSex = remember { mutableStateOf(0) }
 
-    var showLogoutDialog = remember { mutableStateOf(false) }
-    var showDisconnectDialog = remember { mutableStateOf(false) }
+    val showLogoutDialog = remember { mutableStateOf(false) }
+    val showDisconnectDialog = remember { mutableStateOf(false) }
 
     LaunchedEffect(key1 = null){
         if(userData.id == "unknown"){
