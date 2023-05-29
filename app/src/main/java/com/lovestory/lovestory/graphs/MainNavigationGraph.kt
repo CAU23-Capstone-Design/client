@@ -1,22 +1,37 @@
 package com.lovestory.lovestory.graphs
 
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.lovestory.lovestory.R
+import com.lovestory.lovestory.model.UserForLoginPayload
 import com.lovestory.lovestory.ui.screens.*
-import com.lovestory.lovestory.view.ImageSyncView
 import com.lovestory.lovestory.view.PhotoForSyncView
 import com.lovestory.lovestory.view.SyncedPhotoView
-import com.squareup.moshi.Moshi
 
+/**
+ * ## LoveStory App Main Navigation Graph
+ *
+ * ### Bottom Navigation Bar
+ * #### DashBoard / Gallery /Calendar / Setting (Profile)
+ * ####
+ * ### Stack Navigation
+ * #### Gallery Stack : PhotoSync / DetailPhoto / DetailPhotoFromPicker / DetailPhotoFromServer
+ * #### Calendar Stack : Map / Detail / Click
+ * #### Profile Stack : Help / Privacy
+ *
+ * @param navHostController NavHostController
+ * @param photoForSyncView view Model for Photo Sync
+ * @param syncedPhotoView view Model for Synced Photo
+ * @param userData user data from token
+ */
 @Composable
 fun MainNavGraph(
     navHostController: NavHostController,
     photoForSyncView: PhotoForSyncView,
     syncedPhotoView : SyncedPhotoView,
+    userData : UserForLoginPayload
 ){
 
     NavHost(
@@ -24,6 +39,7 @@ fun MainNavGraph(
         startDestination = MainScreens.DashBoard.route,
         route = Graph.MAIN
     ) {
+        /*BottomBar*/
         composable(MainScreens.DashBoard.route){
             DashBoardScreen(navHostController = navHostController)
         }
@@ -34,11 +50,19 @@ fun MainNavGraph(
             )
         }
         composable(MainScreens.Calendar.route){
-            CalendarScreen(navHostController = navHostController, syncedPhotoView = syncedPhotoView)
+            CalendarScreen(
+                navHostController = navHostController,
+                syncedPhotoView = syncedPhotoView
+            )
         }
         composable(MainScreens.Profile.route){
-            ProfileScreen(navHostController = navHostController)
+            ProfileScreen(
+                navHostController = navHostController,
+                userData = userData
+            )
         }
+
+        /*Gallery Stack*/
         composable(GalleryStack.PhotoSync.route){
             PhotoSyncScreen(
                 navHostController = navHostController,
@@ -64,6 +88,8 @@ fun MainNavGraph(
                 photoIndex = photoIndex
             )
         }
+
+        /*Calendar Stack*/
         composable(CalendarStack.Map.route + "/{date}"){
             val date = it.arguments?.getString("date")
             MapScreen(navHostController = navHostController, syncedPhotoView = syncedPhotoView, date = date!!)
@@ -88,6 +114,8 @@ fun MainNavGraph(
                 date = date
             )
         }
+
+        /*Setting(Profile) stack*/
         composable(ProfileStack.Help.route){
             HelpScreen(navHostController = navHostController)
         }
@@ -101,15 +129,13 @@ sealed class MainScreens(val route : String, val title : String, val icon : Int)
     object DashBoard : MainScreens(route = "DASHBOARD", title = "홈", icon = R.drawable.ic_home)
     object Gallery : MainScreens(route = "GALLERY", title = "갤러리", icon = R.drawable.ic_gallery)
     object Calendar : MainScreens(route = "CALENDAR", title = "캘린더", icon = R.drawable.ic_calendar)
-    object Profile : MainScreens(route = "PROFILE", title= "프로필", icon = R.drawable.ic_setting)
+    object Profile : MainScreens(route = "PROFILE", title= "설정", icon = R.drawable.ic_setting)
 }
 
 sealed class GalleryStack(val route : String){
     object PhotoSync : GalleryStack(route = "PhotoSync")
     object DetailPhotoFromDevice : GalleryStack(route= "DetailPhoto")
-
     object DetailPhotoFromDeviceWithPicker : GalleryStack(route="DetailPhotoWithPicker")
-
     object DetailPhotoFromServer : GalleryStack(route = "DetailPhotoFromServer")
 }
 

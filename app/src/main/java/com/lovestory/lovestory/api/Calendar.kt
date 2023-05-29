@@ -1,6 +1,7 @@
 package com.lovestory.lovestory.api
 
 import com.lovestory.lovestory.model.*
+import com.lovestory.lovestory.module.ClusterData
 import retrofit2.http.*
 
 interface CalendarService{

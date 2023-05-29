@@ -1,11 +1,9 @@
 package com.lovestory.lovestory.ui.components
 
 import android.content.Context
+import android.content.Intent
 import android.widget.Toast
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Text
@@ -22,7 +20,11 @@ import com.lovestory.lovestory.database.entities.AdditionalPhoto
 import com.lovestory.lovestory.database.entities.PhotoForSync
 import com.lovestory.lovestory.database.repository.AdditionalPhotoRepository
 import com.lovestory.lovestory.database.repository.PhotoForSyncRepository
+import com.lovestory.lovestory.module.auth.disconnectCouple
+import com.lovestory.lovestory.module.deleteToken
 import com.lovestory.lovestory.module.photo.deletePhotosByIds
+import com.lovestory.lovestory.network.deleteCouple
+import com.lovestory.lovestory.services.LocationService
 import com.lovestory.lovestory.ui.screens.getListOfNotCheckedPhoto
 import com.lovestory.lovestory.ui.screens.getListOfNotCheckedPhotoFromGallery
 import com.lovestory.lovestory.view.SyncedPhotoView
@@ -137,3 +139,118 @@ fun DeleteSyncPhotosDialog(
         shape = RoundedCornerShape(15.dp),
     )
 }
+
+
+const val male = 0
+const val female = 1
+@Composable
+fun LogoutDialog(
+    context : Context,
+    showLogoutDialog : MutableState<Boolean>
+){
+    val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)
+
+    AlertDialog(
+        modifier = Modifier.wrapContentHeight().width(360.dp),
+        shape = RoundedCornerShape(12.dp),
+        onDismissRequest = { showLogoutDialog.value = false },
+        title = {
+            Text(
+                text = "로그아웃",
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp
+            )
+        },
+        text = { Text(
+            text = "정말로 로그아웃 하시겠습니까?",
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Bold,
+        ) },
+        buttons = {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(bottom = 20.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ){
+                TextButton(
+                    onClick = {
+                        showLogoutDialog.value = false
+                        val locationServiceIntent = Intent(context, LocationService::class.java)
+                        context.stopService(locationServiceIntent)
+                        deleteToken(context = context)
+                        intent?.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                        context.startActivity(intent)
+                    }
+                ){
+                    Text("확인", color = Color.Red, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                }
+                TextButton(
+                    onClick = { showLogoutDialog.value = false}
+                ){
+                    Text("취소", color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                }
+            }
+        }
+    )
+}
+
+@Composable
+fun DisconnectDialog(
+    context : Context,
+    showDisconnectDialog : MutableState<Boolean>,
+){
+    val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)
+
+    AlertDialog(
+        modifier = Modifier.wrapContentHeight().width(360.dp),
+        shape = RoundedCornerShape(12.dp),
+        onDismissRequest = { showDisconnectDialog.value = false },
+        title = {
+            Text(
+                text = "상대방과 연결 끊기",
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp
+            )
+        },
+        text = {
+//            Text(
+//                text = "정말로 연결을 끊으시겠습니까?",
+//                fontSize = 16.sp
+//            )
+            Column(){
+                    Text(
+                        text = "상대방과 연결을 끊을 경우 데이터 복구가 불가능합니다.\n정말로 연결을 끊으시겠습니까?",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                    )
+                }
+               },
+        buttons = {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(bottom = 20.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ){
+                TextButton(
+                    onClick = {
+                        showDisconnectDialog.value = false
+
+                        disconnectCouple(context)
+
+                        val locationServiceIntent = Intent(context, LocationService::class.java)
+                        context.stopService(locationServiceIntent)
+                        deleteToken(context = context)
+                        intent?.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                        context.startActivity(intent)
+                    }
+                ){
+                    Text("확인", color = Color.Red, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                }
+                TextButton(
+                    onClick = { showDisconnectDialog.value = false}
+                ){
+                    Text("취소", color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                }
+            }
+        }
+    )
+}
+

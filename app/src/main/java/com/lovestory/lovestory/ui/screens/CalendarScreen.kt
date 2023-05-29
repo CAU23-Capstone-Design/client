@@ -127,8 +127,8 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
     val items = remember{ mutableStateListOf<MyItem>() }
 
     var latLngMarker by remember { mutableStateOf(emptyList<LatLng>()) }
-    val drawable = ContextCompat.getDrawable(context, R.drawable.img) //마커 이미지로 변경
-    val bitmap = (drawable as BitmapDrawable).bitmap
+//    val drawable = ContextCompat.getDrawable(context, R.drawable.img) //마커 이미지로 변경
+//    val bitmap = (drawable as BitmapDrawable).bitmap
 
     var latLngExist by remember { mutableStateOf(false) }
     var photoExist by remember { mutableStateOf(false) }
@@ -537,28 +537,22 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                                                 )
                                             }
                                         }
-                                        //사진 좌표와 비트맵
-                                        latLngMarker.forEach {
-                                            items.add(
-                                                MyItem(
-                                                    it,
-                                                    "LOCATION",
-                                                    "위치",
-                                                    bitmap,
-                                                    "POSITION",
-                                                    "HI"
-                                                )
-                                            )
-                                        }
+//                                        //사진 좌표와 비트맵
+//                                        latLngMarker.forEach {
+//                                            items.add(
+//                                                MyItem(
+//                                                    it,
+//                                                    "LOCATION",
+//                                                    "위치",
+//                                                    null,
+//                                                    "POSITION",
+//                                                    "HI"
+//                                                )
+//                                            )
+//                                        }
                                     }
                                 }
                                 val viewposition = averageLatLng(latLng)
-//                            cameraPositionState = CameraPositionState(
-//                                position = CameraPosition.fromLatLngZoom(
-//                                    viewposition,
-//                                    15f
-//                                )
-//                            )
                                 val zoomLevel = getZoomLevelForDistance(
                                     getMaxDistanceBetweenLatLng(
                                         viewposition,
@@ -716,16 +710,3 @@ val uiSettings = MapUiSettings(
         zoomControlsEnabled = false,
         zoomGesturesEnabled = false
     )
-
-
-
-
-@Preview(showSystemUi = true)
-@Composable
-fun DefaultPreview() {
-    val navController = rememberNavController()
-    LoveStoryTheme {
-        //CalendarScreen(navHostController = navController, onNavigateToMapScreen = )
-    }
-}
-

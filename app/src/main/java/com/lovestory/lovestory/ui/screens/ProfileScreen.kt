@@ -1,290 +1,135 @@
 package com.lovestory.lovestory.ui.screens
 
-import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.drawable.BitmapDrawable
-import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandIn
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.AlertDialog
 import androidx.compose.material.Text
-import androidx.compose.material.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import com.google.gson.Gson
-import com.google.gson.JsonObject
-import com.google.gson.JsonParser
-import com.lovestory.lovestory.resource.vitro
-import com.lovestory.lovestory.ui.theme.LoveStoryTheme
 import com.lovestory.lovestory.R
-import com.lovestory.lovestory.graphs.*
-import com.lovestory.lovestory.model.LoginPayload
+import com.lovestory.lovestory.model.UserForLoginPayload
 import com.lovestory.lovestory.module.*
-import com.lovestory.lovestory.network.deleteCouple
-import com.lovestory.lovestory.services.LocationService
-import kotlinx.coroutines.launch
-import java.util.*
+import com.lovestory.lovestory.ui.components.DisconnectDialog
+import com.lovestory.lovestory.ui.components.LogoutDialog
+import com.lovestory.lovestory.ui.components.SettingMenuList
 
 @Composable
-fun ProfileScreen(navHostController: NavHostController) {
+fun ProfileScreen(
+    navHostController: NavHostController,
+    userData : UserForLoginPayload
+) {
     val context = LocalContext.current
-    val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)
-    var token by remember {mutableStateOf(getToken(context))}
-    var name by remember { mutableStateOf("") }
-    var gender by remember { mutableStateOf("") }
-    var byeBye by remember { mutableStateOf(false) }
-    val coroutineScope = rememberCoroutineScope()
 
-    LaunchedEffect(token){
-        if(token == null){
-            deleteToken(context = context)
-            intent?.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-            context.startActivity(intent)
-        }
-    }
+    val userName = remember { mutableStateOf("") }
+    val userSex = remember { mutableStateOf(0) }
 
-    LaunchedEffect(byeBye){
-        if(byeBye){
-            deleteCouple(token)
-            token = null
-        }
-    }
+    val showLogoutDialog = remember { mutableStateOf(false) }
+    val showDisconnectDialog = remember { mutableStateOf(false) }
 
-//    if (token == null) {
-//        token = getToken(context)
-//        if (token == null){
-//            intent?.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-//            context.startActivity(intent)
-//        }
-//    }
-
-    var showLogoutDialog by remember { mutableStateOf(false) }
-    var showSyncoutDialog by remember { mutableStateOf(false) }
-    if(token != null){
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                val chunks: List<String> = token!!.split(".")
-                val decoder: Base64.Decoder = Base64.getUrlDecoder()
-                val payload = String(decoder.decode(chunks[1]))
-                val payloadJSON : JsonObject = JsonParser.parseString(payload).asJsonObject
-                val data = Gson().fromJson(payloadJSON, LoginPayload::class.java)
-                val bitmap = if (data.user.gender == "male"){
-                    val drawable = ContextCompat.getDrawable(context, R.drawable.img_male)
-                    (drawable as BitmapDrawable).bitmap
-                } else if(data.user.gender == "W"){
-                    val drawable = ContextCompat.getDrawable(context, R.drawable.img_female)
-                    (drawable as BitmapDrawable).bitmap
-                } else{
-                    val drawable = ContextCompat.getDrawable(context, R.drawable.img_human)
-                    (drawable as BitmapDrawable).bitmap
-                }
-
-                Image(
-                    bitmap = bitmap!!.asImageBitmap(),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(100.dp)
-                        .clip(CircleShape)
-                )
-                Spacer(modifier = Modifier.height(25.dp))
-                Text(text = data.user.name,
-                    style = TextStyle(
-                        color = Color.Black,
-                        fontSize = 25.sp,
-                        //fontWeight = FontWeight.Bold
-                    ),
-                )
-                Spacer(modifier = Modifier.height(50.dp))
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    TextButton(
-                        onClick = {
-                            navHostController.navigate(ProfileStack.Help.route) {
-                                popUpTo(ProfileStack.Help.route)
-                            }
-                        }
-                    ){
-                        Text(
-                            text = "사용 가이드",
-                            style = TextStyle(
-                                color = Color.Black,
-                                fontSize = 20.sp
-                            )
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(15.dp))
-                    TextButton(
-                        onClick = {
-                            navHostController.navigate(ProfileStack.Privacy.route) {
-                                popUpTo(ProfileStack.Privacy.route)
-                            }
-                        }
-                    ){
-                        Text(
-                            text = "개인정보 수집",
-                            style = TextStyle(
-                                color = Color.Black,
-                                fontSize = 20.sp
-                            )
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(15.dp))
-                    TextButton(
-                        onClick = {
-                            showLogoutDialog = true
-                        }
-                    ){
-                        Text(
-                            text = "로그아웃",
-                            style = TextStyle(
-                                color = Color.Black,
-                                fontSize = 20.sp
-                            )
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(15.dp))
-                    TextButton(
-                        onClick = {
-                            showSyncoutDialog = true
-                        }
-                    ){
-                        Text(text = "상대방과 연결 끊기",
-                            style = TextStyle(
-                                color = Color.Black,
-                                fontSize = 20.sp)
-                        )
-                    }
-                }
-                Spacer(modifier = Modifier.height(200.dp))
+    LaunchedEffect(key1 = null){
+        if(userData.id == "unknown"){
+            val token = getToken(context)
+            val userDataFromToken = token?.let { getTokenInfo(it) }
+            if(userDataFromToken != null){
+                userName.value = userDataFromToken.user.name
+                userSex.value = if(userDataFromToken.user.gender == "male" || userDataFromToken.user.gender == "M") 0 else 1
             }
         }
     }
 
-    if (showLogoutDialog) {
-        AlertDialog(
-            modifier = Modifier
-                .wrapContentHeight()
-                .width(360.dp),
-            shape = RoundedCornerShape(12.dp),
-            onDismissRequest = { showLogoutDialog = false },
-            title = { Text("카카오톡 로그아웃") },
-            text = { Text("정말로 로그아웃 하시겠습니까?") },
-            buttons = {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 20.dp),
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ){
-                    TextButton(
-                        onClick = {
-                            //kakaoLogoutEvent(appKey = appKey, context = context)
-                            token = null
-                            showLogoutDialog = false
-                            val locationServiceIntent = Intent(context, LocationService::class.java)
-                            context.stopService(locationServiceIntent)
-                            intent?.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                            context.startActivity(intent)
-                        }
-                    ){
-                        Text("확인", color = Color.Red)
-                    }
-                    TextButton(
-                        onClick = {
-                            showLogoutDialog = false
-                        }
-                    ){
-                        Text("취소", color = Color.Black)
-                    }
-                }
-            }
+    AnimatedVisibility(visible = showLogoutDialog.value, enter = fadeIn() + expandIn(), exit = fadeOut()){
+        LogoutDialog(
+            context = context,
+            showLogoutDialog = showLogoutDialog,
+        )
+    }
+    AnimatedVisibility(visible = showDisconnectDialog.value, enter = fadeIn() + expandIn(), exit = fadeOut()) {
+        DisconnectDialog(
+            context = context,
+            showDisconnectDialog = showDisconnectDialog,
         )
     }
 
-    if (showSyncoutDialog) {
-        AlertDialog(
-            modifier = Modifier
-                .wrapContentHeight()
-                .width(360.dp),
-            shape = RoundedCornerShape(12.dp),
-            onDismissRequest = { showSyncoutDialog = false },
-            title = { Text("상대방과 연결 끊기") },
-            text = {
-                Column(){
-                    Text("경고!",
-                        style = TextStyle(
-                            //color = Color.Black,
-                            //fontSize = 25.sp,
-                            fontWeight = FontWeight.Bold
-                        ),
-                    )
-                    Text("상대방과 연결을 끊을 경우 데이터 복구가 불가능합니다.")
-                    Text("정말로 연결을 끊으시겠습니까?")
-                }
-            },
-            buttons = {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 20.dp),
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ){
-                    TextButton(
-                        onClick = {
-                            byeBye = true
-                            showSyncoutDialog = false
-                            val locationServiceIntent = Intent(context, LocationService::class.java)
-                            context.stopService(locationServiceIntent)
-                            intent?.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                            context.startActivity(intent)
-                        }
-                    ){
-                        Text("확인", color = Color.Red)
-                    }
-                    TextButton(
-                        onClick = {
-                            showSyncoutDialog = false
-                        }
-                    ){
-                        Text("취소", color = Color.Black)
-                    }
-                }
-            }
+    Box(
+        modifier = Modifier
+            .background(Color.White)
+            .fillMaxSize()
+    ){
+        SettingHeader()
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ){
+            UserProfileSection(userData)
+            Spacer(modifier = Modifier.height(60.dp))
+            SettingMenuList(
+                navHostController = navHostController,
+                showLogoutDialog = showLogoutDialog,
+                showDisconnectDialog = showDisconnectDialog
+            )
+        }
+    }
+}
+
+@Composable
+fun SettingHeader(){
+    Row(
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .background(Color(0xBBF3F3F3))
+            .fillMaxWidth()
+            .height(60.dp)
+            .padding(horizontal = 20.dp)
+    ){
+        Text(
+            text = "설정",
+            fontSize = 22.sp,
+            fontWeight = FontWeight.Bold
         )
     }
 }
 
-@Preview(showSystemUi = true)
 @Composable
-fun DefaultPreview3() {
-    val navController = rememberNavController()
-    LoveStoryTheme {
-        ProfileScreen(navHostController = navController)
+fun UserProfileSection(userData : UserForLoginPayload){
+    Column (
+        horizontalAlignment = Alignment.CenterHorizontally
+    ){
+        Image(
+            painter = painterResource(id = R.mipmap.ic_male_char_foreground),
+            contentDescription = "profile image",
+            modifier = Modifier
+                .size(100.dp)
+                .clip(CircleShape)
+        )
+        Spacer(modifier = Modifier.height(10.dp))
+        Text(
+            text = userData.name,
+            color = Color.Black,
+            fontSize = 25.sp,
+            fontWeight = FontWeight.Bold
+        )
+        Spacer(modifier = Modifier.height(5.dp))
+        Text(
+            text = userData.birthday.substring(0,10),
+            color = Color.Black,
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold
+        )
     }
 }

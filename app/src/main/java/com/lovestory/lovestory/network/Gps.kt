@@ -2,8 +2,7 @@ package com.lovestory.lovestory.network
 
 import android.util.Log
 import com.lovestory.lovestory.api.CalendarService
-import com.lovestory.lovestory.model.ClusterData
-import com.lovestory.lovestory.model.GetMemory
+import com.lovestory.lovestory.module.ClusterData
 import okhttp3.ResponseBody
 import retrofit2.HttpException
 import retrofit2.Response

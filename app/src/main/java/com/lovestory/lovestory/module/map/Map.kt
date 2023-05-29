@@ -1,4 +1,4 @@
-package com.lovestory.lovestory.model
+package com.lovestory.lovestory.module
 
 import android.location.Location
 import androidx.compose.runtime.*
