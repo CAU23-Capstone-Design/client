@@ -256,7 +256,7 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
         dialogContent = meetDateAfterLoad.contains(dateToString(selection.date))
 
         var editedcomment by remember { mutableStateOf("") }
-        if(isPopupVisibleSave){
+        if(commentSave != ""){
             editedcomment = commentSave
         }
 
