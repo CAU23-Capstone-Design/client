@@ -171,9 +171,9 @@ fun MapScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhot
                 }
 
                 //사진 좌표와 비트맵
-//                latLngMarker.forEach{
-//                    items.add(MyItem(it,"LOCATION","${it.latitude}, ${it.longitude}", bitmap1, "POSITION", "HI"))
-//                }
+                latLngMarker.forEach{
+                    items.add(MyItem(it,"LOCATION","${it.latitude}, ${it.longitude}", null, "POSITION", "HI"))
+                }
             }
 
             GoogleMap(
@@ -281,7 +281,7 @@ data class MyItem(
     val itemPosition: LatLng,
     val itemTitle: String,
     val itemSnippet: String,
-    var icon: Bitmap,
+    var icon: Bitmap?,
     val itemType: String,
     val id: String
 ) : ClusterItem {
@@ -333,7 +333,7 @@ class MarkerClusterRender<T : MyItem>(
         // Set the cluster icon based on the presence of a photoClusterItem
         if (photoClusterItem != null) {
             // Set the cluster icon as the icon of the first photoClusterItem
-            markerOptions.icon(clusterIcon(context, photoClusterItem.icon, getBucket(cluster)))//BitmapDescriptorFactory.fromBitmap(photoClusterItem.icon))
+            markerOptions.icon(clusterIcon(context, photoClusterItem.icon!!, getBucket(cluster)))//BitmapDescriptorFactory.fromBitmap(photoClusterItem.icon))
         } else {
             // Set the default cluster icon
             markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
@@ -352,7 +352,7 @@ class MarkerClusterRender<T : MyItem>(
         // Set the cluster icon based on the presence of a photoClusterItem
         if (photoClusterItem != null) {
             // Set the cluster icon as the icon of the first photoClusterItem
-            marker.setIcon(clusterIcon(context, photoClusterItem.icon, getBucket(cluster)))
+            marker.setIcon(clusterIcon(context, photoClusterItem.icon!!, getBucket(cluster)))
         } else {
             // Set the default cluster icon
             marker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
@@ -371,7 +371,7 @@ class MarkerClusterRender<T : MyItem>(
                 val marker = getMarker(clusterItem)
                 if (marker != null) {
                     if (photoClusterItem != null && clusterItem == photoClusterItem) {
-                        marker.setIcon(clusterIcon(context, photoClusterItem.icon, getBucket(cluster)))
+                        marker.setIcon(clusterIcon(context, photoClusterItem.icon!!, getBucket(cluster)))
                     } else {
                         marker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
                     }
@@ -387,12 +387,6 @@ class MarkerClusterRender<T : MyItem>(
         //setMarker((clusterItem as MyItem), marker)
     }
 
-//    override fun onClusterItemUpdated(item: T, marker: Marker) {
-//        super.onClusterItemUpdated(item, marker)
-//
-//
-//    }
-
     override fun onBeforeClusterItemRendered(item: T, markerOptions: MarkerOptions) {
         super.onBeforeClusterItemRendered(item, markerOptions)
 
@@ -403,44 +397,19 @@ class MarkerClusterRender<T : MyItem>(
             val desiredSize = 60.dp // Set the desired size for the icon
             val density = Resources.getSystem().displayMetrics.density
             val scaledBitmap = Bitmap.createScaledBitmap(
-                markerIcon,
+                markerIcon!!,
                 (desiredSize.value * density).toInt(),
                 (desiredSize.value * density).toInt(),
                 false
             )
             markerOptions.anchor(0.5f, 1f)
-            markerOptions.icon(markerIcon(context, myItem.icon))
+            markerOptions.icon(markerIcon(context, myItem.icon!!))
             markerOptions.title(myItem.itemTitle)
             markerOptions.snippet(myItem.itemSnippet)
         }else{
             markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
             markerOptions.title(myItem.itemTitle)
             markerOptions.snippet(myItem.itemSnippet)
-        }
-    }
-
-    private fun setMarker(poi: MyItem, marker: Marker?) {
-        googleMap.setOnInfoWindowClickListener {
-            onInfoWindowClick(it.tag as MyItem)
-        }
-    }
-
-    private fun getClusterMarker(itemId: String): Marker? {
-        return if (clusterMap.containsKey(itemId)) clusterMap[itemId]
-        else null
-    }
-
-    fun showRouteInfoWindow(key: String) {
-        getClusterMarker(key)?.showInfoWindow()
-    }
-
-    fun changeMarkerColor(marker: Marker, color: Float) {
-        try {
-            marker.setIcon(BitmapDescriptorFactory.defaultMarker(color));
-        } catch (ex: IllegalArgumentException) {
-            ex.printStackTrace()
-        } catch (ex: Exception) {
-            ex.printStackTrace()
         }
     }
 

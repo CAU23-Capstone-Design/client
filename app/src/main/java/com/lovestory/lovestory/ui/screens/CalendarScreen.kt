@@ -348,18 +348,12 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
             }
 
             val screenWidth = LocalConfiguration.current.screenWidthDp.dp
-//            val firstBoxWidth = remember { mutableStateOf(Dp.Unspecified) }
-//            val dens = LocalDensity.current
             Column(
                 modifier = Modifier
                     .width(screenWidth - 40.dp)
                     .wrapContentHeight()
                     .clip(RoundedCornerShape(12.dp))
                     .background(color = Color.White),
-//                    .onSizeChanged {
-//                        firstBoxWidth.value = it.width.toDp(dens)
-//                        Log.d("BoxWidth", "Width of the first Box: ${firstBoxWidth.value}")
-//                    },
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
@@ -387,7 +381,6 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                         fontSize = 16.sp,
                         color = Color.Black,
                     )
-                    //Spacer(Modifier.weight(1f))
                     Button(
                         colors = ButtonDefaults.buttonColors(backgroundColor = Color.Transparent),
                         onClick = {
@@ -537,19 +530,19 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                                                 )
                                             }
                                         }
-//                                        //사진 좌표와 비트맵
-//                                        latLngMarker.forEach {
-//                                            items.add(
-//                                                MyItem(
-//                                                    it,
-//                                                    "LOCATION",
-//                                                    "위치",
-//                                                    null,
-//                                                    "POSITION",
-//                                                    "HI"
-//                                                )
-//                                            )
-//                                        }
+                                        //사진 좌표와 비트맵
+                                        latLngMarker.forEach {
+                                            items.add(
+                                                MyItem(
+                                                    it,
+                                                    "LOCATION",
+                                                    "위치",
+                                                    null,
+                                                    "POSITION",
+                                                    "HI"
+                                                )
+                                            )
+                                        }
                                     }
                                 }
                                 val viewposition = averageLatLng(latLng)
