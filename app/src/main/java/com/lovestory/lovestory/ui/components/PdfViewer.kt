@@ -1,113 +1,74 @@
 package com.lovestory.lovestory.ui.components
 
-import android.graphics.Bitmap
+import android.content.Context
+import android.content.res.AssetManager
 import android.graphics.pdf.PdfRenderer
-import android.net.Uri
 import android.os.ParcelFileDescriptor
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
-import androidx.core.net.toFile
-import coil.compose.rememberImagePainter
-import coil.imageLoader
-import coil.memory.MemoryCache
-import coil.request.ImageRequest
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
-import kotlin.math.sqrt
+import java.io.File
+import java.io.FileOutputStream
 
 @Composable
-fun PdfViewer(
-    modifier: Modifier,
-    uri: Uri,
-    verticalArrangement: Arrangement.Vertical = Arrangement.spacedBy(8.dp)
-) {
-    val rendererScope = rememberCoroutineScope()
-    val mutex = remember { Mutex() }
-    val renderer by produceState<PdfRenderer?>(null, uri) {
-        rendererScope.launch(Dispatchers.IO) {
-            val input = ParcelFileDescriptor.open(uri.toFile(), ParcelFileDescriptor.MODE_READ_ONLY)
-            value = PdfRenderer(input)
-        }
-        awaitDispose {
-            val currentRenderer = value
-            rendererScope.launch(Dispatchers.IO) {
-                mutex.withLock {
-                    currentRenderer?.close()
-                }
-            }
-        }
-    }
+fun PdfViewCompat(assetName: String = "lovestory_terms_of_use.pdf") {
     val context = LocalContext.current
-    val imageLoader = LocalContext.current.imageLoader
-    val imageLoadingScope = rememberCoroutineScope()
-    BoxWithConstraints(modifier = modifier.fillMaxWidth()) {
-        val width = with(LocalDensity.current) { maxWidth.toPx() }.toInt()
-        val height = (width * sqrt(2f)).toInt()
-        val pageCount by remember(renderer) { derivedStateOf { renderer?.pageCount ?: 0 } }
-        LazyColumn(
-            verticalArrangement = verticalArrangement
-        ) {
-            items(
-                count = pageCount,
-                key = { index -> "$uri-$index" }
-            ) { index ->
-                val cacheKey = MemoryCache.Key("$uri-$index")
-                var bitmap by remember { mutableStateOf(imageLoader.memoryCache?.get(cacheKey)) }
-                if (bitmap == null) {
-                    DisposableEffect(uri, index) {
-                        val job = imageLoadingScope.launch(Dispatchers.IO) {
-                            val destinationBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-                            mutex.withLock {
-                                if (!coroutineContext.isActive) return@launch
-                                try {
-                                    renderer?.let {
-                                        it.openPage(index).use { page ->
-                                            page.render(
-                                                destinationBitmap,
-                                                null,
-                                                null,
-                                                PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY
-                                            )
-                                        }
-                                    }
-                                } catch (e: Exception) {
-                                    return@launch
-                                }
-                            }
-//                            bitmap = destinationBitmap
-                        }
-                        onDispose {
-                            job.cancel()
-                        }
-                    }
-                    Box(modifier = Modifier.background(Color.White).aspectRatio((1f / sqrt(2f)).toFloat()).fillMaxWidth())
-                } else {
-                    val request = ImageRequest.Builder(context)
-                        .size(width, height)
-                        .memoryCacheKey(cacheKey)
-                        .data(bitmap)
-                        .build()
+    val assetManager: AssetManager = context.assets
+    val tempFile = copyAssetToTempFile(context, assetName)
+//    val fd = assetManager.openFd(assetName).parcelFileDescriptor
+    val fd = ParcelFileDescriptor.open(tempFile, ParcelFileDescriptor.MODE_READ_ONLY)
+    val renderer = PdfRenderer(fd)
+    val pageCount = renderer.pageCount
+    val pdfBitmaps = List(pageCount) {
+        renderer.openPage(it).run {
+            val bitmap = android.graphics.Bitmap.createBitmap(width, height, android.graphics.Bitmap.Config.ARGB_8888)
+            render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
+            close()
+            bitmap
+        }
+    }
 
-                    Image(
-                        modifier = Modifier.background(Color.White).aspectRatio((1f / sqrt(2f)).toFloat()).fillMaxWidth(),
-                        contentScale = ContentScale.Fit,
-                        painter = rememberImagePainter(request),
-                        contentDescription = "Page ${index + 1} of $pageCount"
-                    )
-                }
+    Box(
+        modifier = Modifier
+            .background(Color.White)
+            .fillMaxSize(),
+    ) {
+        val scrollState = rememberScrollState()
+        Column(modifier = Modifier
+            .background(Color.White)
+            .verticalScroll(scrollState)
+        ) {
+            Spacer(modifier = Modifier.height(60.dp))
+            pdfBitmaps.forEach { pdfBitmap ->
+                Image(
+                    bitmap = pdfBitmap!!.asImageBitmap(),
+                    contentDescription = "pdf page",
+                    modifier = Modifier.size(width = pdfBitmap.width.dp,height=480.dp).background(Color.White),
+                    contentScale = ContentScale.FillWidth
+                )
             }
         }
     }
+
+}
+
+fun copyAssetToTempFile(context: Context, assetName: String): File {
+    val inputStream = context.assets.open(assetName)
+    val tempFile = File.createTempFile("temp_", ".pdf", context.cacheDir)
+    val outputStream = FileOutputStream(tempFile)
+
+    try {
+        inputStream.copyTo(outputStream)
+    } finally {
+        inputStream.close()
+        outputStream.close()
+    }
+
+    return tempFile
 }
