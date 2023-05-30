@@ -56,3 +56,36 @@ fun ScreenHeaderWithBackButton(
         }
     }
 }
+
+@Composable
+fun ScreenHeaderWithDropDown(
+    navHostController : NavHostController,
+    headerTitle: String,
+    dropDownIconComposable: @Composable () -> Unit,
+){
+    Row(
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .background(Color(0xFFF3F3F3))
+            .fillMaxWidth()
+            .height(60.dp)
+            .padding(horizontal = 20.dp)
+    ){
+        Row() {
+            Icon(
+                painter = painterResource(id = R.drawable.baseline_arrow_back_24),
+                contentDescription = null,
+                modifier = Modifier.clickable {navHostController.popBackStack() }
+            )
+            Spacer(modifier = Modifier.width(20.dp))
+            Text(
+                text = headerTitle,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
+
+        dropDownIconComposable()
+    }
+}

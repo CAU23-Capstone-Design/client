@@ -312,16 +312,16 @@ fun HeaderForGallery(
                                 Toast.makeText(context, "사진 동기화가 완료되었습니다.", Toast.LENGTH_SHORT).show()
                             }
                         }
-                    }
+                    }.padding(10.dp)
                 )
 
-                Spacer(modifier = Modifier.width(20.dp))
+//                Spacer(modifier = Modifier.width(20.dp))
 
                 Box() {
                     Icon(
                         painter = painterResource(id = R.drawable.baseline_more_vert_24),
                         contentDescription = null,
-                        modifier = Modifier.clickable {isDropMenuForGalleryScreen.value = true},
+                        modifier = Modifier.clickable {isDropMenuForGalleryScreen.value = true}.padding(10.dp),
                         tint = Color.Black
                     )
                     DropdownMenu(
