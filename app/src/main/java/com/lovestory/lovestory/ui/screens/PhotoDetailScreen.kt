@@ -55,10 +55,7 @@ import com.lovestory.lovestory.module.loadBitmapFromDiskCache
 import com.lovestory.lovestory.module.photo.getDetailPhoto
 import com.lovestory.lovestory.module.saveBitmapToDiskCache
 import com.lovestory.lovestory.view.SyncedPhotoView
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.*
@@ -537,11 +534,15 @@ fun ClickPhotoDetailScreenFromServer(
     val context = LocalContext.current
     val systemUiController = rememberSystemUiController()
 
-    val pagerState = rememberPagerState()
+    var dataLoad by remember { mutableStateOf(false) }
+    //val pagerState = rememberPagerState()
 
     LaunchedEffect(null){
-        pagerState.scrollToPage(6)
-        daySyncedPhoto = syncedPhotos.filter{ it.date.substring(0,10) == date }
+        //pagerState.scrollToPage(6)
+        daySyncedPhoto = syncedPhotos.filter{ it.id == id }
+        if(daySyncedPhoto != null){
+            dataLoad = true
+        }
     }
 
     SideEffect {
@@ -563,7 +564,7 @@ fun ClickPhotoDetailScreenFromServer(
     }
 
     LaunchedEffect(null){
-        pagerState.scrollToPage(0)
+        //pagerState.scrollToPage(0)
     }
 
     Box(
@@ -624,17 +625,16 @@ fun ClickPhotoDetailScreenFromServer(
                         tint = Color.White
                     )
                     Spacer(modifier = Modifier.width(20.dp))
-                    AnimatedVisibility(syncedPhoto != null, enter = fadeIn(), exit = fadeOut()){
+                    AnimatedVisibility(dataLoad == true, enter = fadeIn(), exit = fadeOut()){
                         Column() {
-                            val photoDate = LocalDate.parse(daySyncedPhoto[pagerState.currentPage]!!.date.substring(0, 10))
+                            val photoDate = LocalDate.parse(daySyncedPhoto[0]!!.date.substring(0, 10))
                             val dateFormatter = DateTimeFormatter.ofPattern("yyyy년 M월 d일 (E)", Locale.getDefault())
                             val formattedDate = photoDate.format(dateFormatter)
 
-                            Text(text = daySyncedPhoto[pagerState.currentPage]!!.area1+" "+daySyncedPhoto[pagerState.currentPage]!!.area2+" "+daySyncedPhoto[pagerState.currentPage]!!.area3, color = Color.White)
+                            Text(text = daySyncedPhoto[0]!!.area1+" "+daySyncedPhoto[0]!!.area2+" "+daySyncedPhoto[0]!!.area3, color = Color.White)
                             Text(text = formattedDate, color = Color.White)
                         }
                     }
-
                 }
 
                 Box(){
@@ -653,7 +653,7 @@ fun ClickPhotoDetailScreenFromServer(
                             isDropMenuForDetailPhoto= false
                             CoroutineScope(Dispatchers.IO).launch {
                                 if (token != null) {
-                                    getImageById(context = context, token = token, photo_id = daySyncedPhoto[pagerState.currentPage]!!.id)
+                                    getImageById(context = context, token = token, photo_id = daySyncedPhoto[0]!!.id)
                                 }
                             }
 
