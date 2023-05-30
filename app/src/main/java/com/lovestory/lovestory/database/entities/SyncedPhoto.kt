@@ -4,6 +4,12 @@ import androidx.lifecycle.LiveData
 import androidx.room.*
 import org.jetbrains.annotations.NotNull
 
+/**
+ * SyncedPhoto Entity
+ *
+ * @property photo_id String
+ *
+ */
 @Entity(tableName = "syncedPhotos")
 class SyncedPhoto{
     @PrimaryKey
@@ -102,6 +108,9 @@ interface SyncedPhotoDao {
 
     @Query("SELECT * FROM syncedPhotos WHERE photo_id = :id")
     suspend fun getPhotoById(id: String): SyncedPhoto?
+
+    @Query("SELECT substr(date, 8, 10) FROM syncedPhotos WHERE strftime('%m', date) = :targetMonth")
+    suspend fun getDayListByMonth(targetMonth : String): List<String>?
 
 //    @Query("SELECT DISTINCT substr(date, 1, 10) FROM syncedPhotos")
 //    fun getUniqueDates(): LiveData<List<String>>
