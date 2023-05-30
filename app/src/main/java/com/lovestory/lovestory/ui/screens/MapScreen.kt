@@ -229,7 +229,7 @@ fun MapScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhot
     }
 
     if(isPopupVisible){
-        MapDialog(
+        LoveStoryDialog(
             onDismissRequest = {
                 isPopupVisible = false
                 itemPopup = emptyList()

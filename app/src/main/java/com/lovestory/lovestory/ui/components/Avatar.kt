@@ -27,7 +27,7 @@ fun Avatar(imgUrl : String?, sizeAvatar : Int){
 fun AvatarWithChar(gender : String){
     Image(
         painter =
-        if (gender =="M" || gender == "Male") {
+        if (gender =="M" || gender == "Male" || gender =="m" || gender == "male") {
             painterResource(id = R.mipmap.ic_male_char_foreground)
         }else{
             painterResource(id = R.mipmap.ic_female_char_foreground) },

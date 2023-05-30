@@ -3,6 +3,7 @@ package com.lovestory.lovestory.ui.components
 import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.renderscript.ScriptGroup
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -26,6 +27,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -39,8 +41,15 @@ import com.lovestory.lovestory.services.LocationService
 import com.maxkeppeker.sheets.core.models.base.SheetState
 import java.time.LocalDate
 
+/**
+ * 커플 만난날 입력 Dialog Composable
+ *
+ * @param onDismissRequest Dialog 종료
+ * @param properties Dialog 속성
+ * @param content Dialog 내용
+ */
 @Composable
-fun InputMeetDayDialog(
+fun LoveStoryDialog(
     onDismissRequest : ()-> Unit,
     properties: DialogProperties = DialogProperties(),
     content : @Composable () -> Unit
@@ -53,6 +62,15 @@ fun InputMeetDayDialog(
     }
 }
 
+/**
+ * 커플 만난날 입력 Dialog Container
+ *
+ * @param navHostController Navigation Controller
+ * @param onDismissRequest Dialog 종료
+ * @param selectedMeetDates 커플 만난날
+ * @param calendarForMeetState 달력 상태
+ * @param code 커플 코드
+ */
 @Composable
 fun CoupleSyncDialog(
     navHostController: NavHostController,
@@ -61,7 +79,7 @@ fun CoupleSyncDialog(
     calendarForMeetState : SheetState,
     code :String?
     ){
-    InputMeetDayDialog(
+    LoveStoryDialog(
         onDismissRequest = onDismissRequest,
         properties = DialogProperties(dismissOnBackPress = true, dismissOnClickOutside = true),
     ){
@@ -92,6 +110,9 @@ fun CoupleSyncDialog(
     }
 }
 
+/**
+ * 권한 설정 안내 Dialog Container
+ */
 @Composable
 fun DialogForPermission(
 ){
@@ -118,6 +139,14 @@ fun DialogForPermission(
     }
 }
 
+/**
+ * 권한 설정 안내 Dialog Composable
+ *
+ * @param onDismissRequest Dialog 종료
+ * @param screenWidth 화면 너비
+ * @param isDialogOpen Dialog 상태
+ * @param requestPhotoPermissionLauncher 권한 설정 요청
+ */
 @Composable
 fun PermissionDialog(
     onDismissRequest : () -> Unit,
@@ -190,6 +219,13 @@ fun PermissionDialog(
     }
 }
 
+/**
+ * 권한 설명 Item Composable
+ *
+ * @param id 아이콘 id
+ * @param title 권한 이름
+ * @param description 권한 설명
+ */
 @Composable
 fun PermissionDialogItem(
     id : Int,
@@ -224,6 +260,9 @@ fun PermissionDialogItem(
     }
 }
 
+/**
+ * 백그라운드 위치 권한 설정 Dialog Composable
+ */
 @Composable
 fun AskBackgroundLocationDialog(
     onDismissRequest : ()-> Unit,
@@ -276,40 +315,27 @@ fun AskBackgroundLocationDialog(
     }
 }
 
-@Composable
-fun CalendarDialog(
-    onDismissRequest : ()-> Unit,
-    properties: DialogProperties = DialogProperties(),
-    content : @Composable () -> Unit,
-){
-    Dialog(
-        onDismissRequest = onDismissRequest,
-        properties = properties,
-    ) {
-        Box(
-            modifier = Modifier
-                .background(Color.Transparent)
-        ) {
-            content()
-        }
-    }
-}
-
-@Composable
-fun MapDialog(
-    onDismissRequest : ()-> Unit,
-    properties: DialogProperties = DialogProperties(),
-    content : @Composable () -> Unit,
-){
-    Dialog(
-        onDismissRequest = onDismissRequest,
-        properties = properties,
-    ) {
-        Box(
-            modifier = Modifier
-                .background(Color.Transparent)
-        ) {
-            content()
-        }
-    }
-}
+///**
+// * 캘린더 Dialog Composable
+// * @param onDismissRequest Dialog 닫기
+// * @param properties Dialog 속성
+// * @param content Dialog 내용
+// */
+//@Composable
+//fun CalendarDialog(
+//    onDismissRequest : ()-> Unit,
+//    properties: DialogProperties = DialogProperties(),
+//    content : @Composable () -> Unit,
+//){
+//    Dialog(
+//        onDismissRequest = onDismissRequest,
+//        properties = properties,
+//    ) {
+//        Box(
+//            modifier = Modifier
+//                .background(Color.Transparent)
+//        ) {
+//            content()
+//        }
+//    }
+//}

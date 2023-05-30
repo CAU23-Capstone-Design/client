@@ -273,7 +273,7 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
             editedcomment = existingMemory.comment
         }
 
-        CalendarDialog(
+        LoveStoryDialog(
 //            selection = selection,
             onDismissRequest = {
                 if(existingMemory != null) {
@@ -309,7 +309,6 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
 
             LaunchedEffect(null){
                 isPopupVisibleSave = true
-                Log.d("실행","2, $isPopupVisible, $isPopupVisibleSave, ${items.isNotEmpty()}")
                 //get GPS
                 val gps = getGps(token!!, dateToString(selection.date))
                 if (gps.body() != null) {
