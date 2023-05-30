@@ -8,6 +8,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
@@ -88,6 +89,7 @@ fun EditableTextField(initialValue: String, onValueChanged: (String) -> Unit) {
             value = it
             onValueChanged(it)
         },
+        placeholder = {Text("코멘트를 입력해보세요!")},
         modifier = Modifier
             .wrapContentHeight()
             .fillMaxWidth()
