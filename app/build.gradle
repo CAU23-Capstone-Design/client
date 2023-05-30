@@ -64,6 +64,7 @@ dependencies {
     def room_version = "2.5.0"
     def activity_version = "1.6.1"
     def lottieVersion = "6.0.0"
+    def emoji2_version = "1.2.0"
 
     implementation 'androidx.core:core-ktx:1.7.0'
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.3.1'
@@ -177,5 +178,4 @@ dependencies {
     // Optionally, you can include the widgets library for ScaleBar, etc.
     implementation 'com.google.maps.android:maps-compose-widgets:2.11.2'
     implementation "com.google.accompanist:accompanist-pager:0.28.0"
-
 }

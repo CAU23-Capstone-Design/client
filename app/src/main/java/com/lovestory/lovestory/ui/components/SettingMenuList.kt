@@ -1,6 +1,5 @@
 package com.lovestory.lovestory.ui.components
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -42,7 +41,7 @@ fun SettingMenuList(
                 }
             )
             SettingMenuItem(
-                text ="서비스 이용 약관",
+                text ="서비스 이용약관",
                 onClick = {
                     navHostController.navigate(ProfileStack.Privacy.route) {
                         popUpTo(ProfileStack.Privacy.route)
