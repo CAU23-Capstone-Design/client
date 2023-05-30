@@ -33,6 +33,6 @@ class SyncedPhotoRepository(private val syncedPhotoDao: SyncedPhotoDao) {
 
     suspend fun getSyncedPhotoById(id : String): SyncedPhoto? {return withContext(Dispatchers.IO){ syncedPhotoDao.getPhotoById(id) }}
 
-    suspend fun getDayListByTargetMonth(month : String): List<String>? {return withContext(Dispatchers.IO){ syncedPhotoDao.getDayListByMonth(month) }}
+    suspend fun getDayListByTargetMonth(yearMonth : String): List<String>? {return withContext(Dispatchers.IO){ syncedPhotoDao.getDayListByMonth(yearMonth) }}
 
 }

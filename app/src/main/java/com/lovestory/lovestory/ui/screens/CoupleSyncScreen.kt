@@ -6,15 +6,19 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.scaleIn
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -22,6 +26,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.lovestory.lovestory.R
 import com.lovestory.lovestory.module.getToken
 import com.lovestory.lovestory.module.loveStoryCheckCouple
 import com.lovestory.lovestory.resource.apple_bold
@@ -34,7 +39,8 @@ import java.time.LocalDate
 fun CoupleSyncScreen(
     navHostController: NavHostController,
     myCode : String?,
-    nickname : String?
+    nickname : String?,
+    gender : String?
 ) {
     val context = LocalContext.current as ComponentActivity
     val focusManager = LocalFocusManager.current
@@ -73,7 +79,8 @@ fun CoupleSyncScreen(
         modifier = Modifier.fillMaxSize()
     ){
 
-        Avatar(imgUrl = "캐릭터 넣자...!", sizeAvatar = 120)
+//        Avatar(imgUrl = "캐릭터 넣자...!", sizeAvatar = 120)
+        AvatarWithChar(gender = gender!!)
         Spacer(modifier = Modifier.height(40.dp))
         Text(
             text = "${nickname}님의 코드",

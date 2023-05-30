@@ -15,13 +15,15 @@ fun NavGraphBuilder.loginNavGraph(navHostController: NavHostController){
         composable(route = AuthScreen.Login.route){
             LoginScreen(navHostController = navHostController)
         }
-        composable(route = AuthScreen.CoupleSync.route+"/{code}&{nickname}"){backStackEntry ->
+        composable(route = AuthScreen.CoupleSync.route+"/{code}&{nickname}&{gender}"){backStackEntry ->
             val code = backStackEntry.arguments?.getString("code")
             val nickname = backStackEntry.arguments?.getString("nickname")
+            val gender =  backStackEntry.arguments?.getString("gender")
             CoupleSyncScreen(
                 navHostController = navHostController,
                 myCode=code,
-                nickname = nickname
+                nickname = nickname,
+                gender = gender
             )
         }
     }
@@ -32,13 +34,15 @@ fun NavGraphBuilder.syncCiupleNavGraph(navHostController: NavHostController){
         route = Graph.AUTH,
         startDestination = AuthScreen.CoupleSync.route
     ){
-        composable(route = AuthScreen.CoupleSync.route+"/{code}&{nickname}"){backStackEntry ->
+        composable(route = AuthScreen.CoupleSync.route+"/{code}&{nickname}&{gender}"){backStackEntry ->
             val code = backStackEntry.arguments?.getString("code")
             val nickname = backStackEntry.arguments?.getString("nickname")
+            val gender = backStackEntry.arguments?.getString("gender")
             CoupleSyncScreen(
                 navHostController = navHostController,
                 myCode=code,
-                nickname = nickname
+                nickname = nickname,
+                gender = gender
             )
         }
     }

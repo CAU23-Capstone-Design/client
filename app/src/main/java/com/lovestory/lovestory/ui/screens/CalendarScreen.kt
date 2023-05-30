@@ -150,6 +150,9 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
             meetDate.add(intmonthToString(visibleMonth.yearMonth, it))
         }
 
+
+//        getDayListByTargetMonth
+
         //shared Preference 에서 get Comment
         val data = getSavedComment(context)
         coupleMemoryList = data
@@ -190,6 +193,11 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
         }
 
         meetDateAfterLoad.addAll(meetDate)
+
+        /**********************************************************************
+        val listOfDays = repository.getDayListByTargetMonth("2023-05")
+        Log.d("Calender Screen - ListOfDays", listOfDays.toString())
+        **********************************************************************/
     }
 
     LaunchedEffect(visibleMonth.yearMonth){

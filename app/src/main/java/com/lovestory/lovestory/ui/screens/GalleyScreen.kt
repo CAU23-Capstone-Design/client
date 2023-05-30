@@ -171,36 +171,18 @@ fun GalleryScreen(navHostController: NavHostController, syncedPhotoView : Synced
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            // gallery header
-            Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .background(Color(0xBBF3F3F3))
-                    .fillMaxWidth()
-                    .height(60.dp)
-                    .padding(horizontal = 20.dp)
-            ) {
-                AnimatedVisibility( visible = !isPressedPhotoMode.value, enter = fadeIn(), exit = fadeOut()) {
-                    HeaderForGallery(
-                        context = context,
-                        isDropMenuForGalleryScreen = isDropMenuForGalleryScreen,
-                        isPressedPhotoMode = isPressedPhotoMode,
-                        selectedButton = selectedButton,
-                    )
-                }
-                AnimatedVisibility(visible = isPressedPhotoMode.value, enter = fadeIn(), exit = fadeOut()){
-                    HeaderForDeletePhoto(
-                        context = context,
-                        syncedPhotoView = syncedPhotoView,
-                        isPressedPhotoMode = isPressedPhotoMode,
-                        countSelectedPhotos = countSelectedPhotos,
-                        showDeleteSyncedPhotoDialog = showDeleteSyncedPhotoDialog
-                    )
-                }
-            }
+            GalleryHeader(
+                context,
+                isPressedPhotoMode,
+                isDropMenuForGalleryScreen,
+                selectedButton,
+                syncedPhotoView,
+                countSelectedPhotos,
+                showDeleteSyncedPhotoDialog
+            )
 
             Spacer(modifier = Modifier.weight(1f))
+
             AnimatedVisibility(visible = !isPressedPhotoMode.value, enter= fadeIn(), exit = fadeOut()) {
                 FloatingSection(
                     items = items,
@@ -211,6 +193,45 @@ fun GalleryScreen(navHostController: NavHostController, syncedPhotoView : Synced
                 )
             }
 
+        }
+    }
+}
+
+@Composable
+fun GalleryHeader(
+    context: Context,
+    isPressedPhotoMode : MutableState<Boolean>,
+    isDropMenuForGalleryScreen : MutableState<Boolean>,
+    selectedButton : String,
+    syncedPhotoView : SyncedPhotoView,
+    countSelectedPhotos : MutableState<Int>,
+    showDeleteSyncedPhotoDialog : MutableState<Boolean>,
+){
+    Row(
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .background(Color(0xBBF3F3F3))
+            .fillMaxWidth()
+            .height(60.dp)
+            .padding(horizontal = 20.dp)
+    ) {
+        AnimatedVisibility( visible = !isPressedPhotoMode.value, enter = fadeIn(), exit = fadeOut()) {
+            HeaderForGallery(
+                context = context,
+                isDropMenuForGalleryScreen = isDropMenuForGalleryScreen,
+                isPressedPhotoMode = isPressedPhotoMode,
+                selectedButton = selectedButton,
+            )
+        }
+        AnimatedVisibility(visible = isPressedPhotoMode.value, enter = fadeIn(), exit = fadeOut()){
+            HeaderForDeletePhoto(
+                context = context,
+                syncedPhotoView = syncedPhotoView,
+                isPressedPhotoMode = isPressedPhotoMode,
+                countSelectedPhotos = countSelectedPhotos,
+                showDeleteSyncedPhotoDialog = showDeleteSyncedPhotoDialog
+            )
         }
     }
 }

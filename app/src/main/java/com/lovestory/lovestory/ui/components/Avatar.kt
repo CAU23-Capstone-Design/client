@@ -22,3 +22,18 @@ fun Avatar(imgUrl : String?, sizeAvatar : Int){
         contentScale = ContentScale.Crop,
     )
 }
+
+@Composable
+fun AvatarWithChar(gender : String){
+    Image(
+        painter =
+        if (gender =="M" || gender == "Male") {
+            painterResource(id = R.mipmap.ic_male_char_foreground)
+        }else{
+            painterResource(id = R.mipmap.ic_female_char_foreground) },
+        contentDescription = "profile image",
+        modifier = Modifier
+            .size(100.dp)
+            .clip(CircleShape)
+    )
+}
