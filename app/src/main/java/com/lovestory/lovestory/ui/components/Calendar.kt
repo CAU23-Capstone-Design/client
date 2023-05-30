@@ -4,11 +4,13 @@ import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
+import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -56,6 +58,8 @@ fun Day(
             .padding(6.dp)
             .clip(RoundedCornerShape(16.dp))
             .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = rememberRipple(color = Color.LightGray),
                 enabled = day.position == DayPosition.MonthDate,
                 onClick = {
 //                    onClick(day)
@@ -77,7 +81,7 @@ fun Day(
                     }
                 )
             }
-            .background(color = if (day.date == LocalDate.now() && day.position == DayPosition.MonthDate) colorResource(com.lovestory.lovestory.R.color.ls_pink) else Color.Transparent),
+            .background(color = if (day.date == LocalDate.now() && day.position == DayPosition.MonthDate) colorResource(com.lovestory.lovestory.R.color.ls_pink) else Color.White),
         contentAlignment = Alignment.TopCenter //텍스트 상단 중앙 배치
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {

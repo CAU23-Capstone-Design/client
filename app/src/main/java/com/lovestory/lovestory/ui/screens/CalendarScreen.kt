@@ -1,27 +1,19 @@
 package com.lovestory.lovestory.ui.screens
 
+//import com.google.android.gms.maps.model.CameraPosition
+//import com.google.android.gms.maps.model.LatLng
+//import com.google.maps.android.compose.GoogleMap
+//import com.google.maps.android.compose.Marker
+//import com.google.maps.android.compose.MarkerState
+//import com.google.maps.android.compose.rememberCameraPositionState
 import android.annotation.SuppressLint
-import android.content.pm.PackageManager
-import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
-import android.os.Bundle
 import android.util.Log
-import android.view.ContextThemeWrapper
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
@@ -30,76 +22,48 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.ContextCompat
-import androidx.core.os.bundleOf
-import androidx.lifecycle.LiveData
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-//import com.google.android.gms.maps.model.CameraPosition
-//import com.google.android.gms.maps.model.LatLng
-//import com.google.maps.android.compose.GoogleMap
-//import com.google.maps.android.compose.Marker
-//import com.google.maps.android.compose.MarkerState
-//import com.google.maps.android.compose.rememberCameraPositionState
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.clustering.ClusterManager
+import com.google.maps.android.compose.*
 import com.kizitonwose.calendar.compose.HorizontalCalendar
 import com.kizitonwose.calendar.compose.rememberCalendarState
 import com.kizitonwose.calendar.core.*
+import com.lovestory.lovestory.R
+import com.lovestory.lovestory.database.PhotoDatabase
+import com.lovestory.lovestory.database.entities.SyncedPhoto
+import com.lovestory.lovestory.database.repository.SyncedPhotoRepository
+import com.lovestory.lovestory.graphs.CalendarStack
 import com.lovestory.lovestory.model.*
-import com.lovestory.lovestory.resource.vitro
+import com.lovestory.lovestory.module.*
+import com.lovestory.lovestory.module.photo.getThumbnailForPhoto
+import com.lovestory.lovestory.network.*
 import com.lovestory.lovestory.ui.components.*
 import com.lovestory.lovestory.ui.theme.LoveStoryTheme
+import com.lovestory.lovestory.view.SyncedPhotoView
+import kotlinx.coroutines.*
 import retrofit2.Response
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.*
-import androidx.lifecycle.lifecycleScope
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
-import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.model.CameraPosition
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.Polyline
-import com.google.android.gms.maps.model.PolylineOptions
-import com.google.maps.android.compose.*
-import com.lovestory.lovestory.R
-import com.lovestory.lovestory.database.PhotoDatabase
-import com.lovestory.lovestory.database.entities.SyncedPhoto
-import com.lovestory.lovestory.database.repository.SyncedPhotoRepository
-import com.lovestory.lovestory.graphs.CalendarStack
-import com.lovestory.lovestory.graphs.MainScreens
-import com.lovestory.lovestory.module.*
-import com.lovestory.lovestory.module.photo.getThumbnailForPhoto
-import com.lovestory.lovestory.network.*
-import com.lovestory.lovestory.view.SyncedPhotoView
-import kotlinx.coroutines.*
-import kotlinx.coroutines.selects.select
-import okhttp3.Dispatcher
-import java.time.DayOfWeek
-import java.time.Year
-import kotlin.math.roundToInt
-import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalViewConfiguration
-import androidx.compose.ui.unit.Dp
-import com.google.maps.android.clustering.ClusterManager
 
 @OptIn(MapsComposeExperimentalApi::class)
 @SuppressLint("CoroutineCreationDuringComposition", "SuspiciousIndentation")
@@ -114,17 +78,14 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
     var selectionSave by rememberSaveable { mutableStateOf(CalendarDay(date = LocalDate.now(), position = DayPosition.MonthDate))}
     var isPopupVisibleSave by rememberSaveable { mutableStateOf(false) }
     var commentSave by rememberSaveable{ mutableStateOf("") }
-    //Log.d("세이브", "$selectionSave, $isPopupVisibleSave")
 
     var selection by remember { mutableStateOf(CalendarDay(date = LocalDate.now(), position = DayPosition.MonthDate))}
     var isPopupVisible by remember { mutableStateOf(false) }
     var dialogContent by remember { mutableStateOf(false) }
-    //Log.d("세이브", "$selection, $isPopupVisible")
-    //Log.d("셀렉션1", "${selection.date}")
+
 
     LaunchedEffect(null) {
         if (isPopupVisibleSave) {
-            Log.d("팝업", "1")
             selection = selectionSave
             isPopupVisible = true
         }
@@ -132,7 +93,6 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
 
     val onOpenDialogRequest : ()->Unit = {
         isPopupVisible = true
-        //isPopupVisibleSave = true
     }
     val onDismissRequest : () -> Unit = {isPopupVisible = false}
 
@@ -153,7 +113,9 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
     var latLng by remember { mutableStateOf(emptyList<LatLng>()) }
     var photoPosition by remember { mutableStateOf(emptyList<LatLng>()) }
     val dataLoaded = remember { mutableStateOf(false) }
+    val meetDataLoaded = remember { mutableStateOf(false) }
     val meetDate = remember { mutableStateListOf<String>() }
+    val meetDateAfterLoad = remember { mutableStateListOf<String>() }
 
     val context = LocalContext.current
     val token = getToken(context)
@@ -183,7 +145,6 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
 
     //해야 되는 게 코루틴 정리. 룸 db
     LaunchedEffect(key1 = true) {
-        Log.d("실행","1, $isPopupVisible, $isPopupVisibleSave, ${items.isNotEmpty()}")
         val meetDay = getDay(token!!, monthToString(visibleMonth.yearMonth))
         meetDay.body()?.forEach{
             meetDate.add(intmonthToString(visibleMonth.yearMonth, it))
@@ -227,15 +188,14 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                 uniqueDate.add(synced.date.substring(0, 10))
             }
         }
-        uniqueDate.forEach{
-            Log.d("유니크","$it")
-        }
+
+        meetDateAfterLoad.addAll(meetDate)
     }
 
     LaunchedEffect(visibleMonth.yearMonth){
         val meetDay = getDay(token!!, monthToString(visibleMonth.yearMonth))
         meetDay.body()?.forEach{
-            meetDate.add(intmonthToString(visibleMonth.yearMonth, it))
+            meetDateAfterLoad.add(intmonthToString(visibleMonth.yearMonth, it))
         }
     }
 
@@ -279,7 +239,7 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                     isPopupVisible = isPopupVisible,
                     isSelected = selection == day,
                     onOpenDialogRequest = onOpenDialogRequest,
-                    meetDate = meetDate,
+                    meetDate = meetDateAfterLoad,
                 ) { clicked ->
                     selection = clicked
                 }
@@ -293,10 +253,10 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
 //                dialogContent = true
 //            }
 //        }
-        dialogContent = meetDate.contains(dateToString(selection.date))
+        dialogContent = meetDateAfterLoad.contains(dateToString(selection.date))
 
         var editedcomment by remember { mutableStateOf("") }
-        if(isPopupVisibleSave){
+        if(commentSave != ""){
             editedcomment = commentSave
         }
 
@@ -321,7 +281,7 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                         coroutineScope.launch{
                             val put : Response<Any> = putComment(token!!, dateToString(selection.date), editedcomment)
                             saveComment(context, coupleMemoryList)
-                            meetDate.add(dateToString(selection.date))
+                            meetDateAfterLoad.add(dateToString(selection.date))
                         }
                     }
                 }
@@ -379,25 +339,21 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                 coupleMemoryList = convertToCoupleMemoryList(stringMemoryList)
                 saveComment(context, coupleMemoryList)
                 coupleMemoryList.forEach {
-                    if (!meetDate.contains(dateToString(it.date))) {
-                        meetDate.add(dateToString(it.date))
+                    if (!meetDateAfterLoad.contains(dateToString(it.date))) {
+                        meetDateAfterLoad.add(dateToString(it.date))
                     }
                 }
+
+
             }
 
             val screenWidth = LocalConfiguration.current.screenWidthDp.dp
-//            val firstBoxWidth = remember { mutableStateOf(Dp.Unspecified) }
-//            val dens = LocalDensity.current
             Column(
                 modifier = Modifier
                     .width(screenWidth - 40.dp)
                     .wrapContentHeight()
                     .clip(RoundedCornerShape(12.dp))
                     .background(color = Color.White),
-//                    .onSizeChanged {
-//                        firstBoxWidth.value = it.width.toDp(dens)
-//                        Log.d("BoxWidth", "Width of the first Box: ${firstBoxWidth.value}")
-//                    },
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
@@ -425,7 +381,6 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                         fontSize = 16.sp,
                         color = Color.Black,
                     )
-                    //Spacer(Modifier.weight(1f))
                     Button(
                         colors = ButtonDefaults.buttonColors(backgroundColor = Color.Transparent),
                         onClick = {
@@ -434,7 +389,7 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                                 coupleMemoryList = coupleMemoryList.filterNot { it.date == date }
                                 val delete: Any = deleteComment(token!!, dateToString(selection.date))
                                 if(!photoDate.contains(dateToString(date))){
-                                    meetDate.remove(dateToString(date))
+                                    meetDateAfterLoad.remove(dateToString(date))
                                 }
                             }
                             saveComment(context, coupleMemoryList)
@@ -473,7 +428,7 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                                     coroutineScope.launch{
                                         val put : Response<Any> = putComment(token!!, dateToString(selection.date), editedcomment)
                                         saveComment(context, coupleMemoryList)
-                                        meetDate.add(dateToString(selection.date))
+                                        meetDateAfterLoad.add(dateToString(selection.date))
                                     }
                                 }
                             }
@@ -575,19 +530,19 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                                                 )
                                             }
                                         }
-//                                        //사진 좌표와 비트맵
-//                                        latLngMarker.forEach {
-//                                            items.add(
-//                                                MyItem(
-//                                                    it,
-//                                                    "LOCATION",
-//                                                    "위치",
-//                                                    null,
-//                                                    "POSITION",
-//                                                    "HI"
-//                                                )
-//                                            )
-//                                        }
+                                        //사진 좌표와 비트맵
+                                        latLngMarker.forEach {
+                                            items.add(
+                                                MyItem(
+                                                    it,
+                                                    "LOCATION",
+                                                    "위치",
+                                                    null,
+                                                    "POSITION",
+                                                    "HI"
+                                                )
+                                            )
+                                        }
                                     }
                                 }
                                 val viewposition = averageLatLng(latLng)
@@ -696,7 +651,6 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                                 .background(color = Color.Transparent, RoundedCornerShape(12.dp))
                                 .onSizeChanged {
                                     boxWidth.value = it.width.toDp(dens)
-                                    Log.d("BoxWidth", "Width of the first Box: ${boxWidth.value}")
                                 },
                         ) {
                             val filteredSyncedPhotosByDate = syncedPhotosByDate.filterKeys { key ->
