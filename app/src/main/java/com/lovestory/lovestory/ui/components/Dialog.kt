@@ -262,6 +262,9 @@ fun PermissionDialogItem(
 
 /**
  * 백그라운드 위치 권한 설정 Dialog Composable
+ * @param onDismissRequest Dialog 종료
+ * @param isDialogOpen Dialog 상태
+ * @param requestBackgroundLocationPermissionLauncher 권한 설정 요청
  */
 @Composable
 fun AskBackgroundLocationDialog(
@@ -315,27 +318,39 @@ fun AskBackgroundLocationDialog(
     }
 }
 
-///**
-// * 캘린더 Dialog Composable
-// * @param onDismissRequest Dialog 닫기
-// * @param properties Dialog 속성
-// * @param content Dialog 내용
-// */
-//@Composable
-//fun CalendarDialog(
-//    onDismissRequest : ()-> Unit,
-//    properties: DialogProperties = DialogProperties(),
-//    content : @Composable () -> Unit,
-//){
-//    Dialog(
-//        onDismissRequest = onDismissRequest,
-//        properties = properties,
-//    ) {
-//        Box(
-//            modifier = Modifier
-//                .background(Color.Transparent)
-//        ) {
-//            content()
-//        }
-//    }
-//}
+@Composable
+fun ProgressbarInDialog(
+    onDismissRequest : ()-> Unit,
+    numOfCurrentUploadedPhoto : MutableState<Int>,
+    numOfTotalUploadPhoto : MutableState<Int>,
+    titleForWork : String
+){
+    Dialog(onDismissRequest = onDismissRequest, properties = DialogProperties(dismissOnBackPress = false, dismissOnClickOutside=false)) {
+        Column(
+            modifier = Modifier
+                .width(320.dp)
+                .wrapContentHeight()
+                .clip(RoundedCornerShape(15.dp))
+                .background(color = Color.White)
+                .padding(vertical = 20.dp, horizontal = 10.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
+
+            ){
+            LinearProgressIndicator(
+                progress = numOfCurrentUploadedPhoto.value.toFloat()/numOfTotalUploadPhoto.value.toFloat(),
+                color = Color(0xFFFCC5C5),
+                backgroundColor = Color(0xBBF3F3F3),
+                modifier = Modifier
+                    .padding(vertical = 10.dp)
+                    .height(5.dp)
+            )
+            Text(
+                text = "$titleForWork (${numOfCurrentUploadedPhoto.value} / ${numOfTotalUploadPhoto.value})",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Normal,
+                modifier = Modifier.padding(vertical = 10.dp)
+            )
+        }
+    }
+}

@@ -150,34 +150,12 @@ fun PhotoSyncScreen(navHostController: NavHostController, photoForSyncView: Phot
             )
         }
         AnimatedVisibility(visible = showUploadPhotoDialog.value, enter = fadeIn(), exit = fadeOut()){
-            Dialog(onDismissRequest = onDismissRequest, properties = DialogProperties(dismissOnBackPress = false, dismissOnClickOutside=false)) {
-                Column(
-                    modifier = Modifier
-                        .width(320.dp)
-                        .wrapContentHeight()
-                        .clip(RoundedCornerShape(15.dp))
-                        .background(color = Color.White)
-                        .padding(vertical = 20.dp, horizontal = 10.dp),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally,
-
-                    ){
-                    LinearProgressIndicator(
-                        progress = numOfCurrentUploadedPhoto.value.toFloat()/numOfTotalUploadPhoto.value.toFloat(),
-                        color = Color(0xFFFCC5C5),
-                        backgroundColor = Color(0xBBF3F3F3),
-                        modifier = Modifier
-                            .padding(vertical = 10.dp)
-                            .height(5.dp)
-                    )
-                    Text(
-                        text = "사진 업로드 중 (${numOfCurrentUploadedPhoto.value} / ${numOfTotalUploadPhoto.value})",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Normal,
-                        modifier = Modifier.padding(vertical = 10.dp)
-                    )
-                }
-            }
+            ProgressbarInDialog(
+                onDismissRequest = onDismissRequest,
+                numOfCurrentUploadedPhoto = numOfCurrentUploadedPhoto,
+                numOfTotalUploadPhoto = numOfTotalUploadPhoto,
+                titleForWork = "사진 업로드 중"
+            )
         }
 
         SectionOfPhotoListLayout(

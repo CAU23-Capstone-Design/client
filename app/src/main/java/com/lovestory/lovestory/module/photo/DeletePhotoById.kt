@@ -2,6 +2,7 @@ package com.lovestory.lovestory.module.photo
 
 import android.content.Context
 import android.util.Log
+import androidx.compose.runtime.MutableState
 import com.lovestory.lovestory.module.checkExistNeedPhotoForSync
 import com.lovestory.lovestory.module.getToken
 import com.lovestory.lovestory.network.deletePhotoById
@@ -9,7 +10,7 @@ import com.lovestory.lovestory.view.SyncedPhotoView
 
 suspend fun deletePhotosByIds(
     context : Context,
-    syncedPhotoView : SyncedPhotoView
+    syncedPhotoView : SyncedPhotoView,
 ){
     val token = getToken(context)
 
