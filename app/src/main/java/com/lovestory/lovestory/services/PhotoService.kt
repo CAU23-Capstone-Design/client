@@ -1,15 +1,20 @@
 package com.lovestory.lovestory.services
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.*
 import android.content.*
+import android.content.pm.PackageManager
 import android.database.ContentObserver
 import android.database.Cursor
 import android.net.Uri
 import android.os.*
 import android.provider.MediaStore
 import android.util.Log
+import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
+import com.lovestory.lovestory.MainActivity
 import com.lovestory.lovestory.R
 import com.lovestory.lovestory.broadcasts.LocationToPhoto.ACTION_START_PHOTO_PICKER_SERVICE
 import com.lovestory.lovestory.broadcasts.LocationToPhoto.ACTION_STOP_PHOTO_PICKER_SERVICE
@@ -66,6 +71,22 @@ class PhotoService : Service(){
 
     override fun onDestroy() {
         Log.d("Photo-service", "포토 서비스 삭제")
+        createNotificationForExitPhotoService()
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return
+        }
+        NotificationManagerCompat.from(this).notify(NOTIFICATION_ID, createNotificationForExitPhotoService())
         applicationContext.contentResolver.unregisterContentObserver(contentObserver)
         handlerThread.quitSafely()
         super.onDestroy()
@@ -152,11 +173,29 @@ class PhotoService : Service(){
     }
 
     private fun createNotificationForPhotoService():Notification{
+        val notificationIntent = Intent(this, MainActivity::class.java)
+        val pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE)
+
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("LoveStory")
-            .setContentText("연인을 만났네요! 사진 동기화를 시작합니다!")
-            .setSmallIcon(R.drawable.ic_status_bar_foreground)
+            .setContentText("연인과의 추억을 기록합니다\n행복한 시간 되세요（＾∀＾●）ﾉｼ")
+            .setSmallIcon(R.mipmap.ic_notification_foreground)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true).build()
+    }
+
+    private fun createNotificationForExitPhotoService():Notification{
+        val notificationIntent = Intent(this, MainActivity::class.java)
+        val pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE)
+
+        return NotificationCompat.Builder(this, CHANNEL_ID)
+            .setContentTitle("LoveStory")
+           .setContentText("오늘도 즐거운 데이트 하셨나요?\n앱을 실행해서 오늘의 추억을 확인해보세요")
+            .setSmallIcon(R.mipmap.ic_notification_foreground)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
             .build()
     }
 
