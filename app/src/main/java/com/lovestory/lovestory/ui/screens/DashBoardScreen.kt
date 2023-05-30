@@ -207,7 +207,7 @@ fun ContentOfDashBoard(
         }
         Spacer(modifier = Modifier.height(50.dp))
         Column() {
-            Text(text = "여기에 뭘 넣으면 좋을까?!!!!!!!")
+//            Text(text = "여기에 뭘 넣으면 좋을까?!!!!!!!")
         }
     }
 }

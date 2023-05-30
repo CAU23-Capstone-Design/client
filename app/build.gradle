@@ -60,7 +60,7 @@ android {
 
 dependencies {
     def nav_version = "2.5.3"
-    def sheet_version = "1.1.1"
+//    def sheet_version = "1.1.1"
     def room_version = "2.5.0"
     def activity_version = "1.6.1"
     def lottieVersion = "6.0.0"
@@ -177,5 +177,4 @@ dependencies {
     // Optionally, you can include the widgets library for ScaleBar, etc.
     implementation 'com.google.maps.android:maps-compose-widgets:2.11.2'
     implementation "com.google.accompanist:accompanist-pager:0.28.0"
-
 }

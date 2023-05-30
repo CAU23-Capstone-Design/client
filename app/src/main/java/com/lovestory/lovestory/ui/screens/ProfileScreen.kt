@@ -26,6 +26,8 @@ import com.lovestory.lovestory.module.*
 import com.lovestory.lovestory.ui.components.DisconnectDialog
 import com.lovestory.lovestory.ui.components.LogoutDialog
 import com.lovestory.lovestory.ui.components.SettingMenuList
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun ProfileScreen(
@@ -107,6 +109,13 @@ fun SettingHeader(){
 
 @Composable
 fun UserProfileSection(userData : UserForLoginPayload){
+    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+    val parsedDate = LocalDate.parse(userData.birthday.substring(0,10), formatter)
+    val nextDate = parsedDate.plusDays(1)
+
+    val outputFormatter = DateTimeFormatter.ofPattern("M월 d일")
+    val output = nextDate.format(outputFormatter)
+
     Column (
         horizontalAlignment = Alignment.CenterHorizontally
     ){
@@ -126,10 +135,10 @@ fun UserProfileSection(userData : UserForLoginPayload){
         )
         Spacer(modifier = Modifier.height(5.dp))
         Text(
-            text = userData.birthday.substring(0,10),
+            text = "🎂 $output",
             color = Color.Black,
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Normal
         )
     }
 }

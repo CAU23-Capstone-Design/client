@@ -35,8 +35,6 @@ class SyncedPhotoView(application:Application): ViewModel() {
     lateinit var sizeOfMonthSyncedPhotos : LiveData<List<List<Int>>>
     lateinit var cumOfMonthSyncedPhotos : LiveData<List<List<Int>>>
 
-    //lateinit var uniqueDates : LiveData<List<String>>
-
     private val _syncedPhoto = MutableLiveData<SyncedPhoto?>()
     val syncedPhoto: LiveData<SyncedPhoto?> = _syncedPhoto
 
