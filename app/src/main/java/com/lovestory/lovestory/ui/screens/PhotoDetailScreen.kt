@@ -541,10 +541,8 @@ fun ClickPhotoDetailScreenFromServer(
     val repository = SyncedPhotoRepository(syncedPhotoDao)
 
     LaunchedEffect(null){
-        //pagerState.scrollToPage(6)
-
         val syncedPhoto = repository.getSyncedPhotoById(id)
-        daySyncedPhoto.plus(syncedPhoto)
+        daySyncedPhoto += syncedPhoto!!
         if(daySyncedPhoto != null){
             dataLoad = true
         }

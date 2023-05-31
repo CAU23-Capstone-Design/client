@@ -427,12 +427,12 @@ class MarkerClusterRender<T : MyItem>(
         }
     }
 
-    override fun onClusterItemRendered(clusterItem: T, marker: Marker) {
-        super.onClusterItemRendered(clusterItem, marker)
-        clusterMap[(clusterItem as MyItem).itemTitle] = marker
-
-        //setMarker((clusterItem as MyItem), marker)
-    }
+//    override fun onClusterItemRendered(clusterItem: T, marker: Marker) {
+//        super.onClusterItemRendered(clusterItem, marker)
+//        clusterMap[(clusterItem as MyItem).itemTitle] = marker
+//
+//        //setMarker((clusterItem as MyItem), marker)
+//    }
 
     override fun onBeforeClusterItemRendered(item: T, markerOptions: MarkerOptions) {
         super.onBeforeClusterItemRendered(item, markerOptions)
@@ -458,6 +458,10 @@ class MarkerClusterRender<T : MyItem>(
             markerOptions.title(myItem.itemTitle)
             markerOptions.snippet(myItem.itemSnippet)
         }
+    }
+
+    override fun onClusterItemUpdated(item: T, marker: Marker) {
+        super.onClusterItemUpdated(item, marker)
     }
 
     private fun clusterIcon(context: Context, bitmap : Bitmap, size: Int): BitmapDescriptor {

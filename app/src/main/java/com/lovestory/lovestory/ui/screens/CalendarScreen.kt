@@ -126,14 +126,14 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
     var photoPosition by remember { mutableStateOf(emptyList<LatLng>()) }
     val dataLoaded = remember { mutableStateOf(false) }
     val meetDataLoaded = remember { mutableStateOf(false) }
-    val meetDate = remember { mutableStateListOf<String>() }
+    val meetDate by remember { mutableStateOf(mutableSetOf<String>()) }
     val meetDateAfterLoad = remember { mutableStateListOf<String>() }
 
     val context = LocalContext.current
     val token = getToken(context)
 
     lateinit var repository : SyncedPhotoRepository
-    val photoDate = remember { mutableStateListOf<String>() }
+    var photoDate by remember { mutableStateOf(emptyList<String>()) }
     val items = remember{ mutableStateListOf<MyItem>() }
 
     var latLngMarker by remember { mutableStateOf(emptyList<LatLng>()) }
@@ -141,56 +141,49 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
     var photoExist by remember { mutableStateOf(false) }
 
     val syncedPhotosByDate by syncedPhotoView.groupedSyncedPhotosByDate.observeAsState(initial = mapOf())
-    //val allPhotoListState = rememberLazyGridState()
+    val allPhotoListState = rememberLazyGridState()
 
     //var syncedPhotos by remember { mutableStateOf(emptyList<String>()) }
 //    val allPhotoListState = rememberLazyListState()
     var syncedPhotos by remember { mutableStateOf(emptyList<SyncedPhoto>()) }
 
     var syncedPhoto by remember { mutableStateOf(emptyList<SyncedPhoto>()) }
-    var uniqueDate = remember { mutableStateListOf<String>() }
+    var uniqueDate by remember { mutableStateOf(mutableSetOf<String>()) }
 
     val systemUiController = rememberSystemUiController()
 
     //해야 되는 게 코루틴 정리. 룸 db
     LaunchedEffect(null) {
-        val meetDay = getDay(token!!, monthToString(visibleMonth.yearMonth))
-        meetDay.body()?.forEach{
-            meetDate.add(intmonthToString(visibleMonth.yearMonth, it))
+        //getDayListByTargetMonth
+        val photoDatabase = PhotoDatabase.getDatabase(context)
+        val photoDao = photoDatabase.syncedPhotoDao()
+        repository = SyncedPhotoRepository(photoDao)
+        val listOfDays = repository.getDayListByTargetMonth(monthToString(visibleMonth.yearMonth))
+        listOfDays?.forEach {
+            uniqueDate.add(it)
+            meetDate.add(it)
         }
-
-
-//        getDayListByTargetMonth
-
-        //shared Preference 에서 get Comment
-//        val data = getSavedComment(context)
-//        coupleMemoryList = data
-//        coupleMemoryList.forEach { CoupleMemory -> Log.d("쉐어드1", "$CoupleMemory") }
+        Log.d("유니크","$uniqueDate")
 
         //get Comment
         val getMemoryList: Response<List<GetMemory>> = getComment(token!!)
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
         if(getMemoryList.isSuccessful){
             getMemoryList.body()!!.forEach {getMemory ->
-                val date = LocalDate.parse(getMemory.date, formatter)
-                val comment = getMemory.comment
-                val stringMemory = StringMemory(date.toString(), comment)
-                stringMemoryList.add(stringMemory)
+                coupleMemoryList += CoupleMemory(LocalDate.parse(getMemory.date, formatter), getMemory.comment)
             }
         }
-        coupleMemoryList = convertToCoupleMemoryList(stringMemoryList)
-        saveComment(context, coupleMemoryList)
         coupleMemoryList.forEach {
-            if (!meetDate.contains(dateToString(it.date))) {
-                meetDate.add(dateToString(it.date))
-            }
+            meetDate.add(dateToString(it.date))
         }
 
-        val photoDatabase = PhotoDatabase.getDatabase(context)
-        val photoDao = photoDatabase.syncedPhotoDao()
-        repository = SyncedPhotoRepository(photoDao)
-        val dayList = repository.getDayListByTargetMonth("05")
-        val uniqueDatesSet = HashSet<String>()
+        //get meetday by month
+        val meetDay = getDay(token!!, monthToString(visibleMonth.yearMonth))
+        meetDay.body()?.forEach{
+            meetDate.add(intmonthToString(visibleMonth.yearMonth, it))
+        }
+
+
 
 //        for (synced in syncedPhotos) {
 //            if (synced.date.substring(0, 10) !in uniqueDatesSet) {
@@ -199,19 +192,15 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
 //                uniqueDate.add(synced.date.substring(0, 10))
 //            }
 //        }
-
         meetDateAfterLoad.addAll(meetDate)
-
-        /**********************************************************************
-        val listOfDays = repository.getDayListByTargetMonth("2023-05")
-        Log.d("Calender Screen - ListOfDays", listOfDays.toString())
-        **********************************************************************/
     }
 
     LaunchedEffect(visibleMonth.yearMonth){
-        val meetDay = getDay(token!!, monthToString(visibleMonth.yearMonth))
-        meetDay.body()?.forEach{
-            meetDateAfterLoad.add(intmonthToString(visibleMonth.yearMonth, it))
+        if(visibleMonth.yearMonth != currentMonth) {
+            val meetDay = getDay(token!!, monthToString(visibleMonth.yearMonth))
+            meetDay.body()?.forEach {
+                meetDateAfterLoad.add(intmonthToString(visibleMonth.yearMonth, it))
+            }
         }
     }
 
@@ -410,7 +399,7 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                                     coupleMemoryList.filterNot { it.date == date }
                                 val delete: Any =
                                     deleteComment(token!!, dateToString(selection.date))
-                                if (!photoDate.contains(dateToString(date))) {
+                                if (!uniqueDate.contains(dateToString(date))) {
                                     meetDateAfterLoad.remove(dateToString(date))
                                 }
                             }
@@ -437,7 +426,6 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                                         dateToString(selection.date),
                                         editedcomment
                                     )
-                                    saveComment(context, coupleMemoryList)
                                 }
                             } else {
                                 if (editedcomment != "") {
@@ -477,7 +465,7 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
 
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(3),
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().height((screenWidth - 80.dp) + 100.dp),
                     contentPadding = PaddingValues(bottom = 20.dp, top = 10.dp, start = 20.dp, end = 20.dp),
                     state = allPhotoListState
                 ){
@@ -496,7 +484,7 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
 
                             Spacer(modifier = Modifier.height(10.dp))
 
-                            if (dialogContent) {
+                            if ((dialogContent && uniqueDate.contains(dateToString(selection.date)) || (dialogContent && latLng.isNotEmpty()))) {
                                 Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -504,7 +492,6 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                                         .wrapContentHeight()
                                         .clip(RoundedCornerShape(10.dp))
                                         .background(color = Color(0xFFF8F8F8))
-
                                 ) {
                                     selectionSave = selection
                                     Column(){
@@ -563,7 +550,10 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                                                                 )
                                                             } else {
                                                                 val getResult =
-                                                                    getThumbnailForPhoto(token!!, it.id)
+                                                                    getThumbnailForPhoto(
+                                                                        token!!,
+                                                                        it.id
+                                                                    )
                                                                 items.add(
                                                                     MyItem(
                                                                         LatLng(
@@ -652,12 +642,13 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                                                                 ClusterManager<MyItem>(context, map)
                                                         }
                                                         clusterManager?.addItems(items)
-                                                        clusterManager?.renderer = MarkerClusterRender(
-                                                            context,
-                                                            map,
-                                                            clusterManager!!
-                                                        ) {
-                                                        }
+                                                        clusterManager?.renderer =
+                                                            MarkerClusterRender(
+                                                                context,
+                                                                map,
+                                                                clusterManager!!
+                                                            ) {
+                                                            }
                                                         clusterManager?.setOnClusterClickListener {
                                                             false
                                                         }
@@ -671,46 +662,45 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                                                         }
                                                     }
                                                 }
-                                            }
-                                        else {
-                                            Column(
-                                                modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .aspectRatio(2f)
-                                                    .clip(RoundedCornerShape(10.dp)).background(color = Color(0xFFF8F8F8))
-                                                ,
-                                                verticalArrangement = Arrangement.Center,
-                                                horizontalAlignment = Alignment.CenterHorizontally
+                                            } else {
+                                                if (uniqueDate.contains(dateToString(selection.date))) {
+                                                    Column(
+                                                        modifier = Modifier
+                                                            .fillMaxWidth()
+                                                            .aspectRatio(2f)
+                                                            .clip(RoundedCornerShape(10.dp))
+                                                            .background(color = Color(0xFFF8F8F8)),
+                                                        verticalArrangement = Arrangement.Center,
+                                                        horizontalAlignment = Alignment.CenterHorizontally
 
-                                            ) {
-                                                Icon(
-                                                    painter = painterResource(id = R.drawable.ic_not_exist_location_foreground),
-                                                    contentDescription = "이미지가 존재하지 않음" ,
-                                                    modifier = Modifier.size(50.dp),
-                                                    tint = Color.LightGray
-                                                )
-                                                Spacer(modifier = Modifier.height(10.dp))
-                                                Text(
-                                                    text = "위치 기록이 없어요.",
-                                                    fontWeight = FontWeight.Bold,
-                                                    color = Color.LightGray
-                                                )
+                                                    ) {
+                                                        Icon(
+                                                            painter = painterResource(id = R.drawable.ic_not_exist_location_foreground),
+                                                            contentDescription = "위치 정보가 없음",
+                                                            modifier = Modifier.size(50.dp),
+                                                            tint = Color.LightGray
+                                                        )
+                                                        Spacer(modifier = Modifier.height(10.dp))
+                                                        Text(
+                                                            text = "위치 기록이 없어요.",
+                                                            fontWeight = FontWeight.Bold,
+                                                            color = Color.LightGray
+                                                        )
+                                                    }
+                                                }
                                             }
-                                        }
                                         }
                                     }
-
                                 }
                                 Spacer(modifier = Modifier.height(10.dp))
-
-                            } else {
-                                val screenWidth =
+                            }
+                            else {
+                                val dialogWidth =
                                     LocalConfiguration.current.screenWidthDp.dp - 80.dp
                                 Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .aspectRatio(3f),
-
+                                        .height(dialogWidth),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Text(
@@ -724,7 +714,7 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                         }
                     }
 
-                    if (!uniqueDate.contains(dateToString(selection.date)) && dialogContent) {
+                    if (!uniqueDate.contains(dateToString(selection.date)) && latLng.isNotEmpty()) {
                         item(
                             span = {
                                 GridItemSpan(
@@ -735,7 +725,7 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                             Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .aspectRatio(3f)
+                                    .aspectRatio(2f)
                                     .background(
                                         color = Color.White,
                                         RoundedCornerShape(12.dp)
@@ -759,7 +749,7 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                             }
                         }
                     }
-                    else {
+                    else if(uniqueDate.contains(dateToString(selection.date)) && dialogContent){
                         val filteredSyncedPhotosByDate =
                             syncedPhotosByDate.filterKeys { key ->
                                 key == dateToString(selection.date)
@@ -786,6 +776,7 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                         }
                     }
                 }
+                Spacer(modifier = Modifier.height(20.dp))
             }
         }
     }
