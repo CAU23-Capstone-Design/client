@@ -526,7 +526,6 @@ fun ClickPhotoDetailScreenFromServer(
     id: String,
     date: String
 ){
-    val syncedPhotos by syncedPhotoView.listOfSyncPhotos.observeAsState(initial = listOf())
     var daySyncedPhoto by remember {mutableStateOf(emptyList<SyncedPhoto>())}
 
     var isDropMenuForDetailPhoto by remember {mutableStateOf(false)}
@@ -537,9 +536,13 @@ fun ClickPhotoDetailScreenFromServer(
     var dataLoad by remember { mutableStateOf(false) }
     //val pagerState = rememberPagerState()
 
+    val database = PhotoDatabase.getDatabase(context)
+    val syncedPhotoDao = database.syncedPhotoDao()
+    val repository = SyncedPhotoRepository(syncedPhotoDao)
+
     LaunchedEffect(null){
-        //pagerState.scrollToPage(6)
-        daySyncedPhoto = syncedPhotos.filter{ it.id == id }
+        val syncedPhoto = repository.getSyncedPhotoById(id)
+        daySyncedPhoto += syncedPhoto!!
         if(daySyncedPhoto != null){
             dataLoad = true
         }
@@ -550,10 +553,6 @@ fun ClickPhotoDetailScreenFromServer(
             color = Color.Black,
         )
     }
-
-    val database = PhotoDatabase.getDatabase(context)
-    val syncedPhotoDao = database.syncedPhotoDao()
-    val repository = SyncedPhotoRepository(syncedPhotoDao)
 
     val syncedPhoto by syncedPhotoView.syncedPhoto.observeAsState(null)
 

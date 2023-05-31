@@ -74,9 +74,6 @@ fun MapScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhot
 
     var bitmapList by remember { mutableStateOf(emptyList<Bitmap>()) }
 
-//    val drawable1 = ContextCompat.getDrawable(context, R.drawable.img)
-//    val bitmap1 = (drawable1 as BitmapDrawable).bitmap/**/
-
     var isPopupVisible by remember { mutableStateOf(false) }
     var itemPopup by remember { mutableStateOf(emptyList<MyItem>()) }
 
@@ -210,6 +207,11 @@ fun MapScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhot
                     clusterManager?.setOnClusterClickListener {
                         itemPopup = it.items.filter{it.itemType == "PHOTO"}
                         if(itemPopup.isNotEmpty()){
+                            if(itemPopup.size == 1){
+                                navHostController.navigate(CalendarStack.ClickDetailScreen.route+"/${itemPopup[0].id}/${date}") {
+                                    popUpTo(CalendarStack.ClickDetailScreen.route)
+                                }
+                            }
                             isPopupVisible = true
                         }
                         false
@@ -430,12 +432,12 @@ class MarkerClusterRender<T : MyItem>(
         }
     }
 
-    override fun onClusterItemRendered(clusterItem: T, marker: Marker) {
-        super.onClusterItemRendered(clusterItem, marker)
-        clusterMap[(clusterItem as MyItem).itemTitle] = marker
-
-        //setMarker((clusterItem as MyItem), marker)
-    }
+//    override fun onClusterItemRendered(clusterItem: T, marker: Marker) {
+//        super.onClusterItemRendered(clusterItem, marker)
+//        clusterMap[(clusterItem as MyItem).itemTitle] = marker
+//
+//        //setMarker((clusterItem as MyItem), marker)
+//    }
 
     override fun onBeforeClusterItemRendered(item: T, markerOptions: MarkerOptions) {
         super.onBeforeClusterItemRendered(item, markerOptions)
@@ -461,6 +463,10 @@ class MarkerClusterRender<T : MyItem>(
             markerOptions.title(myItem.itemTitle)
             markerOptions.snippet(myItem.itemSnippet)
         }
+    }
+
+    override fun onClusterItemUpdated(item: T, marker: Marker) {
+        super.onClusterItemUpdated(item, marker)
     }
 
     private fun clusterIcon(context: Context, bitmap : Bitmap, size: Int): BitmapDescriptor {
