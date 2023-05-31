@@ -95,7 +95,7 @@ fun SettingHeader(){
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
-            .background(Color(0xBBF3F3F3))
+            .background(Color(0xFFF3F3F3))
             .fillMaxWidth()
             .height(60.dp)
             .padding(horizontal = 20.dp)
