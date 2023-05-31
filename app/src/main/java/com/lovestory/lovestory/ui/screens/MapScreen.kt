@@ -207,6 +207,11 @@ fun MapScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhot
                     clusterManager?.setOnClusterClickListener {
                         itemPopup = it.items.filter{it.itemType == "PHOTO"}
                         if(itemPopup.isNotEmpty()){
+                            if(itemPopup.size == 1){
+                                navHostController.navigate(CalendarStack.ClickDetailScreen.route+"/${itemPopup[0].id}/${date}") {
+                                    popUpTo(CalendarStack.ClickDetailScreen.route)
+                                }
+                            }
                             isPopupVisible = true
                         }
                         false
