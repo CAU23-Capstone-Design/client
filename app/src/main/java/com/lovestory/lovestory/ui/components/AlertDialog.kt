@@ -121,7 +121,10 @@ fun DeleteSyncPhotosDialog(
                 TextButton(onClick = {
                     showDeleteSyncedPhotoDialog.value = false
                     CoroutineScope(Dispatchers.IO).launch {
-                        deletePhotosByIds(context, syncedPhotoView)
+                        deletePhotosByIds(
+                            context,
+                            syncedPhotoView,
+                        )
                         isPressedPhotoMode.value = false
                         withContext(Dispatchers.Main){
                             Toast.makeText(context, "${countSelectedPhotos.value}장의 사진이 삭제 되었습니다.", Toast.LENGTH_SHORT).show()

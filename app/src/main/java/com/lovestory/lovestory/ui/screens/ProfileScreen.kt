@@ -23,6 +23,7 @@ import androidx.navigation.NavHostController
 import com.lovestory.lovestory.R
 import com.lovestory.lovestory.model.UserForLoginPayload
 import com.lovestory.lovestory.module.*
+import com.lovestory.lovestory.ui.components.AvatarWithChar
 import com.lovestory.lovestory.ui.components.DisconnectDialog
 import com.lovestory.lovestory.ui.components.LogoutDialog
 import com.lovestory.lovestory.ui.components.SettingMenuList
@@ -94,7 +95,7 @@ fun SettingHeader(){
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
-            .background(Color(0xBBF3F3F3))
+            .background(Color(0xFFF3F3F3))
             .fillMaxWidth()
             .height(60.dp)
             .padding(horizontal = 20.dp)
@@ -108,7 +109,9 @@ fun SettingHeader(){
 }
 
 @Composable
-fun UserProfileSection(userData : UserForLoginPayload){
+fun UserProfileSection(
+    userData : UserForLoginPayload
+){
     val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
     val parsedDate = LocalDate.parse(userData.birthday.substring(0,10), formatter)
     val nextDate = parsedDate.plusDays(1)
@@ -119,13 +122,7 @@ fun UserProfileSection(userData : UserForLoginPayload){
     Column (
         horizontalAlignment = Alignment.CenterHorizontally
     ){
-        Image(
-            painter = painterResource(id = R.mipmap.ic_male_char_foreground),
-            contentDescription = "profile image",
-            modifier = Modifier
-                .size(100.dp)
-                .clip(CircleShape)
-        )
+        AvatarWithChar(gender = userData.gender)
         Spacer(modifier = Modifier.height(10.dp))
         Text(
             text = userData.name,

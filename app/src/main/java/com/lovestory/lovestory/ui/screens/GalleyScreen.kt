@@ -9,12 +9,14 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -171,36 +173,18 @@ fun GalleryScreen(navHostController: NavHostController, syncedPhotoView : Synced
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            // gallery header
-            Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .background(Color(0xBBF3F3F3))
-                    .fillMaxWidth()
-                    .height(60.dp)
-                    .padding(horizontal = 20.dp)
-            ) {
-                AnimatedVisibility( visible = !isPressedPhotoMode.value, enter = fadeIn(), exit = fadeOut()) {
-                    HeaderForGallery(
-                        context = context,
-                        isDropMenuForGalleryScreen = isDropMenuForGalleryScreen,
-                        isPressedPhotoMode = isPressedPhotoMode,
-                        selectedButton = selectedButton,
-                    )
-                }
-                AnimatedVisibility(visible = isPressedPhotoMode.value, enter = fadeIn(), exit = fadeOut()){
-                    HeaderForDeletePhoto(
-                        context = context,
-                        syncedPhotoView = syncedPhotoView,
-                        isPressedPhotoMode = isPressedPhotoMode,
-                        countSelectedPhotos = countSelectedPhotos,
-                        showDeleteSyncedPhotoDialog = showDeleteSyncedPhotoDialog
-                    )
-                }
-            }
+            GalleryHeader(
+                context,
+                isPressedPhotoMode,
+                isDropMenuForGalleryScreen,
+                selectedButton,
+                syncedPhotoView,
+                countSelectedPhotos,
+                showDeleteSyncedPhotoDialog
+            )
 
             Spacer(modifier = Modifier.weight(1f))
+
             AnimatedVisibility(visible = !isPressedPhotoMode.value, enter= fadeIn(), exit = fadeOut()) {
                 FloatingSection(
                     items = items,
@@ -211,6 +195,45 @@ fun GalleryScreen(navHostController: NavHostController, syncedPhotoView : Synced
                 )
             }
 
+        }
+    }
+}
+
+@Composable
+fun GalleryHeader(
+    context: Context,
+    isPressedPhotoMode : MutableState<Boolean>,
+    isDropMenuForGalleryScreen : MutableState<Boolean>,
+    selectedButton : String,
+    syncedPhotoView : SyncedPhotoView,
+    countSelectedPhotos : MutableState<Int>,
+    showDeleteSyncedPhotoDialog : MutableState<Boolean>,
+){
+    Row(
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .background(Color(0xBBF3F3F3))
+            .fillMaxWidth()
+            .height(60.dp)
+            .padding(start = 10.dp, end = 10.dp)
+    ) {
+        AnimatedVisibility( visible = !isPressedPhotoMode.value, enter = fadeIn(), exit = fadeOut()) {
+            HeaderForGallery(
+                context = context,
+                isDropMenuForGalleryScreen = isDropMenuForGalleryScreen,
+                isPressedPhotoMode = isPressedPhotoMode,
+                selectedButton = selectedButton,
+            )
+        }
+        AnimatedVisibility(visible = isPressedPhotoMode.value, enter = fadeIn(), exit = fadeOut()){
+            HeaderForDeletePhoto(
+                context = context,
+                syncedPhotoView = syncedPhotoView,
+                isPressedPhotoMode = isPressedPhotoMode,
+                countSelectedPhotos = countSelectedPhotos,
+                showDeleteSyncedPhotoDialog = showDeleteSyncedPhotoDialog
+            )
         }
     }
 }
@@ -275,7 +298,8 @@ fun HeaderForGallery(
         Text(
             text = "갤러리",
             fontSize = 22.sp,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(start = 10.dp)
         )
 
         AnimatedVisibility(visible = selectedButton == "전체", enter = fadeIn(), exit = fadeOut()) {
@@ -283,7 +307,7 @@ fun HeaderForGallery(
                 Icon(
                     painter = painterResource(id = R.drawable.baseline_sync_24),
                     contentDescription = "sync photo",
-                    modifier = Modifier.clickable {
+                    modifier = Modifier.clip(shape = CircleShape).clickable {
                         Toast.makeText(context,"사진 동기화를 시작합니다.", Toast.LENGTH_SHORT).show()
                         CoroutineScope(Dispatchers.IO).launch {
                             checkExistNeedPhotoForSync(context)
@@ -291,16 +315,16 @@ fun HeaderForGallery(
                                 Toast.makeText(context, "사진 동기화가 완료되었습니다.", Toast.LENGTH_SHORT).show()
                             }
                         }
-                    }
+                    }.padding(10.dp)
                 )
 
-                Spacer(modifier = Modifier.width(20.dp))
+//                Spacer(modifier = Modifier.width(20.dp))
 
                 Box() {
                     Icon(
                         painter = painterResource(id = R.drawable.baseline_more_vert_24),
                         contentDescription = null,
-                        modifier = Modifier.clickable {isDropMenuForGalleryScreen.value = true},
+                        modifier = Modifier.clip(shape = CircleShape).clickable {isDropMenuForGalleryScreen.value = true}.padding(10.dp),
                         tint = Color.Black
                     )
                     DropdownMenu(
@@ -348,11 +372,11 @@ fun HeaderForDeletePhoto(
                 text = "취소",
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.clickable {
+                modifier = Modifier.clip(shape = CircleShape).clickable {
                     syncedPhotoView.clearSelectedPhotosSet()
                     isPressedPhotoMode.value = false
                     countSelectedPhotos.value = 0
-                }
+                }.padding(10.dp)
             )
         }
         Box() {
@@ -361,7 +385,7 @@ fun HeaderForDeletePhoto(
                 fontSize = 18.sp,
                 color = Color.Red,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.clickable {
+                modifier = Modifier.clip(shape = CircleShape).clickable {
                     if(countSelectedPhotos.value >0){
                         showDeleteSyncedPhotoDialog.value = true
                     }
@@ -370,7 +394,7 @@ fun HeaderForDeletePhoto(
                             .makeText(context, "선택된 사진이 없습니다.", Toast.LENGTH_SHORT)
                             .show()
                     }
-                }
+                }.padding(10.dp)
             )
         }
     }

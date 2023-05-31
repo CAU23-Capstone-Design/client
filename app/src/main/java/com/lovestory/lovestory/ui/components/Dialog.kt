@@ -1,8 +1,6 @@
 package com.lovestory.lovestory.ui.components
 
 import android.Manifest
-import android.content.Context
-import android.content.Intent
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -14,10 +12,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -32,15 +27,19 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavHostController
-import com.lovestory.lovestory.module.deleteToken
-import com.lovestory.lovestory.module.getPermissionLauncher
-import com.lovestory.lovestory.module.getResultPermissionCheck
-import com.lovestory.lovestory.services.LocationService
+import com.lovestory.lovestory.module.*
 import com.maxkeppeker.sheets.core.models.base.SheetState
 import java.time.LocalDate
 
+/**
+ * 커플 만난날 입력 Dialog Composable
+ *
+ * @param onDismissRequest Dialog 종료
+ * @param properties Dialog 속성
+ * @param content Dialog 내용
+ */
 @Composable
-fun InputMeetDayDialog(
+fun LoveStoryDialog(
     onDismissRequest : ()-> Unit,
     properties: DialogProperties = DialogProperties(),
     content : @Composable () -> Unit
@@ -53,6 +52,15 @@ fun InputMeetDayDialog(
     }
 }
 
+/**
+ * 커플 만난날 입력 Dialog Container
+ *
+ * @param navHostController Navigation Controller
+ * @param onDismissRequest Dialog 종료
+ * @param selectedMeetDates 커플 만난날
+ * @param calendarForMeetState 달력 상태
+ * @param code 커플 코드
+ */
 @Composable
 fun CoupleSyncDialog(
     navHostController: NavHostController,
@@ -61,7 +69,7 @@ fun CoupleSyncDialog(
     calendarForMeetState : SheetState,
     code :String?
     ){
-    InputMeetDayDialog(
+    LoveStoryDialog(
         onDismissRequest = onDismissRequest,
         properties = DialogProperties(dismissOnBackPress = true, dismissOnClickOutside = true),
     ){
@@ -92,6 +100,9 @@ fun CoupleSyncDialog(
     }
 }
 
+/**
+ * 권한 설정 안내 Dialog Container
+ */
 @Composable
 fun DialogForPermission(
 ){
@@ -118,6 +129,14 @@ fun DialogForPermission(
     }
 }
 
+/**
+ * 권한 설정 안내 Dialog Composable
+ *
+ * @param onDismissRequest Dialog 종료
+ * @param screenWidth 화면 너비
+ * @param isDialogOpen Dialog 상태
+ * @param requestPhotoPermissionLauncher 권한 설정 요청
+ */
 @Composable
 fun PermissionDialog(
     onDismissRequest : () -> Unit,
@@ -190,6 +209,13 @@ fun PermissionDialog(
     }
 }
 
+/**
+ * 권한 설명 Item Composable
+ *
+ * @param id 아이콘 id
+ * @param title 권한 이름
+ * @param description 권한 설명
+ */
 @Composable
 fun PermissionDialogItem(
     id : Int,
@@ -224,6 +250,12 @@ fun PermissionDialogItem(
     }
 }
 
+/**
+ * 백그라운드 위치 권한 설정 Dialog Composable
+ * @param onDismissRequest Dialog 종료
+ * @param isDialogOpen Dialog 상태
+ * @param requestBackgroundLocationPermissionLauncher 권한 설정 요청
+ */
 @Composable
 fun AskBackgroundLocationDialog(
     onDismissRequest : ()-> Unit,
@@ -276,40 +308,47 @@ fun AskBackgroundLocationDialog(
     }
 }
 
+/**
+ * 프로그래스바 Dialog Composable
+ *
+ * @param onDismissRequest Dialog 종료
+ * @param numOfCurrentUploadedPhoto 현재 업로드된 사진 수
+ * @param numOfTotalUploadPhoto 총 업로드할 사진 수
+ * @param titleForWork 작업 제목
+ */
 @Composable
-fun CalendarDialog(
+fun ProgressbarInDialog(
     onDismissRequest : ()-> Unit,
-    properties: DialogProperties = DialogProperties(),
-    content : @Composable () -> Unit,
+    numOfCurrentUploadedPhoto : MutableState<Int>,
+    numOfTotalUploadPhoto : MutableState<Int>,
+    titleForWork : String
 ){
-    Dialog(
-        onDismissRequest = onDismissRequest,
-        properties = properties,
-    ) {
-        Box(
+    Dialog(onDismissRequest = onDismissRequest, properties = DialogProperties(dismissOnBackPress = false, dismissOnClickOutside=false)) {
+        Column(
             modifier = Modifier
-                .background(Color.Transparent)
-        ) {
-            content()
-        }
-    }
-}
+                .width(320.dp)
+                .wrapContentHeight()
+                .clip(RoundedCornerShape(15.dp))
+                .background(color = Color.White)
+                .padding(vertical = 20.dp, horizontal = 10.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
 
-@Composable
-fun MapDialog(
-    onDismissRequest : ()-> Unit,
-    properties: DialogProperties = DialogProperties(),
-    content : @Composable () -> Unit,
-){
-    Dialog(
-        onDismissRequest = onDismissRequest,
-        properties = properties,
-    ) {
-        Box(
-            modifier = Modifier
-                .background(Color.Transparent)
-        ) {
-            content()
+            ){
+            LinearProgressIndicator(
+                progress = numOfCurrentUploadedPhoto.value.toFloat()/numOfTotalUploadPhoto.value.toFloat(),
+                color = Color(0xFFFCC5C5),
+                backgroundColor = Color(0xBBF3F3F3),
+                modifier = Modifier
+                    .padding(vertical = 10.dp)
+                    .height(5.dp)
+            )
+            Text(
+                text = "$titleForWork (${numOfCurrentUploadedPhoto.value} / ${numOfTotalUploadPhoto.value})",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Normal,
+                modifier = Modifier.padding(vertical = 10.dp)
+            )
         }
     }
 }

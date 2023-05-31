@@ -464,7 +464,7 @@ fun ThumbnailOfPhotoFromServerPopup(
             .width(imageWidth)
             .aspectRatio(1f)
             .padding(2.dp)
-            .background(Color.LightGray, RoundedCornerShape(12.dp))
+            .background(Color.LightGray, RoundedCornerShape(0.dp))
         )
     }
 }
@@ -490,7 +490,7 @@ fun DisplayImageFromBitmapPopup(
             .width(imageWidth)
             .aspectRatio(1f)
             .padding(2.dp)
-            .clip(RoundedCornerShape(12.dp))
+            .clip(RoundedCornerShape(5.dp))
             .clickable {
                 onImageClick
                 navHostController.navigate(CalendarStack.DetailScreen.route+"/${photoIndex.value}/${date}") {

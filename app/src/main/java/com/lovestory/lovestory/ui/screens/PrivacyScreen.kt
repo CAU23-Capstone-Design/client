@@ -18,6 +18,7 @@ import androidx.navigation.NavHostController
 import com.lovestory.lovestory.R
 import com.lovestory.lovestory.module.getToken
 import com.lovestory.lovestory.ui.components.PdfViewCompat
+import com.lovestory.lovestory.ui.components.ScreenHeaderWithBackButton
 
 @Composable
 fun PrivacyScreen(navHostController: NavHostController){
@@ -30,39 +31,9 @@ fun PrivacyScreen(navHostController: NavHostController){
         contentAlignment = Alignment.TopStart
     ) {
         PdfViewCompat()
-        Column(
-            verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.Start,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .background(Color(0xBBF3F3F3))
-                    .fillMaxWidth()
-                    .height(60.dp)
-                    .padding(horizontal = 20.dp)
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.baseline_arrow_back_24),
-                    contentDescription = null,
-                    modifier = Modifier.clickable { navHostController.popBackStack() },
-                    tint = Color.Black
-                )
-                Spacer(modifier = Modifier.width(20.dp))
-                Row(
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = "서비스 이용약관",
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            }
-        }
+        ScreenHeaderWithBackButton(
+            navHostController = navHostController,
+            headerTitle = "서비스 이용약관"
+        )
     }
 }

@@ -92,9 +92,8 @@ fun EditableTextField(initialValue: String, onValueChanged: (String) -> Unit) {
         placeholder = {Text("코멘트를 입력해보세요!")},
         modifier = Modifier
             .wrapContentHeight()
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp),
-        shape = RoundedCornerShape(15f.dp),
+            .fillMaxWidth(),
+        shape = RoundedCornerShape(10f.dp),
         colors = TextFieldDefaults.textFieldColors(
             backgroundColor = Color(0xFFF8F8F8),
             textColor = Color(0xFF000000),

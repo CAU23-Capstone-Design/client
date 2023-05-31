@@ -109,9 +109,7 @@ interface SyncedPhotoDao {
     @Query("SELECT * FROM syncedPhotos WHERE photo_id = :id")
     suspend fun getPhotoById(id: String): SyncedPhoto?
 
-    @Query("SELECT date FROM syncedPhotos WHERE strftime('%m', date) = :targetMonth")
-    suspend fun getDayListByMonth(targetMonth : String): List<String>?
+    @Query("SELECT DISTINCT substr(date, 1, 10) FROM syncedPhotos WHERE strftime('%Y-%m', date) = :targetYearMonth ORDER BY date ASC")
+    suspend fun getDayListByMonth(targetYearMonth : String): List<String>?
 
-//    @Query("SELECT DISTINCT substr(date, 1, 10) FROM syncedPhotos")
-//    fun getUniqueDates(): LiveData<List<String>>
 }

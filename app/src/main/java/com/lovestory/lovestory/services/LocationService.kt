@@ -2,19 +2,17 @@ package com.lovestory.lovestory.services
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.Service
+import android.app.*
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
 import android.util.Log
 import androidx.core.content.ContextCompat
-import android.app.Notification
 import androidx.core.app.NotificationCompat
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.content.Context
 import android.os.*
 import com.google.android.gms.location.*
+import com.lovestory.lovestory.MainActivity
 import com.lovestory.lovestory.R
 import com.lovestory.lovestory.broadcasts.LocationToPhoto.ACTION_START_PHOTO_PICKER_SERVICE
 import com.lovestory.lovestory.broadcasts.LocationToPhoto.ACTION_STOP_PHOTO_PICKER_SERVICE
@@ -176,11 +174,16 @@ class LocationService : Service() {
     }
 
     private fun createNotificationForLocationService():Notification{
+        val notificationIntent = Intent(this, MainActivity::class.java)
+        val pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE)
+
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("LoveStory")
             .setContentText("연인을 만나 추억을 기록해보세요!")
-            .setSmallIcon(R.drawable.ic_status_bar_foreground)
+            .setSmallIcon(R.mipmap.ic_notification_foreground)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
             .build()
     }
 

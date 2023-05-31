@@ -24,12 +24,11 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.lovestory.lovestory.R
 import com.lovestory.lovestory.module.getToken
+import com.lovestory.lovestory.ui.components.ScreenHeaderWithBackButton
 import com.lovestory.lovestory.ui.components.SelectMenuButtons
 
 @Composable
 fun HelpScreen(navHostController: NavHostController){
-    val context = LocalContext.current
-    val token = getToken(context)
     val (selectedButton, setSelectedButton) = remember { mutableStateOf("갤러리") }
     val items = listOf<String>(
         "갤러리", "캘린더"
@@ -41,30 +40,24 @@ fun HelpScreen(navHostController: NavHostController){
             .fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-//        AnimatedVisibility(visible = selectedButton =="대시보드",
-//        ){
-//            Text("대시보드 설명")
-//        }
-        AnimatedVisibility(visible = selectedButton =="갤러리",
-        ){
-            Box(modifier = Modifier
-                .fillMaxSize()
-                .padding(top = 60.dp)){
+        Box(modifier = Modifier
+            .fillMaxSize()
+            .padding(top = 80.dp, bottom= 80.dp, start = 20.dp, end = 20.dp)){
+            AnimatedVisibility(
+                visible = selectedButton =="갤러리",
+                enter = fadeIn(),
+                exit = fadeOut()
+            ){
                 Image(painter = painterResource(id = R.drawable.img_helpgallery), contentDescription = null, modifier = Modifier.fillMaxSize())
             }
-        }
-        AnimatedVisibility(visible = selectedButton =="캘린더",
-        ){
-            Box(modifier = Modifier
-                .fillMaxSize()
-                .padding(top = 60.dp)){
+            AnimatedVisibility(
+                visible = selectedButton =="캘린더",
+                enter = fadeIn(),
+                exit = fadeOut()
+            ){
                 Image(painter = painterResource(id = R.drawable.img_helpcalendar), contentDescription = null, modifier = Modifier.fillMaxSize())
             }
         }
-//        AnimatedVisibility(visible = selectedButton =="프로필",
-//        ){
-//            Text("프로필 설명")
-//        }
 
         Column(
             verticalArrangement = Arrangement.Top,
@@ -72,35 +65,10 @@ fun HelpScreen(navHostController: NavHostController){
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .background(Color(0xBBF3F3F3))
-                    .fillMaxWidth()
-                    .height(60.dp)
-                    .padding(horizontal = 20.dp)
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.baseline_arrow_back_24),
-                    contentDescription = null,
-                    modifier = Modifier.clickable {navHostController.popBackStack() },
-                    tint = Color.Black
-                )
-                Spacer(modifier = Modifier.width(20.dp))
-                Row(
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                ) {
-                    Text(
-                        text = "사용 가이드",
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            }
+            ScreenHeaderWithBackButton(
+                navHostController = navHostController,
+                headerTitle = "사용 가이드"
+            )
             Spacer(modifier = Modifier.weight(1f))
             Row(
                 horizontalArrangement = Arrangement.Center,

@@ -6,23 +6,31 @@ import android.content.res.Resources
 import android.graphics.Bitmap
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.*
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.google.android.gms.maps.model.CameraPosition
@@ -117,15 +125,26 @@ fun MapScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhot
     Box(
         modifier = Modifier.fillMaxSize(),
     ){
-
         if (!dataLoaded.value) {
-            Box(modifier = Modifier
+            Column(modifier = Modifier
                 .fillMaxSize()
-                .background(color = Color.Transparent)
+                .background(color = Color.Transparent),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             ){
+                Icon(
+                    Icons.Outlined.LocationOn,
+                    contentDescription = "Load Google Map",
+                    modifier = Modifier
+                        .size(50.dp),
+                    tint = Color(0xFFE47676)
+                )
+                Spacer(modifier = Modifier.height(20.dp))
                 Text(
-                    text = "지도 로드 중...",
-                    modifier = Modifier.align(Alignment.Center)
+                    text = "지도 불러 오는 중",
+                    fontWeight = FontWeight.Bold,
+                    color = Color.LightGray,
+                    fontSize = 20.sp
                 )
             }
         } else {
@@ -215,7 +234,7 @@ fun MapScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhot
                 coroutineScopeMap.cancel()
                 navHostController.popBackStack()
             },
-            backgroundColor = colorResource(id = R.color.ls_pink)
+            backgroundColor = Color(0xFFF3F3F3)
         ) {
             Icon(
                 painter = painterResource(id = R.drawable.baseline_arrow_back_24),
@@ -226,7 +245,7 @@ fun MapScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhot
     }
 
     if(isPopupVisible){
-        MapDialog(
+        LoveStoryDialog(
             onDismissRequest = {
                 isPopupVisible = false
                 itemPopup = emptyList()
@@ -237,15 +256,17 @@ fun MapScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhot
             val screenWidth = LocalConfiguration.current.screenWidthDp.dp
             val boxWidth = remember { mutableStateOf(Dp.Unspecified) }
             val dens = LocalDensity.current
-                Box(
+                Column(
                     modifier = Modifier
                         .width(screenWidth - 80.dp)
                         .height(screenWidth)
                         .background(color = Color.White, RoundedCornerShape(12.dp))
+                        .padding(10.dp)
                         .onSizeChanged {
                             boxWidth.value = it.width.toDp(dens)
                         },
-                    contentAlignment = Alignment.TopCenter
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Top
                 ) {
                     val popupWidthDp = with(LocalDensity.current) {
                         LocalContext.current.resources.displayMetrics.widthPixels.dp
@@ -259,6 +280,10 @@ fun MapScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhot
                     }
 
                     //isPopupVisibleSave = true
+                    MapDialogHeader(onClick = {
+                        isPopupVisible = false
+                        itemPopup = emptyList()
+                    })
                     PhotoForMap(
                         syncedPhotosByDate = filteredSyncedPhotos,
                         token = token,
@@ -272,6 +297,31 @@ fun MapScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhot
         }
     }
 }
+
+@Composable
+fun MapDialogHeader(
+    onClick: () -> Unit
+){
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 5.dp),
+        horizontalArrangement = Arrangement.End,
+        verticalAlignment = Alignment.CenterVertically
+    ){
+        Icon(
+            Icons.Outlined.Close,
+            contentDescription = "나가기",
+            modifier = Modifier
+                .width(30.dp)
+                .height(30.dp)
+                .clip(CircleShape)
+                .clickable {
+                    onClick()
+                }
+                .padding(5.dp),
+        )
+    }
+}
+
 
 
 data class MyItem(
