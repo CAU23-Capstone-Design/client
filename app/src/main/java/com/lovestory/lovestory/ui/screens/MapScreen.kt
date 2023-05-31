@@ -432,12 +432,27 @@ class MarkerClusterRender<T : MyItem>(
         }
     }
 
-//    override fun onClusterItemRendered(clusterItem: T, marker: Marker) {
-//        super.onClusterItemRendered(clusterItem, marker)
-//        clusterMap[(clusterItem as MyItem).itemTitle] = marker
-//
-//        //setMarker((clusterItem as MyItem), marker)
-//    }
+    override fun onClusterItemRendered(clusterItem: T, marker: Marker) {
+        super.onClusterItemRendered(clusterItem, marker)
+
+        val myItem = clusterItem as MyItem
+
+        if(myItem.itemType == "PHOTO") {
+            val markerIcon = myItem.icon
+            val desiredSize = 60.dp // Set the desired size for the icon
+            val density = Resources.getSystem().displayMetrics.density
+            val scaledBitmap = Bitmap.createScaledBitmap(
+                markerIcon!!,
+                (desiredSize.value * density).toInt(),
+                (desiredSize.value * density).toInt(),
+                false
+            )
+            marker.setIcon(markerIcon(context, myItem.icon!!))
+        }else{
+            marker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
+        }
+    }
+
 
     override fun onBeforeClusterItemRendered(item: T, markerOptions: MarkerOptions) {
         super.onBeforeClusterItemRendered(item, markerOptions)
