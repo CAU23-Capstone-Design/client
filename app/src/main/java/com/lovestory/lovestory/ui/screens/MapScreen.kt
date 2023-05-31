@@ -66,9 +66,6 @@ fun MapScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhot
 
     var bitmapList by remember { mutableStateOf(emptyList<Bitmap>()) }
 
-//    val drawable1 = ContextCompat.getDrawable(context, R.drawable.img)
-//    val bitmap1 = (drawable1 as BitmapDrawable).bitmap/**/
-
     var isPopupVisible by remember { mutableStateOf(false) }
     var itemPopup by remember { mutableStateOf(emptyList<MyItem>()) }
 

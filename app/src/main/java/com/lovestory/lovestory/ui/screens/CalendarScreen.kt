@@ -119,24 +119,19 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
 
     val context = LocalContext.current
     val token = getToken(context)
-    val dialogWidthDp = remember { mutableStateOf(0.dp) }
 
     lateinit var repository : SyncedPhotoRepository
-    lateinit var repositoryDummy : SyncedPhotoRepository //나중에 월별로 받아오면 삭제할 부분
     val photoDate = remember { mutableStateListOf<String>() }
     val items = remember{ mutableStateListOf<MyItem>() }
 
     var latLngMarker by remember { mutableStateOf(emptyList<LatLng>()) }
-//    val drawable = ContextCompat.getDrawable(context, R.drawable.img) //마커 이미지로 변경
-//    val bitmap = (drawable as BitmapDrawable).bitmap
-
     var latLngExist by remember { mutableStateOf(false) }
     var photoExist by remember { mutableStateOf(false) }
 
     val syncedPhotosByDate by syncedPhotoView.groupedSyncedPhotosByDate.observeAsState(initial = mapOf())
     val allPhotoListState = rememberLazyGridState()
 
-    var syncedPhotos by remember { mutableStateOf(emptyList<SyncedPhoto>()) }
+    var syncedPhotos by remember { mutableStateOf(emptyList<String>()) }
 
     var syncedPhoto by remember { mutableStateOf(emptyList<SyncedPhoto>()) }
     var uniqueDate = remember { mutableStateListOf<String>() }
@@ -144,15 +139,15 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
     val systemUiController = rememberSystemUiController()
 
     //해야 되는 게 코루틴 정리. 룸 db
-    LaunchedEffect(key1 = true) {
+    LaunchedEffect(null) {
         val meetDay = getDay(token!!, monthToString(visibleMonth.yearMonth))
         meetDay.body()?.forEach{
             meetDate.add(intmonthToString(visibleMonth.yearMonth, it))
         }
 
         //shared Preference 에서 get Comment
-        val data = getSavedComment(context)
-        coupleMemoryList = data
+//        val data = getSavedComment(context)
+//        coupleMemoryList = data
 //        coupleMemoryList.forEach { CoupleMemory -> Log.d("쉐어드1", "$CoupleMemory") }
 
         //get Comment
@@ -177,17 +172,16 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
         val photoDatabase = PhotoDatabase.getDatabase(context)
         val photoDao = photoDatabase.syncedPhotoDao()
         repository = SyncedPhotoRepository(photoDao)
-        syncedPhotos = repository.listOfGetAllSyncedPhoto()
-
+        val dayList = repository.getDayListByTargetMonth("05")
         val uniqueDatesSet = HashSet<String>()
 
-        for (synced in syncedPhotos) {
-            if (synced.date.substring(0, 10) !in uniqueDatesSet) {
-                uniqueDatesSet.add(synced.date.substring(0, 10))
-                meetDate.add(synced.date.substring(0, 10))
-                uniqueDate.add(synced.date.substring(0, 10))
-            }
-        }
+//        for (synced in syncedPhotos) {
+//            if (synced.date.substring(0, 10) !in uniqueDatesSet) {
+//                uniqueDatesSet.add(synced.date.substring(0, 10))
+//                meetDate.add(synced.date.substring(0, 10))
+//                uniqueDate.add(synced.date.substring(0, 10))
+//            }
+//        }
 
         meetDateAfterLoad.addAll(meetDate)
     }
@@ -248,11 +242,6 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
     }
 
     if (isPopupVisible) {
-//        coroutineScope.launch{
-//            if(meetDate.contains(dateToString(selection.date))){
-//                dialogContent = true
-//            }
-//        }
         dialogContent = meetDateAfterLoad.contains(dateToString(selection.date))
 
         var editedcomment by remember { mutableStateOf("") }
@@ -266,7 +255,6 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
         }
 
         CalendarDialog(
-//            selection = selection,
             onDismissRequest = {
                 if(existingMemory != null) {
                     coupleMemoryList.find{ it.date == selection.date }?.comment = editedcomment
@@ -294,14 +282,13 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                 photoPosition = emptyList()
                 dataLoaded.value = false
                 commentSave = ""
-            }, //onDismissRequest,
+            },
             properties = DialogProperties(dismissOnBackPress = true, dismissOnClickOutside = true)
         ) {
             var photoPosition by remember { mutableStateOf(emptyList<LatLng>()) }
 
             LaunchedEffect(null){
                 isPopupVisibleSave = true
-                Log.d("실행","2, $isPopupVisible, $isPopupVisibleSave, ${items.isNotEmpty()}")
                 //get GPS
                 val gps = getGps(token!!, dateToString(selection.date))
                 if (gps.body() != null) {
@@ -343,8 +330,6 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                         meetDateAfterLoad.add(dateToString(it.date))
                     }
                 }
-
-
             }
 
             val screenWidth = LocalConfiguration.current.screenWidthDp.dp
@@ -357,13 +342,12 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .wrapContentHeight()
                         .background(color = Color.Transparent)
-                        .padding(start = 25.dp, end = 25.dp, top = 15.dp, bottom = 10.dp),//vertical = 15.dp, horizontal = 25.dp),
+                        .padding(start = 25.dp, end = 25.dp, top = 15.dp, bottom = 10.dp),
                     verticalAlignment = Alignment.Bottom
                 ){
                     Text(
