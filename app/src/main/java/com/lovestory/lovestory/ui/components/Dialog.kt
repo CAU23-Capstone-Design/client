@@ -1,9 +1,6 @@
 package com.lovestory.lovestory.ui.components
 
 import android.Manifest
-import android.content.Context
-import android.content.Intent
-import android.renderscript.ScriptGroup
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -15,10 +12,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,17 +21,13 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavHostController
-import com.lovestory.lovestory.module.deleteToken
-import com.lovestory.lovestory.module.getPermissionLauncher
-import com.lovestory.lovestory.module.getResultPermissionCheck
-import com.lovestory.lovestory.services.LocationService
+import com.lovestory.lovestory.module.*
 import com.maxkeppeker.sheets.core.models.base.SheetState
 import java.time.LocalDate
 
@@ -318,6 +308,14 @@ fun AskBackgroundLocationDialog(
     }
 }
 
+/**
+ * 프로그래스바 Dialog Composable
+ *
+ * @param onDismissRequest Dialog 종료
+ * @param numOfCurrentUploadedPhoto 현재 업로드된 사진 수
+ * @param numOfTotalUploadPhoto 총 업로드할 사진 수
+ * @param titleForWork 작업 제목
+ */
 @Composable
 fun ProgressbarInDialog(
     onDismissRequest : ()-> Unit,

@@ -9,12 +9,14 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -214,7 +216,7 @@ fun GalleryHeader(
             .background(Color(0xBBF3F3F3))
             .fillMaxWidth()
             .height(60.dp)
-            .padding(horizontal = 20.dp)
+            .padding(start = 10.dp, end = 10.dp)
     ) {
         AnimatedVisibility( visible = !isPressedPhotoMode.value, enter = fadeIn(), exit = fadeOut()) {
             HeaderForGallery(
@@ -296,7 +298,8 @@ fun HeaderForGallery(
         Text(
             text = "갤러리",
             fontSize = 22.sp,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(start = 10.dp)
         )
 
         AnimatedVisibility(visible = selectedButton == "전체", enter = fadeIn(), exit = fadeOut()) {
@@ -304,7 +307,7 @@ fun HeaderForGallery(
                 Icon(
                     painter = painterResource(id = R.drawable.baseline_sync_24),
                     contentDescription = "sync photo",
-                    modifier = Modifier.clickable {
+                    modifier = Modifier.clip(shape = CircleShape).clickable {
                         Toast.makeText(context,"사진 동기화를 시작합니다.", Toast.LENGTH_SHORT).show()
                         CoroutineScope(Dispatchers.IO).launch {
                             checkExistNeedPhotoForSync(context)
@@ -321,7 +324,7 @@ fun HeaderForGallery(
                     Icon(
                         painter = painterResource(id = R.drawable.baseline_more_vert_24),
                         contentDescription = null,
-                        modifier = Modifier.clickable {isDropMenuForGalleryScreen.value = true}.padding(10.dp),
+                        modifier = Modifier.clip(shape = CircleShape).clickable {isDropMenuForGalleryScreen.value = true}.padding(10.dp),
                         tint = Color.Black
                     )
                     DropdownMenu(
@@ -369,11 +372,11 @@ fun HeaderForDeletePhoto(
                 text = "취소",
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.clickable {
+                modifier = Modifier.clip(shape = CircleShape).clickable {
                     syncedPhotoView.clearSelectedPhotosSet()
                     isPressedPhotoMode.value = false
                     countSelectedPhotos.value = 0
-                }
+                }.padding(10.dp)
             )
         }
         Box() {
@@ -382,7 +385,7 @@ fun HeaderForDeletePhoto(
                 fontSize = 18.sp,
                 color = Color.Red,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.clickable {
+                modifier = Modifier.clip(shape = CircleShape).clickable {
                     if(countSelectedPhotos.value >0){
                         showDeleteSyncedPhotoDialog.value = true
                     }
@@ -391,7 +394,7 @@ fun HeaderForDeletePhoto(
                             .makeText(context, "선택된 사진이 없습니다.", Toast.LENGTH_SHORT)
                             .show()
                     }
-                }
+                }.padding(10.dp)
             )
         }
     }

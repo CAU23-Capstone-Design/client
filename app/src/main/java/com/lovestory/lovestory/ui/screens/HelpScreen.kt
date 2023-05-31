@@ -40,25 +40,21 @@ fun HelpScreen(navHostController: NavHostController){
             .fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        AnimatedVisibility(
-            visible = selectedButton =="갤러리",
-            enter = fadeIn(),
-            exit = fadeOut()
-        ){
-            Box(modifier = Modifier
-                .fillMaxSize()
-                .padding(top = 60.dp)){
+        Box(modifier = Modifier
+            .fillMaxSize()
+            .padding(top = 80.dp, bottom= 80.dp, start = 20.dp, end = 20.dp)){
+            AnimatedVisibility(
+                visible = selectedButton =="갤러리",
+                enter = fadeIn(),
+                exit = fadeOut()
+            ){
                 Image(painter = painterResource(id = R.drawable.img_helpgallery), contentDescription = null, modifier = Modifier.fillMaxSize())
             }
-        }
-        AnimatedVisibility(
-            visible = selectedButton =="캘린더",
-            enter = fadeIn(),
-            exit = fadeOut()
-        ){
-            Box(modifier = Modifier
-                .fillMaxSize()
-                .padding(top = 60.dp)){
+            AnimatedVisibility(
+                visible = selectedButton =="캘린더",
+                enter = fadeIn(),
+                exit = fadeOut()
+            ){
                 Image(painter = painterResource(id = R.drawable.img_helpcalendar), contentDescription = null, modifier = Modifier.fillMaxSize())
             }
         }

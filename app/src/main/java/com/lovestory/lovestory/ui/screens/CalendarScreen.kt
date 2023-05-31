@@ -1,11 +1,5 @@
 package com.lovestory.lovestory.ui.screens
 
-//import com.google.android.gms.maps.model.CameraPosition
-//import com.google.android.gms.maps.model.LatLng
-//import com.google.maps.android.compose.GoogleMap
-//import com.google.maps.android.compose.Marker
-//import com.google.maps.android.compose.MarkerState
-//import com.google.maps.android.compose.rememberCameraPositionState
 import android.annotation.SuppressLint
 import android.graphics.drawable.BitmapDrawable
 import android.util.Log
@@ -42,6 +36,7 @@ import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.clustering.ClusterManager
 import com.google.maps.android.compose.*
+import com.kizitonwose.calendar.compose.CalendarState
 import com.kizitonwose.calendar.compose.HorizontalCalendar
 import com.kizitonwose.calendar.compose.rememberCalendarState
 import com.kizitonwose.calendar.core.*
@@ -71,8 +66,8 @@ import java.util.*
 @Composable
 fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhotoView) {
     val currentMonth = remember { YearMonth.now() }
-    val startMonth = remember { currentMonth.minusMonths(100) } // Adjust as needed
-    val endMonth = remember { currentMonth.plusMonths(100) } // Adjust as needed
+    val startMonth = remember { currentMonth.minusMonths(100) }
+    val endMonth = remember { currentMonth.plusMonths(100) }
     val daysOfWeek = remember { daysOfWeek() }
 
     var selectionSave by rememberSaveable { mutableStateOf(CalendarDay(date = LocalDate.now(), position = DayPosition.MonthDate))}
@@ -213,54 +208,58 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
         )
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White),
-        //horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Spacer(modifier = Modifier.height(10.dp))
-        SimpleCalendarTitle(
+    Box(){
+
+        Column(
             modifier = Modifier
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-            currentMonth = visibleMonth.yearMonth,
-            goToPrevious = {
-                coroutineScope.launch {
-                    state.animateScrollToMonth(state.firstVisibleMonth.yearMonth.previousMonth)
+                .fillMaxSize()
+                .background(Color.White).padding(top = 100.dp),
+        ) {
+//            Spacer(modifier = Modifier.height(10.dp))
+//            SimpleCalendarTitle(
+//                modifier = Modifier
+//                    .padding(horizontal = 16.dp, vertical = 12.dp),
+//                currentMonth = visibleMonth.yearMonth,
+//                goToPrevious = {
+//                    coroutineScope.launch {
+//                        state.animateScrollToMonth(state.firstVisibleMonth.yearMonth.previousMonth)
+//                    }
+//                },
+//                goToNext = {
+//                    coroutineScope.launch {
+//                        state.animateScrollToMonth(state.firstVisibleMonth.yearMonth.nextMonth)
+//                    }
+//                },
+//            )
+            Spacer(modifier = Modifier.height(10.dp))
+            DaysOfWeekTitle(daysOfWeek = daysOfWeek)
+            Spacer(modifier = Modifier.height(16.dp))
+            HorizontalCalendar(
+                modifier = Modifier.wrapContentWidth(),
+                state = state,
+                dayContent = { day ->
+                    Day(
+                        day = day,
+                        isPopupVisible = isPopupVisible,
+                        isSelected = selection == day,
+                        onOpenDialogRequest = onOpenDialogRequest,
+                        meetDate = meetDateAfterLoad,
+                    ) { clicked ->
+                        selection = clicked
+                    }
                 }
-            },
-            goToNext = {
-                coroutineScope.launch {
-                    state.animateScrollToMonth(state.firstVisibleMonth.yearMonth.nextMonth)
-                }
-            },
-        )
-        Spacer(modifier = Modifier.height(10.dp))
-        DaysOfWeekTitle(daysOfWeek = daysOfWeek)
-        Spacer(modifier = Modifier.height(16.dp))
-        HorizontalCalendar(
-            modifier = Modifier.wrapContentWidth(),//.background(color = Color.White, RoundedCornerShape(30.dp)),
+            )
+        }
+        CalendarHeader(
+            visibleMonth = visibleMonth,
+            coroutineScope = coroutineScope,
             state = state,
-            dayContent = { day ->
-                Day(
-                    day = day,
-                    isPopupVisible = isPopupVisible,
-                    isSelected = selection == day,
-                    onOpenDialogRequest = onOpenDialogRequest,
-                    meetDate = meetDateAfterLoad,
-                ) { clicked ->
-                    selection = clicked
-                }
-            }
         )
     }
 
+
+
     if (isPopupVisible) {
-//        coroutineScope.launch{
-//            if(meetDate.contains(dateToString(selection.date))){
-//                dialogContent = true
-//            }
-//        }
         dialogContent = meetDateAfterLoad.contains(dateToString(selection.date))
 
         var editedcomment by remember { mutableStateOf("") }
@@ -625,7 +624,7 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                                         .clip(RoundedCornerShape(12.dp))
                                 ){
                                     Text(
-                                        text = "위치 데이터가 없어요...",
+                                        text = "위치 데이터가 없어요",
                                         modifier = Modifier.align(Alignment.Center)
                                     )
                                 }
@@ -695,6 +694,44 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                 }
             }
         }
+    }
+}
+
+@Composable
+fun CalendarHeader(
+    visibleMonth: CalendarMonth,
+    coroutineScope: CoroutineScope,
+    state: CalendarState
+){
+    Row(
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .background(Color(0xBBF3F3F3))
+            .fillMaxWidth()
+            .height(85.dp)
+            .padding(horizontal = 20.dp)
+    ){
+        SimpleCalendarTitle(
+            modifier = Modifier
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            currentMonth = visibleMonth.yearMonth,
+            goToPrevious = {
+                coroutineScope.launch {
+                    state.animateScrollToMonth(state.firstVisibleMonth.yearMonth.previousMonth)
+                }
+            },
+            goToNext = {
+                coroutineScope.launch {
+                    state.animateScrollToMonth(state.firstVisibleMonth.yearMonth.nextMonth)
+                }
+            },
+        )
+//        Text(
+//            text = "캘린더",
+//            fontSize = 22.sp,
+//            fontWeight = FontWeight.Bold
+//        )
     }
 }
 

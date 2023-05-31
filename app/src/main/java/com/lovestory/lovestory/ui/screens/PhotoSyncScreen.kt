@@ -272,6 +272,7 @@ fun SectionOfPhotoListLayout(
                                 Box(
                                     modifier = Modifier
                                         .border(2.dp, Color.Black, CircleShape)
+                                        .clip(shape = CircleShape)
                                         .clickable {
                                             photoLauncher.launch(
                                                 PickVisualMediaRequest(

@@ -16,10 +16,12 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -55,7 +57,7 @@ fun DropDownIcon(
         Icon(
             painter = painterResource(id = R.drawable.baseline_more_vert_24),
             contentDescription = null,
-            modifier = Modifier.clickable {isDropMenuForRemovePhoto.value = true}.padding(10.dp),
+            modifier = Modifier.clip(shape = CircleShape).clickable {isDropMenuForRemovePhoto.value = true}.padding(10.dp),
             tint = Color.Black
         )
         DropdownMenu(

@@ -1,6 +1,9 @@
 package com.lovestory.lovestory.ui.components
 
 import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -10,6 +13,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.ArrowForward
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -17,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -54,17 +60,14 @@ fun Day(
 ){
     Box(
         modifier = Modifier
-            .aspectRatio(1f) // This is important for square sizing!
+            .aspectRatio(1f)
             .padding(6.dp)
-            .clip(RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(10.dp))
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = rememberRipple(color = Color.LightGray),
                 enabled = day.position == DayPosition.MonthDate,
                 onClick = {
-//                    onClick(day)
-//                    onOpenDialogRequest()
-//                    Log.d("탭","싱글탭1")
                 }
             )
             .pointerInput(Unit){
@@ -72,12 +75,10 @@ fun Day(
                     onTap = {
                         onClick(day)
                         onOpenDialogRequest()
-                        //Log.d("탭","싱글탭2")
                     },
                     onDoubleTap = {
                         onClick(day)
                         onOpenDialogRequest()
-                        //Log.d("탭","더블탭")
                     }
                 )
             }
@@ -91,9 +92,6 @@ fun Day(
                     DayOfWeek.SUNDAY -> Color.Red
                     else -> Color.Black
                 }
-                    // coupleMemoryList.firstOrNull { it.date == day.date }?.let {
-                    //colorResource(R.color.black)//R.color.ls_pink) // 공휴일 색 넣는 로직 넣을 예정
-                //} ?: Color.Black // 공휴일 색 바꾸는 로직 필요
                 DayPosition.InDate, DayPosition.OutDate -> Color.Transparent // 해당 월에 속하지 않은 날들의 숫자 색
             }
             val circleColor = when (day.position){
@@ -111,7 +109,11 @@ fun Day(
 
             Spacer(modifier = Modifier.height(2.dp))
 
-            if((meetDate.contains(dateToString(day.date)) && (day.date != LocalDate.now())) && (day.position == DayPosition.MonthDate)){
+            AnimatedVisibility(
+                visible = (meetDate.contains(dateToString(day.date)) && (day.date != LocalDate.now())) && (day.position == DayPosition.MonthDate),
+                enter = fadeIn(),
+                exit = fadeOut()
+            ){
                 Box(modifier = Modifier
                     .size(8.dp)
                     .background(color = circleColor, CircleShape), //colorResource(R.color.ls_pink)
@@ -156,22 +158,13 @@ fun SimpleCalendarTitle(
     ) {
         Column( modifier = Modifier.padding(start = 10.dp)) {
             Text(
-                //modifier = Modifier
-                //.weight(1f)
-                //    .testTag("MonthTitle"),
                 text = currentMonth.year.toString(),//currentMonth.displayText(),
                 fontSize = 20.sp,
-                //textAlign = TextAlign.Center,
-                //fontWeight = FontWeight.ExtraBold,
                 color = Color.Black, // 툴바에 있는 월, 연도 글자의 색 분홍색으로 할 거면 color = colorResource(color.ls_pink)
             )
             Text(
-                //modifier = Modifier
-                //.weight(1f)
-                //    .testTag("MonthTitle"),
                 text = currentMonth.month.displayText(),//currentMonth.displayText(),
                 fontSize = 32.sp,
-                //textAlign = TextAlign.Center,
                 fontWeight = FontWeight.ExtraBold,
                 color = Color.Black, // 툴바에 있는 월, 연도 글자의 색
             )
@@ -183,19 +176,20 @@ fun SimpleCalendarTitle(
             verticalAlignment = Alignment.Bottom
         ){
             Box(
-                modifier = Modifier.size(50.dp)
+                modifier = Modifier.size(30.dp)
             ){
                 CalendarNavigationIcon(
-                    icon = painterResource(id = R.drawable.ic_chevron_left),
+                    icon = painterResource(id = R.drawable.arrow_left),
                     contentDescription = "Previous",
                     onClick = goToPrevious,
                 )
             }
+            Spacer(modifier = Modifier.width(15.dp))
             Box(
-                modifier = Modifier.size(50.dp)
+                modifier = Modifier.size(30.dp)
             ){
                 CalendarNavigationIcon(
-                    icon = painterResource(id = R.drawable.ic_chevron_right),
+                    icon = painterResource(id = R.drawable.arrow_right) ,
                     contentDescription = "Next",
                     onClick = goToNext,
                 )
@@ -217,11 +211,11 @@ private fun CalendarNavigationIcon(
         .clickable(role = Role.Button, onClick = onClick),
 ) {
     Icon(
+        icon,
         modifier = Modifier
             .fillMaxSize()
-            .padding(4.dp)
+            .padding(5.dp)
             .align(Alignment.Center),
-        painter = icon,
         tint = Color.Black,
         contentDescription = contentDescription,
     )
@@ -230,8 +224,6 @@ private fun CalendarNavigationIcon(
 @Composable
 fun rememberFirstCompletelyVisibleMonth(state: CalendarState): CalendarMonth {
     val visibleMonth = remember(state) { mutableStateOf(state.firstVisibleMonth) }
-    // Only take non-null values as null will be produced when the
-    // list is mid-scroll as no index will be completely visible.
     LaunchedEffect(state) {
         snapshotFlow { state.layoutInfo.completelyVisibleMonths.firstOrNull() }
             .filterNotNull()
