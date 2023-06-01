@@ -302,6 +302,7 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
             properties = DialogProperties(dismissOnBackPress = true, dismissOnClickOutside = true)
         ) {
             var photoPosition by remember { mutableStateOf(emptyList<LatLng>()) }
+            var loadMarker by remember { mutableStateOf(true) }
             LaunchedEffect(null){
                 isPopupVisibleSave = true
                 //get GPS
@@ -515,67 +516,70 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                                         ) {
                                             if (latLng.isNotEmpty()) {
                                                 LaunchedEffect(null) {
-                                                    coroutineScopeMap.launch {
-                                                        syncedPhoto.forEach {
-                                                            val cacheKey = "thumbnail_${it.id}"
-                                                            val cachedBitmap =
-                                                                loadBitmapFromDiskCache(
-                                                                    context,
-                                                                    cacheKey
-                                                                )
-                                                            if (cachedBitmap != null) {
-                                                                items.add(
-                                                                    MyItem(
-                                                                        LatLng(
-                                                                            it.latitude,
-                                                                            it.longitude
-                                                                        ),
-                                                                        "PHOTO",
-                                                                        "사진",
-                                                                        cachedBitmap!!,
-                                                                        "PHOTO",
-                                                                        it.id
+                                                    if(loadMarker) {
+                                                        coroutineScopeMap.launch {
+                                                            syncedPhoto.forEach {
+                                                                val cacheKey = "thumbnail_${it.id}"
+                                                                val cachedBitmap =
+                                                                    loadBitmapFromDiskCache(
+                                                                        context,
+                                                                        cacheKey
                                                                     )
-                                                                )
-                                                            } else {
-                                                                val getResult =
-                                                                    getThumbnailForPhoto(
-                                                                        token!!,
-                                                                        it.id
+                                                                if (cachedBitmap != null) {
+                                                                    items.add(
+                                                                        MyItem(
+                                                                            LatLng(
+                                                                                it.latitude,
+                                                                                it.longitude
+                                                                            ),
+                                                                            "PHOTO",
+                                                                            "사진",
+                                                                            cachedBitmap!!,
+                                                                            "PHOTO",
+                                                                            it.id
+                                                                        )
                                                                     )
-                                                                items.add(
-                                                                    MyItem(
-                                                                        LatLng(
-                                                                            it.latitude,
-                                                                            it.longitude
-                                                                        ),
-                                                                        "PHOTO",
-                                                                        "사진",
+                                                                } else {
+                                                                    val getResult =
+                                                                        getThumbnailForPhoto(
+                                                                            token!!,
+                                                                            it.id
+                                                                        )
+                                                                    items.add(
+                                                                        MyItem(
+                                                                            LatLng(
+                                                                                it.latitude,
+                                                                                it.longitude
+                                                                            ),
+                                                                            "PHOTO",
+                                                                            "사진",
+                                                                            getResult!!,
+                                                                            "PHOTO",
+                                                                            it.id
+                                                                        )
+                                                                    )
+                                                                    saveBitmapToDiskCache(
+                                                                        context,
                                                                         getResult!!,
-                                                                        "PHOTO",
-                                                                        it.id
+                                                                        cacheKey
                                                                     )
-                                                                )
-                                                                saveBitmapToDiskCache(
-                                                                    context,
-                                                                    getResult!!,
-                                                                    cacheKey
+                                                                }
+                                                            }
+                                                            //사진 좌표와 비트맵
+                                                            latLngMarker.forEach {
+                                                                items.add(
+                                                                    MyItem(
+                                                                        it,
+                                                                        "LOCATION",
+                                                                        "위치",
+                                                                        null,
+                                                                        "POSITION",
+                                                                        "HI"
+                                                                    )
                                                                 )
                                                             }
                                                         }
-                                                        //사진 좌표와 비트맵
-                                                        latLngMarker.forEach {
-                                                            items.add(
-                                                                MyItem(
-                                                                    it,
-                                                                    "LOCATION",
-                                                                    "위치",
-                                                                    null,
-                                                                    "POSITION",
-                                                                    "HI"
-                                                                )
-                                                            )
-                                                        }
+                                                        loadMarker = false
                                                     }
                                                 }
                                                 val viewposition = averageLatLng(latLng)
