@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.Resources
 import android.graphics.Bitmap
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -121,6 +122,7 @@ fun MapScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhot
         }
 
         dataLoaded.value = true
+        Log.d("위치좌표", "$latLng")
     }
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -376,7 +378,7 @@ class MarkerClusterRender<T : MyItem>(
 
     override fun onBeforeClusterRendered(cluster: Cluster<T>, markerOptions: MarkerOptions) {
         super.onBeforeClusterRendered(cluster, markerOptions)
-
+        Log.d("클러스터비포렌더러","${cluster.size}")
         val clusterItems = cluster.items.toList()
 
         // Check if there is a clusterItem with itemType "PHOTO"
@@ -389,13 +391,12 @@ class MarkerClusterRender<T : MyItem>(
         } else {
             // Set the default cluster icon
             markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
-            //markerOptions.icon(getDescriptorForCluster(cluster))
         }
     }
 
     override fun onClusterUpdated(cluster: Cluster<T>, marker: Marker) {
         super.onClusterUpdated(cluster, marker)
-
+        Log.d("클러스터업데이트","${cluster.size}")
         val clusterItems = cluster.items.toList()
 
         // Check if there is a clusterItem with itemType "PHOTO"
@@ -408,19 +409,20 @@ class MarkerClusterRender<T : MyItem>(
         } else {
             // Set the default cluster icon
             marker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
-            //markerOptions.icon(getDescriptorForCluster(cluster))
         }
     }
 
+    //여기가 문제임
     override fun onClustersChanged(clusters: Set<Cluster<T>>) {
         super.onClustersChanged(clusters)
-
+        Log.d("클러스터체인지","${clusters.size}")
         for (cluster in clusters) {
             val clusterItems = cluster.items.toList()
             val photoClusterItem = clusterItems.find { it.itemType == "PHOTO" }
 
             for (clusterItem in clusterItems) {
-                val marker = getMarker(clusterItem)
+                val marker = getMarker(clusterItem) // 왜 여기서 null이 생길까?
+                Log.d("마커","$marker")
                 if (marker != null) {
                     if (photoClusterItem != null && clusterItem == photoClusterItem) {
                         marker.setIcon(clusterIcon(context, photoClusterItem.icon!!, getBucket(cluster)))
@@ -438,15 +440,15 @@ class MarkerClusterRender<T : MyItem>(
         val myItem = clusterItem as MyItem
 
         if(myItem.itemType == "PHOTO") {
-            val markerIcon = myItem.icon
-            val desiredSize = 60.dp // Set the desired size for the icon
-            val density = Resources.getSystem().displayMetrics.density
-            val scaledBitmap = Bitmap.createScaledBitmap(
-                markerIcon!!,
-                (desiredSize.value * density).toInt(),
-                (desiredSize.value * density).toInt(),
-                false
-            )
+//            val markerIcon = myItem.icon
+//            val desiredSize = 60.dp // Set the desired size for the icon
+//            val density = Resources.getSystem().displayMetrics.density
+//            val scaledBitmap = Bitmap.createScaledBitmap(
+//                markerIcon!!,
+//                (desiredSize.value * density).toInt(),
+//                (desiredSize.value * density).toInt(),
+//                false
+//            )
             marker.setIcon(markerIcon(context, myItem.icon!!))
         }else{
             marker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
@@ -456,19 +458,19 @@ class MarkerClusterRender<T : MyItem>(
 
     override fun onBeforeClusterItemRendered(item: T, markerOptions: MarkerOptions) {
         super.onBeforeClusterItemRendered(item, markerOptions)
-
+        Log.d("마커","${item}")
         val myItem = item as MyItem
 
         if(myItem.itemType == "PHOTO") {
-            val markerIcon = myItem.icon
-            val desiredSize = 60.dp // Set the desired size for the icon
-            val density = Resources.getSystem().displayMetrics.density
-            val scaledBitmap = Bitmap.createScaledBitmap(
-                markerIcon!!,
-                (desiredSize.value * density).toInt(),
-                (desiredSize.value * density).toInt(),
-                false
-            )
+//            val markerIcon = myItem.icon
+//            val desiredSize = 60.dp // Set the desired size for the icon
+//            val density = Resources.getSystem().displayMetrics.density
+//            val scaledBitmap = Bitmap.createScaledBitmap(
+//                markerIcon!!,
+//                (desiredSize.value * density).toInt(),
+//                (desiredSize.value * density).toInt(),
+//                false
+//            )
             markerOptions.anchor(0.5f, 1f)
             markerOptions.icon(markerIcon(context, myItem.icon!!))
             markerOptions.title(myItem.itemTitle)
@@ -482,6 +484,23 @@ class MarkerClusterRender<T : MyItem>(
 
     override fun onClusterItemUpdated(item: T, marker: Marker) {
         super.onClusterItemUpdated(item, marker)
+
+        val myItem = item as MyItem
+
+        if(myItem.itemType == "PHOTO") {
+//            val markerIcon = myItem.icon
+//            val desiredSize = 60.dp // Set the desired size for the icon
+//            val density = Resources.getSystem().displayMetrics.density
+//            val scaledBitmap = Bitmap.createScaledBitmap(
+//                markerIcon!!,
+//                (desiredSize.value * density).toInt(),
+//                (desiredSize.value * density).toInt(),
+//                false
+//            )
+            marker.setIcon(markerIcon(context, myItem.icon!!))
+        }else{
+            marker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
+        }
     }
 
     private fun clusterIcon(context: Context, bitmap : Bitmap, size: Int): BitmapDescriptor {
@@ -490,8 +509,6 @@ class MarkerClusterRender<T : MyItem>(
     }
 
     private fun markerIcon(context: Context, bitmap : Bitmap): BitmapDescriptor {
-        // Customize your ClusterView. The cluster gives you its size (cluster.size) and its items within it (cluster.items)
-        // Use that to customize the cluster appearance.
         val markerView = MarkerView(context, bitmap)
         return BitmapDescriptorFactory.fromBitmap(markerView.toBitmap(50.dpToPx(context), 50.dpToPx(context)))
     }
