@@ -198,6 +198,19 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                 meetDateAfterLoad.add(it)
                 uniqueDate.add(it)
             }
+        }else{
+            if(selectionSave.date != LocalDate.now()){
+                val meetDay = getDay(token!!, monthToString(visibleMonth.yearMonth))
+                meetDay.body()?.forEach {
+                    meetDateAfterLoad.add(intmonthToString(visibleMonth.yearMonth, it))
+                }
+
+                val listOfDays = repository.getDayListByTargetMonth(monthToString(visibleMonth.yearMonth))
+                listOfDays?.forEach{
+                    meetDateAfterLoad.add(it)
+                    uniqueDate.add(it)
+                }
+            }
         }
     }
 
@@ -220,22 +233,22 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                 coroutineScope = coroutineScope,
                 state = state,
             )
-            Spacer(modifier = Modifier.height(5.dp))
-            SimpleCalendarTitle(
-                modifier = Modifier
-                    .padding(horizontal = 16.dp, vertical = 12.dp),
-                currentMonth = visibleMonth.yearMonth,
-                goToPrevious = {
-                    coroutineScope.launch {
-                        state.animateScrollToMonth(state.firstVisibleMonth.yearMonth.previousMonth)
-                    }
-                },
-                goToNext = {
-                    coroutineScope.launch {
-                        state.animateScrollToMonth(state.firstVisibleMonth.yearMonth.nextMonth)
-                    }
-                },
-            )
+//            Spacer(modifier = Modifier.height(5.dp))
+//            SimpleCalendarTitle(
+//                modifier = Modifier
+//                    .padding(horizontal = 16.dp, vertical = 12.dp),
+//                currentMonth = visibleMonth.yearMonth,
+//                goToPrevious = {
+//                    coroutineScope.launch {
+//                        state.animateScrollToMonth(state.firstVisibleMonth.yearMonth.previousMonth)
+//                    }
+//                },
+//                goToNext = {
+//                    coroutineScope.launch {
+//                        state.animateScrollToMonth(state.firstVisibleMonth.yearMonth.nextMonth)
+//                    }
+//                },
+//            )
             Spacer(modifier = Modifier.height(10.dp))
             DaysOfWeekTitle(daysOfWeek = daysOfWeek)
             Spacer(modifier = Modifier.height(16.dp))
@@ -817,35 +830,37 @@ fun CalendarHeader(
     coroutineScope: CoroutineScope,
     state: CalendarState
 ){
-    Row(
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .background(Color(0xFFF3F3F3))
-            .fillMaxWidth()
-            .height(60.dp)
-            .padding(horizontal = 20.dp)
-    ){
-//        SimpleCalendarTitle(
-//            modifier = Modifier
-//                .padding(horizontal = 0.dp, vertical = 12.dp),
-//            currentMonth = visibleMonth.yearMonth,
-//            goToPrevious = {
-//                coroutineScope.launch {
-//                    state.animateScrollToMonth(state.firstVisibleMonth.yearMonth.previousMonth)
-//                }
-//            },
-//            goToNext = {
-//                coroutineScope.launch {
-//                    state.animateScrollToMonth(state.firstVisibleMonth.yearMonth.nextMonth)
-//                }
-//            },
-//        )
-        Text(
-            text = "캘린더",
-            fontSize = 22.sp,
-            fontWeight = FontWeight.Bold
+//    Row(
+//        horizontalArrangement = Arrangement.SpaceBetween,
+//        verticalAlignment = Alignment.CenterVertically,
+//        modifier = Modifier
+//            .background(Color(0xFFF3F3F3))
+//            .fillMaxWidth()
+//            .height(60.dp)
+//            .padding(horizontal = 20.dp)
+//    )
+    Box(modifier = Modifier.fillMaxWidth().wrapContentHeight().background(Color(0xFFF3F3F3)))
+    {
+        SimpleCalendarTitle(
+            modifier = Modifier
+                .padding(horizontal = 0.dp, vertical = 12.dp),
+            currentMonth = visibleMonth.yearMonth,
+            goToPrevious = {
+                coroutineScope.launch {
+                    state.animateScrollToMonth(state.firstVisibleMonth.yearMonth.previousMonth)
+                }
+            },
+            goToNext = {
+                coroutineScope.launch {
+                    state.animateScrollToMonth(state.firstVisibleMonth.yearMonth.nextMonth)
+                }
+            },
         )
+//        Text(
+//            text = "캘린더",
+//            fontSize = 22.sp,
+//            fontWeight = FontWeight.Bold
+//        )
     }
 }
 

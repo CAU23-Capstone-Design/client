@@ -161,7 +161,6 @@ fun SimpleCalendarTitle(
                 fontWeight = FontWeight.ExtraBold,
                 color = Color.Black, // 툴바에 있는 월, 연도 글자의 색
             )
-
         }
         Row(
             modifier = Modifier.fillMaxWidth(),
