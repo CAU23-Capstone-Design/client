@@ -95,7 +95,6 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
     var isPopupVisible by remember { mutableStateOf(false) }
     var dialogContent by remember { mutableStateOf(false) }
 
-
     LaunchedEffect(null) {
         if (isPopupVisibleSave) {
             selection = selectionSave
@@ -132,7 +131,10 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
     val context = LocalContext.current
     val token = getToken(context)
 
-    lateinit var repository : SyncedPhotoRepository
+    val photoDatabase = PhotoDatabase.getDatabase(context)
+    val photoDao = photoDatabase.syncedPhotoDao()
+    val repository = SyncedPhotoRepository(photoDao)
+
     var photoDate by remember { mutableStateOf(emptyList<String>()) }
     val items = remember{ mutableStateListOf<MyItem>() }
 
@@ -155,9 +157,6 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
     //해야 되는 게 코루틴 정리. 룸 db
     LaunchedEffect(null) {
         //getDayListByTargetMonth
-        val photoDatabase = PhotoDatabase.getDatabase(context)
-        val photoDao = photoDatabase.syncedPhotoDao()
-        repository = SyncedPhotoRepository(photoDao)
         val listOfDays = repository.getDayListByTargetMonth(monthToString(visibleMonth.yearMonth))
         listOfDays?.forEach {
             uniqueDate.add(it)
@@ -182,16 +181,6 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
         meetDay.body()?.forEach{
             meetDate.add(intmonthToString(visibleMonth.yearMonth, it))
         }
-
-
-
-//        for (synced in syncedPhotos) {
-//            if (synced.date.substring(0, 10) !in uniqueDatesSet) {
-//                uniqueDatesSet.add(synced.date.substring(0, 10))
-//                meetDate.add(synced.date.substring(0, 10))
-//                uniqueDate.add(synced.date.substring(0, 10))
-//            }
-//        }
         meetDateAfterLoad.addAll(meetDate)
     }
 
@@ -200,6 +189,12 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
             val meetDay = getDay(token!!, monthToString(visibleMonth.yearMonth))
             meetDay.body()?.forEach {
                 meetDateAfterLoad.add(intmonthToString(visibleMonth.yearMonth, it))
+            }
+
+            val listOfDays = repository.getDayListByTargetMonth(monthToString(visibleMonth.yearMonth))
+            listOfDays?.forEach{
+                meetDateAfterLoad.add(it)
+                uniqueDate.add(it)
             }
         }
     }
@@ -216,24 +211,29 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color.White)
-                .padding(top = 100.dp),
+//                .padding(top = 100.dp),
         ) {
-//            Spacer(modifier = Modifier.height(10.dp))
-//            SimpleCalendarTitle(
-//                modifier = Modifier
-//                    .padding(horizontal = 16.dp, vertical = 12.dp),
-//                currentMonth = visibleMonth.yearMonth,
-//                goToPrevious = {
-//                    coroutineScope.launch {
-//                        state.animateScrollToMonth(state.firstVisibleMonth.yearMonth.previousMonth)
-//                    }
-//                },
-//                goToNext = {
-//                    coroutineScope.launch {
-//                        state.animateScrollToMonth(state.firstVisibleMonth.yearMonth.nextMonth)
-//                    }
-//                },
-//            )
+            CalendarHeader(
+                visibleMonth = visibleMonth,
+                coroutineScope = coroutineScope,
+                state = state,
+            )
+            Spacer(modifier = Modifier.height(5.dp))
+            SimpleCalendarTitle(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                currentMonth = visibleMonth.yearMonth,
+                goToPrevious = {
+                    coroutineScope.launch {
+                        state.animateScrollToMonth(state.firstVisibleMonth.yearMonth.previousMonth)
+                    }
+                },
+                goToNext = {
+                    coroutineScope.launch {
+                        state.animateScrollToMonth(state.firstVisibleMonth.yearMonth.nextMonth)
+                    }
+                },
+            )
             Spacer(modifier = Modifier.height(10.dp))
             DaysOfWeekTitle(daysOfWeek = daysOfWeek)
             Spacer(modifier = Modifier.height(16.dp))
@@ -253,11 +253,7 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                 }
             )
         }
-        CalendarHeader(
-            visibleMonth = visibleMonth,
-            coroutineScope = coroutineScope,
-            state = state,
-        )
+
     }
 
 
@@ -282,7 +278,6 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                     coupleMemoryList.find{ it.date == selection.date }?.comment = editedcomment
                     coroutineScope.launch{
                         val put : Response<Any> = putComment(token!!, dateToString(selection.date), editedcomment)
-                        saveComment(context, coupleMemoryList)
                     }
                 } else {
                     if ( editedcomment != ""){
@@ -290,7 +285,6 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                         coupleMemoryList = coupleMemoryList.toMutableList().apply{add(newMemory)}
                         coroutineScope.launch{
                             val put : Response<Any> = putComment(token!!, dateToString(selection.date), editedcomment)
-                            saveComment(context, coupleMemoryList)
                             meetDateAfterLoad.add(dateToString(selection.date))
                         }
                     }
@@ -308,7 +302,6 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
             properties = DialogProperties(dismissOnBackPress = true, dismissOnClickOutside = true)
         ) {
             var photoPosition by remember { mutableStateOf(emptyList<LatLng>()) }
-
             LaunchedEffect(null){
                 isPopupVisibleSave = true
                 //get GPS
@@ -317,10 +310,6 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                     latLng = getLatLng(gps.body()!!)
                 }
                 latLngMarker = latLng
-
-                val photoDatabase = PhotoDatabase.getDatabase(context)
-                val photoDao = photoDatabase.syncedPhotoDao()
-                repository = SyncedPhotoRepository(photoDao)
 
                 syncedPhoto = repository.getSyncedPhotosByDate(dateToString(selection.date))
 
@@ -713,43 +702,8 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                             }
                         }
                     }
-
-                    if (!uniqueDate.contains(dateToString(selection.date)) && latLng.isNotEmpty()) {
-                        item(
-                            span = {
-                                GridItemSpan(
-                                    maxLineSpan
-                                )
-                            }
-                        ) {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .aspectRatio(2f)
-                                    .background(
-                                        color = Color.White,
-                                        RoundedCornerShape(12.dp)
-                                    ),
-                                verticalArrangement = Arrangement.Center,
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.ic_not_exist_image_foreground),
-                                    contentDescription = "이미지가 존재하지 않음" ,
-                                    modifier = Modifier.size(50.dp),
-                                    tint = Color.LightGray
-                                )
-                                Spacer(modifier = Modifier.height(10.dp))
-                                Text(
-                                    text = "사진이 없어요.",
-                                    fontSize = 14.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color.LightGray
-                                )
-                            }
-                        }
-                    }
-                    else if(uniqueDate.contains(dateToString(selection.date)) && dialogContent){
+                    Log.d("통과","${uniqueDate.contains(dateToString(selection.date))}")
+                    if ( uniqueDate.contains(dateToString(selection.date)) && dialogContent ) {
                         val filteredSyncedPhotosByDate =
                             syncedPhotosByDate.filterKeys { key ->
                                 key == dateToString(selection.date)
@@ -775,6 +729,41 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                             }
                         }
                     }
+                    else if(!uniqueDate.contains(dateToString(selection.date)) && latLng.isEmpty() && dialogContent){
+                    item(
+                        span = {
+                            GridItemSpan(
+                                maxLineSpan
+                            )
+                        }
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .aspectRatio(2f)
+                                .background(
+                                    color = Color.White,
+                                    RoundedCornerShape(12.dp)
+                                ),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_not_exist_image_foreground),
+                                contentDescription = "이미지가 존재하지 않음" ,
+                                modifier = Modifier.size(50.dp),
+                                tint = Color.LightGray
+                            )
+                            Spacer(modifier = Modifier.height(10.dp))
+                            Text(
+                                text = "사진이 없어요.",
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.LightGray
+                            )
+                        }
+                    }
+                    }
                 }
                 Spacer(modifier = Modifier.height(20.dp))
             }
@@ -794,29 +783,29 @@ fun CalendarHeader(
         modifier = Modifier
             .background(Color(0xFFF3F3F3))
             .fillMaxWidth()
-            .height(85.dp)
+            .height(60.dp)
             .padding(horizontal = 20.dp)
     ){
-        SimpleCalendarTitle(
-            modifier = Modifier
-                .padding(horizontal = 0.dp, vertical = 12.dp),
-            currentMonth = visibleMonth.yearMonth,
-            goToPrevious = {
-                coroutineScope.launch {
-                    state.animateScrollToMonth(state.firstVisibleMonth.yearMonth.previousMonth)
-                }
-            },
-            goToNext = {
-                coroutineScope.launch {
-                    state.animateScrollToMonth(state.firstVisibleMonth.yearMonth.nextMonth)
-                }
-            },
-        )
-//        Text(
-//            text = "캘린더",
-//            fontSize = 22.sp,
-//            fontWeight = FontWeight.Bold
+//        SimpleCalendarTitle(
+//            modifier = Modifier
+//                .padding(horizontal = 0.dp, vertical = 12.dp),
+//            currentMonth = visibleMonth.yearMonth,
+//            goToPrevious = {
+//                coroutineScope.launch {
+//                    state.animateScrollToMonth(state.firstVisibleMonth.yearMonth.previousMonth)
+//                }
+//            },
+//            goToNext = {
+//                coroutineScope.launch {
+//                    state.animateScrollToMonth(state.firstVisibleMonth.yearMonth.nextMonth)
+//                }
+//            },
 //        )
+        Text(
+            text = "캘린더",
+            fontSize = 22.sp,
+            fontWeight = FontWeight.Bold
+        )
     }
 }
 
