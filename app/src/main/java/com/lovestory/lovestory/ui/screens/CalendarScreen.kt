@@ -3,7 +3,9 @@ package com.lovestory.lovestory.ui.screens
 import android.annotation.SuppressLint
 import android.graphics.drawable.BitmapDrawable
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandIn
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
@@ -196,6 +198,19 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                 meetDateAfterLoad.add(it)
                 uniqueDate.add(it)
             }
+        }else{
+            if(selectionSave.date != LocalDate.now()){
+                val meetDay = getDay(token!!, monthToString(visibleMonth.yearMonth))
+                meetDay.body()?.forEach {
+                    meetDateAfterLoad.add(intmonthToString(visibleMonth.yearMonth, it))
+                }
+
+                val listOfDays = repository.getDayListByTargetMonth(monthToString(visibleMonth.yearMonth))
+                listOfDays?.forEach{
+                    meetDateAfterLoad.add(it)
+                    uniqueDate.add(it)
+                }
+            }
         }
     }
 
@@ -218,22 +233,22 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                 coroutineScope = coroutineScope,
                 state = state,
             )
-            Spacer(modifier = Modifier.height(5.dp))
-            SimpleCalendarTitle(
-                modifier = Modifier
-                    .padding(horizontal = 16.dp, vertical = 12.dp),
-                currentMonth = visibleMonth.yearMonth,
-                goToPrevious = {
-                    coroutineScope.launch {
-                        state.animateScrollToMonth(state.firstVisibleMonth.yearMonth.previousMonth)
-                    }
-                },
-                goToNext = {
-                    coroutineScope.launch {
-                        state.animateScrollToMonth(state.firstVisibleMonth.yearMonth.nextMonth)
-                    }
-                },
-            )
+//            Spacer(modifier = Modifier.height(5.dp))
+//            SimpleCalendarTitle(
+//                modifier = Modifier
+//                    .padding(horizontal = 16.dp, vertical = 12.dp),
+//                currentMonth = visibleMonth.yearMonth,
+//                goToPrevious = {
+//                    coroutineScope.launch {
+//                        state.animateScrollToMonth(state.firstVisibleMonth.yearMonth.previousMonth)
+//                    }
+//                },
+//                goToNext = {
+//                    coroutineScope.launch {
+//                        state.animateScrollToMonth(state.firstVisibleMonth.yearMonth.nextMonth)
+//                    }
+//                },
+//            )
             Spacer(modifier = Modifier.height(10.dp))
             DaysOfWeekTitle(daysOfWeek = daysOfWeek)
             Spacer(modifier = Modifier.height(16.dp))
@@ -344,6 +359,41 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                 }
             }
 
+            val showDeletDialog = remember { mutableStateOf(false) }
+            val deleteCheck = remember { mutableStateOf(false) }
+
+            AnimatedVisibility(visible = showDeletDialog.value, enter = fadeIn() + expandIn(), exit = fadeOut()){
+                DeleteCommentDialog(
+                    context = context,
+                    showDeleteDialog = showDeletDialog,
+                    deleteCheck = deleteCheck
+                )
+            }
+
+            LaunchedEffect(deleteCheck.value){
+                if(deleteCheck.value){
+                    val date = selection.date
+                    coupleMemoryList =
+                        coupleMemoryList.filterNot { it.date == date }
+                    val delete: Any =
+                        deleteComment(token!!, dateToString(selection.date))
+                    Log.d("위치좌표","$latLng")
+                    if (!uniqueDate.contains(dateToString(date)) && latLng.isEmpty()) {
+                        meetDateAfterLoad.remove(dateToString(date))
+                    }
+                    isPopupVisible = false
+                    isPopupVisibleSave = false
+                    items.clear()
+                    latLng = emptyList()
+                    latLngExist = false
+                    photoExist = false
+                    photoPosition = emptyList()
+                    dataLoaded.value = false
+                    commentSave = ""
+                    deleteCheck.value = false
+                }
+            }
+
             val screenWidth = LocalConfiguration.current.screenWidthDp.dp
             Column(
                 modifier = Modifier
@@ -383,20 +433,20 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                     )
                     ButtonForCalendarDialog(
                         onClick = {
-                            coroutineScope.launch {
-                                val date = selection.date
-                                coupleMemoryList =
-                                    coupleMemoryList.filterNot { it.date == date }
-                                val delete: Any =
-                                    deleteComment(token!!, dateToString(selection.date))
-                                if (!uniqueDate.contains(dateToString(date))) {
-                                    meetDateAfterLoad.remove(dateToString(date))
+//                            if(meetDateAfterLoad.contains(dateToString(selection.date))){
+//                                showDeletDialog.value = true
+//                            }else{
+                                if(editedcomment == ""){
+                                    val message = "삭제할 코멘트가 없습니다."
+                                    Toast.makeText(
+                                        context,
+                                        message,
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }else{
+                                    showDeletDialog.value = true
                                 }
-                            }
-                            saveComment(context, coupleMemoryList)
-                            isPopupVisible = false
-                            isPopupVisibleSave = false
-                            commentSave = ""
+//                            }
                         },
                         description = "delete",
                         icon = Icons.Outlined.Delete,
@@ -432,7 +482,6 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                                             dateToString(selection.date),
                                             editedcomment
                                         )
-                                        saveComment(context, coupleMemoryList)
                                         meetDateAfterLoad.add(dateToString(selection.date))
                                     }
                                 }
@@ -781,35 +830,37 @@ fun CalendarHeader(
     coroutineScope: CoroutineScope,
     state: CalendarState
 ){
-    Row(
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .background(Color(0xFFF3F3F3))
-            .fillMaxWidth()
-            .height(60.dp)
-            .padding(horizontal = 20.dp)
-    ){
-//        SimpleCalendarTitle(
-//            modifier = Modifier
-//                .padding(horizontal = 0.dp, vertical = 12.dp),
-//            currentMonth = visibleMonth.yearMonth,
-//            goToPrevious = {
-//                coroutineScope.launch {
-//                    state.animateScrollToMonth(state.firstVisibleMonth.yearMonth.previousMonth)
-//                }
-//            },
-//            goToNext = {
-//                coroutineScope.launch {
-//                    state.animateScrollToMonth(state.firstVisibleMonth.yearMonth.nextMonth)
-//                }
-//            },
-//        )
-        Text(
-            text = "캘린더",
-            fontSize = 22.sp,
-            fontWeight = FontWeight.Bold
+//    Row(
+//        horizontalArrangement = Arrangement.SpaceBetween,
+//        verticalAlignment = Alignment.CenterVertically,
+//        modifier = Modifier
+//            .background(Color(0xFFF3F3F3))
+//            .fillMaxWidth()
+//            .height(60.dp)
+//            .padding(horizontal = 20.dp)
+//    )
+    Box(modifier = Modifier.fillMaxWidth().wrapContentHeight().background(Color(0xFFF3F3F3)))
+    {
+        SimpleCalendarTitle(
+            modifier = Modifier
+                .padding(horizontal = 0.dp, vertical = 12.dp),
+            currentMonth = visibleMonth.yearMonth,
+            goToPrevious = {
+                coroutineScope.launch {
+                    state.animateScrollToMonth(state.firstVisibleMonth.yearMonth.previousMonth)
+                }
+            },
+            goToNext = {
+                coroutineScope.launch {
+                    state.animateScrollToMonth(state.firstVisibleMonth.yearMonth.nextMonth)
+                }
+            },
         )
+//        Text(
+//            text = "캘린더",
+//            fontSize = 22.sp,
+//            fontWeight = FontWeight.Bold
+//        )
     }
 }
 
