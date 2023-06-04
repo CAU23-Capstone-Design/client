@@ -30,6 +30,7 @@ fun StartService(context : Context){
     Log.d("StartService", "서비스 시작 결정")
 
     val token = getToken(context)
+    Log.d("StartService", "$token")
 
     LaunchedEffect(key1 = null){
         if(token != null){

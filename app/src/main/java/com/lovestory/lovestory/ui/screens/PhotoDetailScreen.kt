@@ -60,6 +60,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.*
 import kotlin.io.path.ExperimentalPathApi
+import kotlin.system.measureTimeMillis
 
 @Composable
 fun PhotoDetailScreenFromDevice(navHostController: NavHostController, photoId: String) {
@@ -343,6 +344,7 @@ fun PhotoDetailScreenFromServer(
                             CoroutineScope(Dispatchers.IO).launch {
                                 if (token != null) {
                                     getImageById(context = context, token = token, photo_id = syncedPhotos[pagerState.currentPage]!!.id)
+
                                 }
                             }
 

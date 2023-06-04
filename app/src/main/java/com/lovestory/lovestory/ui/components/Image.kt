@@ -37,6 +37,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlin.properties.Delegates
+import kotlin.system.measureTimeMillis
 
 @Composable
 fun BigThumbnailFromServer(
@@ -54,20 +55,25 @@ fun BigThumbnailFromServer(
     val cacheKey = "detail_${photoId}"
 
     LaunchedEffect(key1 = photoId){
-        val cachedBitmap = loadBitmapFromDiskCache(context, cacheKey)
-        if(cachedBitmap != null){
-            bitmap.value = cachedBitmap
-        }
-        else{
-            val getResult = getDetailPhoto(token!!, photoId, 20)
-            if(getResult != null){
-                saveBitmapToDiskCache(context, getResult, cacheKey)
-                bitmap.value = getResult
+        val result : Long = measureTimeMillis{
+            val cachedBitmap = loadBitmapFromDiskCache(context, cacheKey)
+            if(cachedBitmap != null){
+                bitmap.value = cachedBitmap
+                Log.d("COMPONENT-BigImage", "from cache")
             }
             else{
-                Log.d("COMPONENT-BigThumbnailFromServer", "Error in transfer bitmap")
+                val getResult = getDetailPhoto(token!!, photoId, 20)
+                if(getResult != null){
+                    saveBitmapToDiskCache(context, getResult, cacheKey)
+                    bitmap.value = getResult
+                }
+                else{
+                    Log.d("COMPONENT-BigThumbnailFromServer", "Error in transfer bitmap")
+                }
+                Log.d("COMPONENT-BigImage", "from server")
             }
         }
+        Log.d("COMPONENT-BigImage", "$result")
     }
 
     AnimatedVisibility (bitmap.value!= null,enter = fadeIn(), exit = fadeOut()){

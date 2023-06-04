@@ -47,9 +47,9 @@ fun DashBoardScreen(navHostController: NavHostController) {
     val coupleInfo :MutableState<UsersOfCoupleInfo?> = remember {
         mutableStateOf(null)
     }
-    val coupleDistance = remember {
-        mutableStateOf(99999999)
-    }
+//    val coupleDistance = remember {
+//        mutableStateOf(99999999)
+//    }
 
     LaunchedEffect(null){
         val result = getCoupleInfo(context)
@@ -64,13 +64,13 @@ fun DashBoardScreen(navHostController: NavHostController) {
         }
     }
 
-    LaunchedEffect(null){
-        val result = getDistanceInfo(context)
-
-        if(result == null){
-            coupleDistance.value = 99999999
-        }
-    }
+//    LaunchedEffect(null){
+//        val result = getDistanceInfo(context)
+//
+//        if(result == null){
+//            coupleDistance.value = 99999999
+//        }
+//    }
 
     BackHandler(enabled = true) {
         if(doubleBackToExitPressedOnce.value){
@@ -91,16 +91,16 @@ fun DashBoardScreen(navHostController: NavHostController) {
             .background(Color.White)
             .fillMaxSize()
     ){
-        Text(text = "${coupleDistance.value}", modifier = Modifier
-            .padding(top = 70.dp)
-            .clickable {
-                val result = getDistanceInfo(context)
-                if (result == null) {
-                    coupleDistance.value = 99999999
-                } else {
-                    coupleDistance.value = result
-                }
-            })
+//        Text(text = "${coupleDistance.value}", modifier = Modifier
+//            .padding(top = 70.dp)
+//            .clickable {
+//                val result = getDistanceInfo(context)
+//                if (result == null) {
+//                    coupleDistance.value = 99999999
+//                } else {
+//                    coupleDistance.value = result
+//                }
+//            })
         
         HeaderOfDashBoard()
 

@@ -98,7 +98,7 @@ fun checkLoginToken(context : Context, token : String, navHostController: NavHos
         }
     }else{
         Log.d("Route to CoupleSync", "route to coupleSync : $data")
-        navHostController.navigate(route = AuthScreen.CoupleSync.route+"/${data.user.code}&${data.user.name}"){
+        navHostController.navigate(route = AuthScreen.CoupleSync.route+"/${data.user.code}&${data.user.name}&${data.user.gender}"){
             popUpTo(AuthScreen.Login.route)
         }
     }

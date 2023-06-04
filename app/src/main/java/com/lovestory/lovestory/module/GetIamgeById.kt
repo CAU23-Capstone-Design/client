@@ -14,12 +14,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.ResponseBody
+import kotlin.system.measureTimeMillis
 
 suspend fun getImageById(context: Context ,token : String, photo_id : String){
     val localId = System.currentTimeMillis().toString()
 
     CoroutineScope(Dispatchers.IO).launch {
         Log.d("MODULE-getImageById", "파일 다운받기 시도")
+
         val response = getNotSyncImage(token, photo_id)
         if (response.isSuccessful) {
             Log.d("MODULE-getImageById", "파일 다운받기 성공")
