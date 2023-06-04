@@ -31,6 +31,7 @@ import com.lovestory.lovestory.graphs.MainScreens
 import com.lovestory.lovestory.module.checkExistNeedPhotoForSync
 import com.lovestory.lovestory.R
 import com.lovestory.lovestory.module.getToken
+import com.lovestory.lovestory.module.photo.deletePhotosByIds
 import com.lovestory.lovestory.ui.components.*
 import com.lovestory.lovestory.view.SyncedPhotoView
 import kotlinx.coroutines.*
@@ -105,13 +106,25 @@ fun GalleryScreen(navHostController: NavHostController, syncedPhotoView : Synced
             .fillMaxSize()
     ) {
         AnimatedVisibility (visible = showDeleteSyncedPhotoDialog.value, enter = fadeIn(), exit = fadeOut()){
-            DeleteSyncPhotosDialog(
-                showDeleteSyncedPhotoDialog = showDeleteSyncedPhotoDialog,
-                isPressedPhotoMode = isPressedPhotoMode,
-                countSelectedPhotos = countSelectedPhotos,
-                syncedPhotoView = syncedPhotoView,
-                context = context
-            )
+            DialogWithConfirmAndCancelButton(
+                showDialog = showDeleteSyncedPhotoDialog,
+                title = "사진을 삭제하시겠습니까?",
+                text = "${countSelectedPhotos.value}장의 사진이 Lovestory에서 삭제됩니다.",
+                confirmText = "삭제"
+            ) {
+                showDeleteSyncedPhotoDialog.value = false
+                CoroutineScope(Dispatchers.IO).launch {
+                    deletePhotosByIds(
+                        context,
+                        syncedPhotoView,
+                    )
+                    isPressedPhotoMode.value = false
+                    withContext(Dispatchers.Main){
+                        Toast.makeText(context, "${countSelectedPhotos.value}장의 사진이 삭제 되었습니다.", Toast.LENGTH_SHORT).show()
+                        countSelectedPhotos.value = 0
+                    }
+                }
+            }
         }
 
         // Gallery List
@@ -307,15 +320,22 @@ fun HeaderForGallery(
                 Icon(
                     painter = painterResource(id = R.drawable.baseline_sync_24),
                     contentDescription = "sync photo",
-                    modifier = Modifier.clip(shape = CircleShape).clickable {
-                        Toast.makeText(context,"사진 동기화를 시작합니다.", Toast.LENGTH_SHORT).show()
-                        CoroutineScope(Dispatchers.IO).launch {
-                            checkExistNeedPhotoForSync(context)
-                            withContext(Dispatchers.Main) {
-                                Toast.makeText(context, "사진 동기화가 완료되었습니다.", Toast.LENGTH_SHORT).show()
+                    modifier = Modifier
+                        .clip(shape = CircleShape)
+                        .clickable {
+                            Toast
+                                .makeText(context, "사진 동기화를 시작합니다.", Toast.LENGTH_SHORT)
+                                .show()
+                            CoroutineScope(Dispatchers.IO).launch {
+                                checkExistNeedPhotoForSync(context)
+                                withContext(Dispatchers.Main) {
+                                    Toast
+                                        .makeText(context, "사진 동기화가 완료되었습니다.", Toast.LENGTH_SHORT)
+                                        .show()
+                                }
                             }
                         }
-                    }.padding(10.dp)
+                        .padding(10.dp)
                 )
 
 //                Spacer(modifier = Modifier.width(20.dp))
@@ -324,7 +344,10 @@ fun HeaderForGallery(
                     Icon(
                         painter = painterResource(id = R.drawable.baseline_more_vert_24),
                         contentDescription = null,
-                        modifier = Modifier.clip(shape = CircleShape).clickable {isDropMenuForGalleryScreen.value = true}.padding(10.dp),
+                        modifier = Modifier
+                            .clip(shape = CircleShape)
+                            .clickable { isDropMenuForGalleryScreen.value = true }
+                            .padding(10.dp),
                         tint = Color.Black
                     )
                     DropdownMenu(
@@ -372,11 +395,14 @@ fun HeaderForDeletePhoto(
                 text = "취소",
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.clip(shape = CircleShape).clickable {
-                    syncedPhotoView.clearSelectedPhotosSet()
-                    isPressedPhotoMode.value = false
-                    countSelectedPhotos.value = 0
-                }.padding(10.dp)
+                modifier = Modifier
+                    .clip(shape = CircleShape)
+                    .clickable {
+                        syncedPhotoView.clearSelectedPhotosSet()
+                        isPressedPhotoMode.value = false
+                        countSelectedPhotos.value = 0
+                    }
+                    .padding(10.dp)
             )
         }
         Box() {
@@ -385,16 +411,18 @@ fun HeaderForDeletePhoto(
                 fontSize = 18.sp,
                 color = Color.Red,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.clip(shape = CircleShape).clickable {
-                    if(countSelectedPhotos.value >0){
-                        showDeleteSyncedPhotoDialog.value = true
+                modifier = Modifier
+                    .clip(shape = CircleShape)
+                    .clickable {
+                        if (countSelectedPhotos.value > 0) {
+                            showDeleteSyncedPhotoDialog.value = true
+                        } else {
+                            Toast
+                                .makeText(context, "선택된 사진이 없습니다.", Toast.LENGTH_SHORT)
+                                .show()
+                        }
                     }
-                    else{
-                        Toast
-                            .makeText(context, "선택된 사진이 없습니다.", Toast.LENGTH_SHORT)
-                            .show()
-                    }
-                }.padding(10.dp)
+                    .padding(10.dp)
             )
         }
     }

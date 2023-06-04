@@ -1,7 +1,6 @@
 package com.lovestory.lovestory.ui.screens
 
 import android.annotation.SuppressLint
-import android.graphics.drawable.BitmapDrawable
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
@@ -9,24 +8,17 @@ import androidx.compose.animation.expandIn
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.LocationOn
-import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -34,22 +26,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
-import androidx.core.content.ContextCompat
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
@@ -69,7 +55,6 @@ import com.lovestory.lovestory.module.*
 import com.lovestory.lovestory.module.photo.getThumbnailForPhoto
 import com.lovestory.lovestory.network.*
 import com.lovestory.lovestory.ui.components.*
-import com.lovestory.lovestory.ui.theme.LoveStoryTheme
 import com.lovestory.lovestory.view.SyncedPhotoView
 import kotlinx.coroutines.*
 import retrofit2.Response
@@ -233,22 +218,7 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                 coroutineScope = coroutineScope,
                 state = state,
             )
-//            Spacer(modifier = Modifier.height(5.dp))
-//            SimpleCalendarTitle(
-//                modifier = Modifier
-//                    .padding(horizontal = 16.dp, vertical = 12.dp),
-//                currentMonth = visibleMonth.yearMonth,
-//                goToPrevious = {
-//                    coroutineScope.launch {
-//                        state.animateScrollToMonth(state.firstVisibleMonth.yearMonth.previousMonth)
-//                    }
-//                },
-//                goToNext = {
-//                    coroutineScope.launch {
-//                        state.animateScrollToMonth(state.firstVisibleMonth.yearMonth.nextMonth)
-//                    }
-//                },
-//            )
+
             Spacer(modifier = Modifier.height(10.dp))
             DaysOfWeekTitle(daysOfWeek = daysOfWeek)
             Spacer(modifier = Modifier.height(16.dp))
@@ -520,244 +490,6 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                                 onValueChanged = { editedcomment = it }
                             )
                             Spacer(modifier = Modifier.height(10.dp))
-
-                            /*
-                            if(!meetDateAfterLoad.contains(dateToString(selection.date)) ){
-                                val dialogWidth =
-                                    LocalConfiguration.current.screenWidthDp.dp - 80.dp
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(dialogWidth),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(
-                                        text = "기록된 추억이 없어요.",
-                                        modifier = Modifier.align(Alignment.Center),
-                                        fontWeight = FontWeight.Bold,
-                                        color = Color.LightGray
-                                    )
-                                }
-                            }else{
-                                Box(){
-                                    Column(){
-                                        AnimatedVisibility(
-                                            visible = latLng.isEmpty(),
-                                            enter = fadeIn(),
-                                            exit = fadeOut()
-                                        ) {
-                                            val dialogWidth =
-                                                LocalConfiguration.current.screenWidthDp.dp - 80.dp
-                                            Box(
-                                                modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .height(dialogWidth),
-                                                contentAlignment = Alignment.Center
-                                            ) {
-                                                Text(
-                                                    text = "기록된 추억이 없어요.",
-                                                    modifier = Modifier.align(Alignment.Center),
-                                                    fontWeight = FontWeight.Bold,
-                                                    color = Color.LightGray
-                                                )
-                                            }
-                                        }
-                                    }
-                                    Column(){
-                                        AnimatedVisibility(
-                                            visible = latLng.isNotEmpty(),
-                                            enter = fadeIn(),
-                                            exit = fadeOut()
-                                        ) {
-                                            Box(
-                                                modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .aspectRatio(2f)
-                                                    .wrapContentHeight()
-                                                    .clip(RoundedCornerShape(10.dp))
-                                                    .background(color = Color(0xFFF8F8F8))
-                                            ) {
-                                                selectionSave = selection
-                                                Column() {
-                                                    AnimatedVisibility(
-                                                        visible = !dataLoaded.value,
-                                                        enter = fadeIn(),
-                                                        exit = fadeOut()
-                                                    ) {
-                                                        Box(
-                                                            modifier = Modifier
-                                                                .fillMaxWidth()
-                                                                .aspectRatio(2f)
-                                                                .clip(RoundedCornerShape(10.dp))
-                                                                .background(color = Color(0xFFF8F8F8))
-                                                        ) {
-                                                            Icon(
-                                                                Icons.Outlined.LocationOn,
-                                                                contentDescription = "Load Google Map",
-                                                                modifier = Modifier
-                                                                    .align(Alignment.Center)
-                                                                    .size(50.dp),
-                                                                tint = Color(0xFFE47676)
-                                                            )
-                                                        }
-                                                    }
-                                                }
-                                                Column() {
-                                                    AnimatedVisibility(
-                                                        visible = dataLoaded.value,
-                                                        enter = fadeIn(),
-                                                        exit = fadeOut()
-                                                    ) {
-                                                        LaunchedEffect(null) {
-                                                            if(loadMarker) {
-                                                                coroutineScopeMap.launch {
-                                                                    syncedPhoto.forEach {
-                                                                        val cacheKey = "thumbnail_${it.id}"
-                                                                        val cachedBitmap =
-                                                                            loadBitmapFromDiskCache(
-                                                                                context,
-                                                                                cacheKey
-                                                                            )
-                                                                        if (cachedBitmap != null) {
-                                                                            items.add(
-                                                                                MyItem(
-                                                                                    LatLng(
-                                                                                        it.latitude,
-                                                                                        it.longitude
-                                                                                    ),
-                                                                                    "PHOTO",
-                                                                                    "사진",
-                                                                                    cachedBitmap!!,
-                                                                                    "PHOTO",
-                                                                                    it.id
-                                                                                )
-                                                                            )
-                                                                        } else {
-                                                                            val getResult =
-                                                                                getThumbnailForPhoto(
-                                                                                    token!!,
-                                                                                    it.id
-                                                                                )
-                                                                            items.add(
-                                                                                MyItem(
-                                                                                    LatLng(
-                                                                                        it.latitude,
-                                                                                        it.longitude
-                                                                                    ),
-                                                                                    "PHOTO",
-                                                                                    "사진",
-                                                                                    getResult!!,
-                                                                                    "PHOTO",
-                                                                                    it.id
-                                                                                )
-                                                                            )
-                                                                            saveBitmapToDiskCache(
-                                                                                context,
-                                                                                getResult!!,
-                                                                                cacheKey
-                                                                            )
-                                                                        }
-                                                                    }
-                                                                    //사진 좌표와 비트맵
-                                                                    latLngMarker.forEach {
-                                                                        items.add(
-                                                                            MyItem(
-                                                                                it,
-                                                                                "LOCATION",
-                                                                                "위치",
-                                                                                null,
-                                                                                "POSITION",
-                                                                                "HI"
-                                                                            )
-                                                                        )
-                                                                    }
-                                                                }
-                                                                loadMarker = false
-                                                            }
-                                                        }
-                                                        val viewposition = averageLatLng(latLng)
-                                                        val zoomLevel = getZoomLevelForDistance(
-                                                            getMaxDistanceBetweenLatLng(
-                                                                viewposition,
-                                                                latLng
-                                                            )
-                                                        ) - 1
-
-                                                        val cameraPositionState = remember {
-                                                            CameraPositionState(
-                                                                position = CameraPosition.fromLatLngZoom(
-                                                                    viewposition,
-                                                                    zoomLevel
-                                                                )
-                                                            )
-                                                        }
-
-                                                        GoogleMap(
-                                                            modifier = Modifier
-                                                                .fillMaxWidth()
-                                                                .aspectRatio(2f)
-                                                                .clip(RoundedCornerShape(10.dp)),
-                                                            cameraPositionState = cameraPositionState,
-                                                            onMapClick = {
-                                                                coroutineScopeMap.cancel()
-                                                                isPopupVisible = false
-//                                    isPopupVisibleSave = true
-                                                                commentSave = editedcomment
-                                                                items.clear()
-
-                                                                navHostController.navigate(
-                                                                    CalendarStack.Map.route + "/${
-                                                                        dateToString(
-                                                                            selection.date
-                                                                        )
-                                                                    }"
-                                                                ) {
-                                                                    launchSingleTop = true
-                                                                }
-                                                            },
-                                                            uiSettings = uiSettings
-                                                        ) {
-                                                            var clusterManager by remember {
-                                                                mutableStateOf<ClusterManager<MyItem>?>(
-                                                                    null
-                                                                )
-                                                            }
-                                                            MapEffect(items) { map ->
-                                                                if (clusterManager == null) {
-                                                                    clusterManager =
-                                                                        ClusterManager<MyItem>(context, map)
-                                                                }
-                                                                clusterManager?.addItems(items)
-                                                                clusterManager?.renderer =
-                                                                    MarkerClusterRender(
-                                                                        context,
-                                                                        map,
-                                                                        clusterManager!!
-                                                                    ) {
-                                                                    }
-                                                                clusterManager?.setOnClusterClickListener {
-                                                                    false
-                                                                }
-                                                                clusterManager?.setOnClusterItemClickListener {
-                                                                    false
-                                                                }
-                                                            }
-                                                            LaunchedEffect(key1 = cameraPositionState.isMoving) {
-                                                                if (!cameraPositionState.isMoving) {
-                                                                    clusterManager?.onCameraIdle()
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-
-                                        }
-                                    }
-                                }
-                            }
-
-                             */
 
 
                             if ((dialogContent && uniqueDate.contains(dateToString(selection.date)) || (dialogContent && latLng.isNotEmpty()))) {
@@ -1071,20 +803,11 @@ fun CalendarHeader(
     coroutineScope: CoroutineScope,
     state: CalendarState
 ){
-//    Row(
-//        horizontalArrangement = Arrangement.SpaceBetween,
-//        verticalAlignment = Alignment.CenterVertically,
-//        modifier = Modifier
-//            .background(Color(0xFFF3F3F3))
-//            .fillMaxWidth()
-//            .height(60.dp)
-//            .padding(horizontal = 20.dp)
-//    )
     Box(modifier = Modifier.fillMaxWidth().wrapContentHeight().background(Color(0xFFF3F3F3)))
     {
         SimpleCalendarTitle(
             modifier = Modifier
-                .padding(horizontal = 0.dp, vertical = 12.dp),
+                .padding(horizontal = 15.dp, vertical = 12.dp),
             currentMonth = visibleMonth.yearMonth,
             goToPrevious = {
                 coroutineScope.launch {
@@ -1097,11 +820,6 @@ fun CalendarHeader(
                 }
             },
         )
-//        Text(
-//            text = "캘린더",
-//            fontSize = 22.sp,
-//            fontWeight = FontWeight.Bold
-//        )
     }
 }
 

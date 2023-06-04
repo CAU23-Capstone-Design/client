@@ -137,17 +137,32 @@ fun PhotoSyncScreen(navHostController: NavHostController, photoForSyncView: Phot
             .fillMaxSize(),
     ){
         AnimatedVisibility (visible = showDeletePhotoDialog.value, enter = fadeIn(), exit = fadeOut()) {
-            DeletPhotoDialog(
-                showDeletePhotoDialog = showDeletePhotoDialog,
-                notSyncedPhotos = notSyncedPhotos,
-                checkPhotoList = photoForSyncView.checkPhotoList.value,
-                photoForSyncRepository = photoForSyncRepository,
-                additionalPhotoRepository = additionalPhotoRepository,
-                navHostController = navHostController,
-                context = context,
-                additionalPhotos = additionalNotSync,
-                checkPhotoFromGalleryList = photoForSyncView.checkPhotoFromGalleryList.value,
-            )
+            DialogWithConfirmAndCancelButton(
+                showDialog = showDeletePhotoDialog,
+                title = "사진을 삭제하시겠습니까?",
+                text = "사진 업로드 리스트에서 제외됩니다. 기기에 저장된 사진은 삭제되지 않습니다.",
+                confirmText = "삭제",
+            ) {
+                showDeletePhotoDialog.value = false
+                val deleteFromLoveStory =  getListOfNotCheckedPhoto(notSyncedPhotos, photoForSyncView.checkPhotoList.value)
+                val deleteFromGallery = getListOfNotCheckedPhotoFromGallery(additionalNotSync, photoForSyncView.checkPhotoFromGalleryList.value,)
+
+                var countDeleteItem = 0
+                if(deleteFromLoveStory.isNotEmpty()){
+                    for(item in deleteFromLoveStory){
+                        photoForSyncRepository.deletePhotoForSync(item)
+                    }
+                    countDeleteItem += deleteFromLoveStory.size
+                }
+                if(deleteFromGallery.isNotEmpty()){
+                    for(item in deleteFromGallery){
+                        additionalPhotoRepository.deleteAdditionalPhoto(item)
+                    }
+                    countDeleteItem += deleteFromGallery.size
+                }
+
+                Toast.makeText(context, "${countDeleteItem}개의 사진을 삭제했습니다.", Toast.LENGTH_SHORT).show()
+            }
         }
         AnimatedVisibility(visible = showUploadPhotoDialog.value, enter = fadeIn(), exit = fadeOut()){
             ProgressbarInDialog(

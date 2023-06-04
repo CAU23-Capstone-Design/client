@@ -1,5 +1,6 @@
 package com.lovestory.lovestory.ui.screens
 
+import android.content.Intent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandIn
 import androidx.compose.animation.fadeIn
@@ -23,10 +24,9 @@ import androidx.navigation.NavHostController
 import com.lovestory.lovestory.R
 import com.lovestory.lovestory.model.UserForLoginPayload
 import com.lovestory.lovestory.module.*
-import com.lovestory.lovestory.ui.components.AvatarWithChar
-import com.lovestory.lovestory.ui.components.DisconnectDialog
-import com.lovestory.lovestory.ui.components.LogoutDialog
-import com.lovestory.lovestory.ui.components.SettingMenuList
+import com.lovestory.lovestory.module.auth.disconnectCouple
+import com.lovestory.lovestory.services.LocationService
+import com.lovestory.lovestory.ui.components.*
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -55,16 +55,41 @@ fun ProfileScreen(
     }
 
     AnimatedVisibility(visible = showLogoutDialog.value, enter = fadeIn() + expandIn(), exit = fadeOut()){
-        LogoutDialog(
-            context = context,
-            showLogoutDialog = showLogoutDialog,
-        )
+        DialogWithConfirmAndCancelButton(
+            showDialog = showLogoutDialog,
+            title = "로그아웃",
+            text = "정말로 로그아웃 하시겠습니까?",
+            confirmText = "로그아웃"
+        ) {
+            val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)
+
+            showLogoutDialog.value = false
+            val locationServiceIntent = Intent(context, LocationService::class.java)
+            context.stopService(locationServiceIntent)
+            deleteToken(context = context)
+            intent?.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            context.startActivity(intent)
+        }
     }
     AnimatedVisibility(visible = showDisconnectDialog.value, enter = fadeIn() + expandIn(), exit = fadeOut()) {
-        DisconnectDialog(
-            context = context,
-            showDisconnectDialog = showDisconnectDialog,
-        )
+        DialogWithConfirmAndCancelButton(
+            showDialog = showDisconnectDialog,
+            title = "상대방과 연결 끊기",
+            text = "상대방과 연결을 끊을 경우 데이터 복구가 불가능합니다.\n정말로 연결을 끊으시겠습니까?",
+            confirmText = "연결 끊기"
+        ) {
+            val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)
+
+            showDisconnectDialog.value = false
+
+            disconnectCouple(context)
+
+            val locationServiceIntent = Intent(context, LocationService::class.java)
+            context.stopService(locationServiceIntent)
+            deleteToken(context = context)
+            intent?.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            context.startActivity(intent)
+        }
     }
 
     Box(
