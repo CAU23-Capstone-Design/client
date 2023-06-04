@@ -398,7 +398,6 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
             Column(
                 modifier = Modifier
                     .width(screenWidth - 40.dp)
-//                    .height(500.dp)
                     .wrapContentHeight()
                     .clip(RoundedCornerShape(10.dp))
                     .background(color = Color.White),
@@ -520,8 +519,246 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                                 initialValue = editedcomment,
                                 onValueChanged = { editedcomment = it }
                             )
-
                             Spacer(modifier = Modifier.height(10.dp))
+
+                            /*
+                            if(!meetDateAfterLoad.contains(dateToString(selection.date)) ){
+                                val dialogWidth =
+                                    LocalConfiguration.current.screenWidthDp.dp - 80.dp
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(dialogWidth),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = "기록된 추억이 없어요.",
+                                        modifier = Modifier.align(Alignment.Center),
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.LightGray
+                                    )
+                                }
+                            }else{
+                                Box(){
+                                    Column(){
+                                        AnimatedVisibility(
+                                            visible = latLng.isEmpty(),
+                                            enter = fadeIn(),
+                                            exit = fadeOut()
+                                        ) {
+                                            val dialogWidth =
+                                                LocalConfiguration.current.screenWidthDp.dp - 80.dp
+                                            Box(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .height(dialogWidth),
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                Text(
+                                                    text = "기록된 추억이 없어요.",
+                                                    modifier = Modifier.align(Alignment.Center),
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = Color.LightGray
+                                                )
+                                            }
+                                        }
+                                    }
+                                    Column(){
+                                        AnimatedVisibility(
+                                            visible = latLng.isNotEmpty(),
+                                            enter = fadeIn(),
+                                            exit = fadeOut()
+                                        ) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .aspectRatio(2f)
+                                                    .wrapContentHeight()
+                                                    .clip(RoundedCornerShape(10.dp))
+                                                    .background(color = Color(0xFFF8F8F8))
+                                            ) {
+                                                selectionSave = selection
+                                                Column() {
+                                                    AnimatedVisibility(
+                                                        visible = !dataLoaded.value,
+                                                        enter = fadeIn(),
+                                                        exit = fadeOut()
+                                                    ) {
+                                                        Box(
+                                                            modifier = Modifier
+                                                                .fillMaxWidth()
+                                                                .aspectRatio(2f)
+                                                                .clip(RoundedCornerShape(10.dp))
+                                                                .background(color = Color(0xFFF8F8F8))
+                                                        ) {
+                                                            Icon(
+                                                                Icons.Outlined.LocationOn,
+                                                                contentDescription = "Load Google Map",
+                                                                modifier = Modifier
+                                                                    .align(Alignment.Center)
+                                                                    .size(50.dp),
+                                                                tint = Color(0xFFE47676)
+                                                            )
+                                                        }
+                                                    }
+                                                }
+                                                Column() {
+                                                    AnimatedVisibility(
+                                                        visible = dataLoaded.value,
+                                                        enter = fadeIn(),
+                                                        exit = fadeOut()
+                                                    ) {
+                                                        LaunchedEffect(null) {
+                                                            if(loadMarker) {
+                                                                coroutineScopeMap.launch {
+                                                                    syncedPhoto.forEach {
+                                                                        val cacheKey = "thumbnail_${it.id}"
+                                                                        val cachedBitmap =
+                                                                            loadBitmapFromDiskCache(
+                                                                                context,
+                                                                                cacheKey
+                                                                            )
+                                                                        if (cachedBitmap != null) {
+                                                                            items.add(
+                                                                                MyItem(
+                                                                                    LatLng(
+                                                                                        it.latitude,
+                                                                                        it.longitude
+                                                                                    ),
+                                                                                    "PHOTO",
+                                                                                    "사진",
+                                                                                    cachedBitmap!!,
+                                                                                    "PHOTO",
+                                                                                    it.id
+                                                                                )
+                                                                            )
+                                                                        } else {
+                                                                            val getResult =
+                                                                                getThumbnailForPhoto(
+                                                                                    token!!,
+                                                                                    it.id
+                                                                                )
+                                                                            items.add(
+                                                                                MyItem(
+                                                                                    LatLng(
+                                                                                        it.latitude,
+                                                                                        it.longitude
+                                                                                    ),
+                                                                                    "PHOTO",
+                                                                                    "사진",
+                                                                                    getResult!!,
+                                                                                    "PHOTO",
+                                                                                    it.id
+                                                                                )
+                                                                            )
+                                                                            saveBitmapToDiskCache(
+                                                                                context,
+                                                                                getResult!!,
+                                                                                cacheKey
+                                                                            )
+                                                                        }
+                                                                    }
+                                                                    //사진 좌표와 비트맵
+                                                                    latLngMarker.forEach {
+                                                                        items.add(
+                                                                            MyItem(
+                                                                                it,
+                                                                                "LOCATION",
+                                                                                "위치",
+                                                                                null,
+                                                                                "POSITION",
+                                                                                "HI"
+                                                                            )
+                                                                        )
+                                                                    }
+                                                                }
+                                                                loadMarker = false
+                                                            }
+                                                        }
+                                                        val viewposition = averageLatLng(latLng)
+                                                        val zoomLevel = getZoomLevelForDistance(
+                                                            getMaxDistanceBetweenLatLng(
+                                                                viewposition,
+                                                                latLng
+                                                            )
+                                                        ) - 1
+
+                                                        val cameraPositionState = remember {
+                                                            CameraPositionState(
+                                                                position = CameraPosition.fromLatLngZoom(
+                                                                    viewposition,
+                                                                    zoomLevel
+                                                                )
+                                                            )
+                                                        }
+
+                                                        GoogleMap(
+                                                            modifier = Modifier
+                                                                .fillMaxWidth()
+                                                                .aspectRatio(2f)
+                                                                .clip(RoundedCornerShape(10.dp)),
+                                                            cameraPositionState = cameraPositionState,
+                                                            onMapClick = {
+                                                                coroutineScopeMap.cancel()
+                                                                isPopupVisible = false
+//                                    isPopupVisibleSave = true
+                                                                commentSave = editedcomment
+                                                                items.clear()
+
+                                                                navHostController.navigate(
+                                                                    CalendarStack.Map.route + "/${
+                                                                        dateToString(
+                                                                            selection.date
+                                                                        )
+                                                                    }"
+                                                                ) {
+                                                                    launchSingleTop = true
+                                                                }
+                                                            },
+                                                            uiSettings = uiSettings
+                                                        ) {
+                                                            var clusterManager by remember {
+                                                                mutableStateOf<ClusterManager<MyItem>?>(
+                                                                    null
+                                                                )
+                                                            }
+                                                            MapEffect(items) { map ->
+                                                                if (clusterManager == null) {
+                                                                    clusterManager =
+                                                                        ClusterManager<MyItem>(context, map)
+                                                                }
+                                                                clusterManager?.addItems(items)
+                                                                clusterManager?.renderer =
+                                                                    MarkerClusterRender(
+                                                                        context,
+                                                                        map,
+                                                                        clusterManager!!
+                                                                    ) {
+                                                                    }
+                                                                clusterManager?.setOnClusterClickListener {
+                                                                    false
+                                                                }
+                                                                clusterManager?.setOnClusterItemClickListener {
+                                                                    false
+                                                                }
+                                                            }
+                                                            LaunchedEffect(key1 = cameraPositionState.isMoving) {
+                                                                if (!cameraPositionState.isMoving) {
+                                                                    clusterManager?.onCameraIdle()
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+
+                                        }
+                                    }
+                                }
+                            }
+
+                             */
+
 
                             if ((dialogContent && uniqueDate.contains(dateToString(selection.date)) || (dialogContent && latLng.isNotEmpty()))) {
                                 Box(
@@ -753,9 +990,11 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                                     )
                                 }
                             }
+
+
                         }
                     }
-                    Log.d("통과","${uniqueDate.contains(dateToString(selection.date))}")
+
                     if ( uniqueDate.contains(dateToString(selection.date)) && dialogContent ) {
                         val filteredSyncedPhotosByDate =
                             syncedPhotosByDate.filterKeys { key ->
@@ -782,7 +1021,7 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                             }
                         }
                     }
-                    else if(!uniqueDate.contains(dateToString(selection.date)) && latLng.isEmpty() && dialogContent){
+                    else if(!uniqueDate.contains(dateToString(selection.date)) && latLngMarker.isNotEmpty() && dialogContent){
                     item(
                         span = {
                             GridItemSpan(
@@ -817,6 +1056,8 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                         }
                     }
                     }
+
+
                 }
                 Spacer(modifier = Modifier.height(20.dp))
             }
