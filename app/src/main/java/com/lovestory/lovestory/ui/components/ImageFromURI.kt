@@ -74,26 +74,20 @@ fun ThumbnailOfPhotoFromServer(
     val cacheKey = "thumbnail_${photo.id}"
 
     LaunchedEffect(photo) {
-        val result : Long  = measureTimeMillis {
-            indexForDetail.value = syncedPhotoView.getAllSyncedPhotoIndex(photo)
-            val cachedBitmap = loadBitmapFromDiskCache(context, cacheKey)
-            if (cachedBitmap != null) {
-                Log.d("COMPONENT-ThumbnailImage", "from cache")
-                bitmap.value = cachedBitmap
-            } else {
-                Log.d("COMPONENT-ThumbnailImage", "from server")
-                val getResult = getThumbnailForPhoto(token, photo.id)
-                if(getResult != null){
-                    saveBitmapToDiskCache(context, getResult, cacheKey)
-                    bitmap.value = getResult
-                }
-                else{
-                    Log.d("COMPONENT-ThumbnailOfPhotoFromServer", "Error in transfer bitmap")
-                }
+        indexForDetail.value = syncedPhotoView.getAllSyncedPhotoIndex(photo)
+        val cachedBitmap = loadBitmapFromDiskCache(context, cacheKey)
+        if (cachedBitmap != null) {
+            bitmap.value = cachedBitmap
+        } else {
+            val getResult = getThumbnailForPhoto(token, photo.id)
+            if(getResult != null){
+                saveBitmapToDiskCache(context, getResult, cacheKey)
+                bitmap.value = getResult
+            }
+            else{
+                Log.d("COMPONENT-ThumbnailOfPhotoFromServer", "Error in transfer bitmap")
             }
         }
-        Log.d("COMPONENT-ThumbnailImage", "$result")
-
     }
 
     AnimatedVisibility (

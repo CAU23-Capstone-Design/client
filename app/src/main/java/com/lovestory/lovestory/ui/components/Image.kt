@@ -55,25 +55,20 @@ fun BigThumbnailFromServer(
     val cacheKey = "detail_${photoId}"
 
     LaunchedEffect(key1 = photoId){
-        val result : Long = measureTimeMillis{
-            val cachedBitmap = loadBitmapFromDiskCache(context, cacheKey)
-            if(cachedBitmap != null){
-                bitmap.value = cachedBitmap
-                Log.d("COMPONENT-BigImage", "from cache")
+        val cachedBitmap = loadBitmapFromDiskCache(context, cacheKey)
+        if(cachedBitmap != null){
+            bitmap.value = cachedBitmap
+        }
+        else{
+            val getResult = getDetailPhoto(token!!, photoId, 20)
+            if(getResult != null){
+                saveBitmapToDiskCache(context, getResult, cacheKey)
+                bitmap.value = getResult
             }
             else{
-                val getResult = getDetailPhoto(token!!, photoId, 20)
-                if(getResult != null){
-                    saveBitmapToDiskCache(context, getResult, cacheKey)
-                    bitmap.value = getResult
-                }
-                else{
-                    Log.d("COMPONENT-BigThumbnailFromServer", "Error in transfer bitmap")
-                }
-                Log.d("COMPONENT-BigImage", "from server")
+                Log.d("COMPONENT-BigThumbnailFromServer", "Error in transfer bitmap")
             }
         }
-        Log.d("COMPONENT-BigImage", "$result")
     }
 
     AnimatedVisibility (bitmap.value!= null,enter = fadeIn(), exit = fadeOut()){

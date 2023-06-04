@@ -6,19 +6,15 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.scaleIn
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -26,7 +22,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import com.lovestory.lovestory.R
 import com.lovestory.lovestory.module.getToken
 import com.lovestory.lovestory.module.loveStoryCheckCouple
 import com.lovestory.lovestory.resource.apple_bold
@@ -98,7 +93,7 @@ fun CoupleSyncScreen(
             textAlign = TextAlign.Center,
         )
         Spacer(modifier = Modifier.height(36.dp))
-        textFieldForAuth(
+        TextFieldForAuth(
             name=code,
             onNameChanged = onCodeChanged,
             label= "코드 입력",

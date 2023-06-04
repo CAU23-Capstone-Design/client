@@ -8,7 +8,6 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
@@ -18,7 +17,7 @@ import com.maxkeppeker.sheets.core.models.base.SheetState
 import java.time.LocalDate
 
 @Composable
-fun textFieldForAuth(
+fun TextFieldForAuth(
     name : String,
     onNameChanged : (String) -> Unit,
     label : String,
@@ -50,7 +49,7 @@ fun InputPreview() {
     var name by remember { mutableStateOf("nickname", ) }
     val onNameChanged: (String) -> Unit = { name = it }
     LoveStoryTheme() {
-        textFieldForAuth(name = name, onNameChanged=onNameChanged, label = name)
+        TextFieldForAuth(name = name, onNameChanged=onNameChanged, label = name)
     }
 }
 

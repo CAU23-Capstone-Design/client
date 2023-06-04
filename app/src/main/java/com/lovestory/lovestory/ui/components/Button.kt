@@ -1,6 +1,5 @@
 package com.lovestory.lovestory.ui.components
 
-import android.content.ClipDescription
 import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -9,8 +8,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,12 +23,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.lovestory.lovestory.R
-import com.lovestory.lovestory.model.dateToString
 import com.lovestory.lovestory.module.*
-import com.lovestory.lovestory.network.deleteComment
 import com.lovestory.lovestory.resource.apple_bold
 import com.maxkeppeker.sheets.core.models.base.SheetState
-import kotlinx.coroutines.launch
 
 @Composable
 fun ButtonForAuth(navHostController: NavHostController){

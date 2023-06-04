@@ -379,7 +379,7 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                         .fillMaxWidth()
                         .wrapContentHeight()
                         .background(color = Color.Transparent)
-                        .padding(start = 25.dp, end = 25.dp, top = 15.dp, bottom = 10.dp),
+                        .padding(start = 20.dp, end = 20.dp, top = 15.dp, bottom = 10.dp),
                     verticalAlignment = Alignment.Bottom
                 ) {
                     Text(
@@ -469,12 +469,12 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                         icon = Icons.Outlined.Close,
                     )
                 }
-                Divider(color = Color.LightGray, thickness = 1.dp, modifier = Modifier.padding(start = 20.dp, end = 20.dp))
+                Divider(color = Color.LightGray, thickness = 1.dp, modifier = Modifier.padding(start = 15.dp, end = 15.dp))
 
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(3),
                     modifier = Modifier.fillMaxWidth().height((screenWidth - 80.dp) + 100.dp),
-                    contentPadding = PaddingValues(bottom = 20.dp, top = 10.dp, start = 20.dp, end = 20.dp),
+                    contentPadding = PaddingValues(bottom = 15.dp, top = 10.dp, start = 15.dp, end = 15.dp),
                     state = allPhotoListState
                 ){
                     item(

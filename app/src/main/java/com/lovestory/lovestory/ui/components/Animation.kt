@@ -1,17 +1,11 @@
 package com.lovestory.lovestory.ui.components
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import com.airbnb.lottie.RenderMode
@@ -54,8 +48,6 @@ fun AnimateCharacter(
     LaunchedEffect(characterAnimation) {
         lottieAnimatable.animate(
             composition = characterAnimation,
-//                        clipSpec = LottieClipSpec.Frame(0, 1200),
-//                        initialProgress = 0f,
             reverseOnRepeat = true,
             iterations = LottieConstants.IterateForever,
             iteration = 4,
