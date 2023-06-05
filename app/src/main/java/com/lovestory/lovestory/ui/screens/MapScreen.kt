@@ -20,6 +20,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -151,9 +152,16 @@ fun MapScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhot
             }
         } else {
             val viewPosition = averageLatLng(latLng)
-
             val zoomLevel = getZoomLevelForDistance(getMaxDistanceBetweenLatLng(viewPosition, latLng)) - 1
-            val cameraPositionState = remember { CameraPositionState(position = CameraPosition.fromLatLngZoom(viewPosition, zoomLevel)) }
+            val viewPositionSave = rememberSaveable { mutableStateOf(LatLng(0.0, 0.0)) }
+            val zoomLevelSave = rememberSaveable { mutableStateOf(100f) }
+
+            var cameraPositionState = remember { CameraPositionState(position = CameraPosition.fromLatLngZoom(viewPosition, zoomLevel)) }
+//            if(zoomLevelSave.value != 100f){
+//                cameraPositionState = CameraPositionState(position = CameraPosition.fromLatLngZoom(viewPositionSave.value, zoomLevelSave.value))
+//                viewPositionSave.value = LatLng(0.0,0.0)
+//                zoomLevelSave.value = 100f
+//            }
 
                 LaunchedEffect(null){
                     coroutineScopeMap.launch{
@@ -208,23 +216,29 @@ fun MapScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhot
                     clusterManager?.setOnClusterClickListener {
                         itemPopup = it.items.filter{it.itemType == "PHOTO"}
                         if(itemPopup.isNotEmpty()){
+                            zoomLevelSave.value = cameraPositionState.position.zoom
+                            viewPositionSave.value = LatLng(cameraPositionState.position.target.latitude,cameraPositionState.position.target.longitude)
                             if(itemPopup.size == 1){
                                 navHostController.navigate(CalendarStack.ClickDetailScreen.route+"/${itemPopup[0].id}/${date}") {
                                     popUpTo(CalendarStack.ClickDetailScreen.route)
                                 }
+                            }else{
+                                isPopupVisible = true
                             }
-                            isPopupVisible = true
                         }
                         false
                     }
                     clusterManager?.setOnClusterItemClickListener {
                         if(it.itemType == "PHOTO"){
+                            zoomLevelSave.value = cameraPositionState.position.zoom
+                            viewPositionSave.value = LatLng(cameraPositionState.position.target.latitude,cameraPositionState.position.target.longitude)
                             navHostController.navigate(CalendarStack.ClickDetailScreen.route+"/${it.id}/${date}") {
                                 popUpTo(CalendarStack.ClickDetailScreen.route)
                             }
                         }
                         false
                     }
+
                 }
                 LaunchedEffect(key1 = cameraPositionState.isMoving) {
                     if (!cameraPositionState.isMoving) {
