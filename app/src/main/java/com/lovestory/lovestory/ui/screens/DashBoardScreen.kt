@@ -37,10 +37,7 @@ import com.lovestory.lovestory.module.dashboard.getCoupleInfo
 import com.lovestory.lovestory.module.dashboard.requestUsersOfCoupleInfo
 import com.lovestory.lovestory.module.shared.getDistanceInfo
 import com.lovestory.lovestory.resource.vitro
-import com.lovestory.lovestory.ui.components.AnimateCharacter
-import com.lovestory.lovestory.ui.components.AnimateFlyHeart
-import com.lovestory.lovestory.ui.components.AnimateHeart
-import com.lovestory.lovestory.ui.components.copyAssetToTempFile
+import com.lovestory.lovestory.ui.components.*
 import com.lovestory.lovestory.view.NearbyView
 import kotlinx.coroutines.*
 import java.time.LocalDate
@@ -63,9 +60,6 @@ fun DashBoardScreen(
     val coupleInfo :MutableState<UsersOfCoupleInfo?> = remember {
         mutableStateOf(null)
     }
-//    val coupleDistance = remember {
-//        mutableStateOf(99999999)
-//    }
 
     val isNearby by nearbyView.isNearby.observeAsState(initial = false)
 
@@ -88,14 +82,6 @@ fun DashBoardScreen(
         }
     }
 
-//    LaunchedEffect(null){
-//        val result = getDistanceInfo(context)
-//
-//        if(result == null){
-//            coupleDistance.value = 99999999
-//        }
-//    }
-
     BackHandler(enabled = true) {
         if(doubleBackToExitPressedOnce.value){
             (context as Activity).finish()
@@ -115,43 +101,19 @@ fun DashBoardScreen(
             .background(Color.White)
             .fillMaxSize()
     ){
-//        Text(text = "${coupleDistance.value}", modifier = Modifier
-//            .padding(top = 70.dp)
-//            .clickable {
-//                val result = getDistanceInfo(context)
-//                if (result == null) {
-//                    coupleDistance.value = 99999999
-//                } else {
-//                    coupleDistance.value = result
-//                }
-//            })
-
         HeaderOfDashBoard()
 
         ContentOfDashBoard(
             coupleInfo = coupleInfo,
             isVisibleFlyingAnimation = isVisibleFlyingAnimation,
-//            countDay = countDay
             isNearby = isNearby
         )
 
         AnimatedVisibility(isVisibleFlyingAnimation.value , enter = fadeIn(), exit = fadeOut()){
             AnimateFlyHeart()
         }
-
-
-
-//        DisplayGif()
     }
 }
-
-//@Composable
-//fun DisplayGif() {
-//    val context = LocalContext.current
-//    val tempFile = copyAssetToTempFile(context, "alone.gif")
-//    val painter = rememberImagePainter(data = tempFile)
-//    Image(painter = painter, contentDescription = "My gif")
-//}
 
 
 @Composable
@@ -189,13 +151,24 @@ fun ContentOfDashBoard(
             .padding(top = 70.dp)
     ) {
 
-        AnimatedVisibility(visible = isNearby, enter = fadeIn(), exit = fadeOut())
-        {
-            AnimateCharacter()
+        Box() {
+            Log.d("DashBoard Screen", "isNearby : $isNearby")
+            Column() {
+                AnimatedVisibility(visible = isNearby, enter = fadeIn(), exit = fadeOut())
+                {
+                    AnimateCharacter()
+                }
+            }
+            Column() {
+                AnimatedVisibility(visible = !isNearby , enter = fadeIn(), exit = fadeOut()){
+                    GifImage(
+                        assetName = "alone2.gif"
+                    )
+                }
+            }
+
         }
-        AnimatedVisibility(visible = !isNearby , enter = fadeIn(), exit = fadeOut()){
-            GifImage()
-        }
+
         Spacer(modifier = Modifier.height(20.dp))
         if(coupleInfo.value != null){
             Column(
@@ -242,7 +215,6 @@ fun ContentOfDashBoard(
                     val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
                     val localDate = LocalDate.parse(coupleInfo.value!!.firstDate!!, formatter)
                     Text(
-//                    text = "D + ${countDay.value}",
                         text = "D+ ${currentDate.toEpochDay() - localDate.toEpochDay()}",
                         fontFamily = vitro,
                         fontSize = 20.sp
@@ -267,35 +239,32 @@ fun ContentOfDashBoard(
             }
         }
         Spacer(modifier = Modifier.height(50.dp))
-        Column() {
-//            Text(text = "여기에 뭘 넣으면 좋을까?!!!!!!!")
-        }
     }
 }
 
-@Composable
-fun GifImage(
-    modifier: Modifier = Modifier,
-) {
-
-    val context = LocalContext.current
-    val tempFile = copyAssetToTempFile(context, "alone2.gif")
-    val imageLoader = ImageLoader.Builder(context)
-        .components {
-            if (SDK_INT >= 28) {
-                add(ImageDecoderDecoder.Factory())
-            } else {
-                add(GifDecoder.Factory())
-            }
-        }
-        .build()
-    Image(
-        painter = rememberAsyncImagePainter(
-            ImageRequest.Builder(context).data(data = tempFile).apply(block = {
-                size(Size.ORIGINAL)
-            }).build(), imageLoader = imageLoader
-        ),
-        contentDescription = null,
-        modifier = modifier.fillMaxWidth(),
-    )
-}
+//@Composable
+//fun GifImage(
+//    modifier: Modifier = Modifier,
+//) {
+//
+//    val context = LocalContext.current
+//    val tempFile = copyAssetToTempFile(context, "alone2.gif")
+//    val imageLoader = ImageLoader.Builder(context)
+//        .components {
+//            if (SDK_INT >= 28) {
+//                add(ImageDecoderDecoder.Factory())
+//            } else {
+//                add(GifDecoder.Factory())
+//            }
+//        }
+//        .build()
+//    Image(
+//        painter = rememberAsyncImagePainter(
+//            ImageRequest.Builder(context).data(data = tempFile).apply(block = {
+//                size(Size.ORIGINAL)
+//            }).build(), imageLoader = imageLoader
+//        ),
+//        contentDescription = null,
+//        modifier = modifier.fillMaxWidth(),
+//    )
+//}
