@@ -11,15 +11,20 @@ import androidx.core.content.ContextCompat
 import androidx.core.app.NotificationCompat
 import android.content.Context
 import android.os.*
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelStoreOwner
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.android.gms.location.*
 import com.lovestory.lovestory.MainActivity
 import com.lovestory.lovestory.R
+import com.lovestory.lovestory.broadcasts.LocationToPhoto.ACTION_CHANGE_VALUE_NEARBY
 import com.lovestory.lovestory.broadcasts.LocationToPhoto.ACTION_START_PHOTO_PICKER_SERVICE
 import com.lovestory.lovestory.broadcasts.LocationToPhoto.ACTION_STOP_PHOTO_PICKER_SERVICE
 import com.lovestory.lovestory.module.checkNearby
 import com.lovestory.lovestory.module.getToken
 import com.lovestory.lovestory.module.saveLocation
 import com.lovestory.lovestory.module.shared.saveDistanceInfo
+import com.lovestory.lovestory.view.NearbyView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -39,7 +44,6 @@ class LocationService : Service() {
 
     private lateinit var locationRequest : LocationRequest
     private lateinit var locationCallback: LocationCallback
-
 
     override fun onBind(intent: Intent): IBinder? {
         return null
@@ -148,18 +152,29 @@ class LocationService : Service() {
 
     private fun sendBroadcastToSecondService(action: String) {
         val intent = Intent(this, PhotoService::class.java)
+        val intentForNearbyView = Intent(ACTION_CHANGE_VALUE_NEARBY)
+
+
         intent.action = action
         when (intent.action) {
             ACTION_START_PHOTO_PICKER_SERVICE -> {
                 if (!isPhotoServiceRunning) {
                     isPhotoServiceRunning = true
                     startForegroundService(intent)
+                    intentForNearbyView.putExtra("isNearby", true) // 변경된 데이터
+                    LocalBroadcastManager.getInstance(this).sendBroadcast(intentForNearbyView)
+//                    sendBroadcast(intent)
+                    Log.d("LocationService-2", "isNearby : true")
                 }
             }
             ACTION_STOP_PHOTO_PICKER_SERVICE -> {
                 if (isPhotoServiceRunning) {
                     isPhotoServiceRunning = false
                     stopService(intent)
+                    intentForNearbyView.putExtra("isNearby", false) // 변경된 데이터
+//                    sendBroadcast(intent)
+                    LocalBroadcastManager.getInstance(this).sendBroadcast(intentForNearbyView)
+                    Log.d("LocationService-2", "isNearby : false")
                 }
             }
         }

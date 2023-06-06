@@ -177,4 +177,9 @@ dependencies {
     // Optionally, you can include the widgets library for ScaleBar, etc.
     implementation 'com.google.maps.android:maps-compose-widgets:2.11.2'
     implementation "com.google.accompanist:accompanist-pager:0.28.0"
+
+    // image library
+//    implementation 'io.coil-kt:coil-compose:1.4.0'
+    implementation "io.coil-kt:coil-compose:2.1.0"
+    implementation "io.coil-kt:coil-gif:2.1.0"
 }

@@ -25,6 +25,7 @@ import com.lovestory.lovestory.R
 import com.lovestory.lovestory.model.UserForLoginPayload
 import com.lovestory.lovestory.module.*
 import com.lovestory.lovestory.module.auth.disconnectCouple
+import com.lovestory.lovestory.module.dashboard.deleteCoupleInfo
 import com.lovestory.lovestory.services.LocationService
 import com.lovestory.lovestory.ui.components.*
 import java.time.LocalDate
@@ -66,6 +67,7 @@ fun ProfileScreen(
             showLogoutDialog.value = false
             val locationServiceIntent = Intent(context, LocationService::class.java)
             context.stopService(locationServiceIntent)
+            deleteCoupleInfo(context = context)
             deleteToken(context = context)
             intent?.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
             context.startActivity(intent)
@@ -82,10 +84,12 @@ fun ProfileScreen(
 
             showDisconnectDialog.value = false
 
+
             disconnectCouple(context)
 
             val locationServiceIntent = Intent(context, LocationService::class.java)
             context.stopService(locationServiceIntent)
+            deleteCoupleInfo(context = context)
             deleteToken(context = context)
             intent?.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
             context.startActivity(intent)

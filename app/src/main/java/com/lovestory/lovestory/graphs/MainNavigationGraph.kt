@@ -7,6 +7,7 @@ import androidx.navigation.compose.composable
 import com.lovestory.lovestory.R
 import com.lovestory.lovestory.model.UserForLoginPayload
 import com.lovestory.lovestory.ui.screens.*
+import com.lovestory.lovestory.view.NearbyView
 import com.lovestory.lovestory.view.PhotoForSyncView
 import com.lovestory.lovestory.view.SyncedPhotoView
 
@@ -24,6 +25,7 @@ import com.lovestory.lovestory.view.SyncedPhotoView
  * @param navHostController NavHostController
  * @param photoForSyncView view Model for Photo Sync
  * @param syncedPhotoView view Model for Synced Photo
+ * @param nearbyView view Model for Nearby
  * @param userData user data from token
  */
 @Composable
@@ -31,6 +33,7 @@ fun MainNavGraph(
     navHostController: NavHostController,
     photoForSyncView: PhotoForSyncView,
     syncedPhotoView : SyncedPhotoView,
+    nearbyView : NearbyView,
     userData : UserForLoginPayload
 ){
 
@@ -41,7 +44,10 @@ fun MainNavGraph(
     ) {
         /*BottomBar*/
         composable(MainScreens.DashBoard.route){
-            DashBoardScreen(navHostController = navHostController)
+            DashBoardScreen(
+                navHostController = navHostController,
+                nearbyView = nearbyView,
+            )
         }
         composable(MainScreens.Gallery.route){
             GalleryScreen(

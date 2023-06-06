@@ -34,6 +34,7 @@ fun MainScreen(
     val owner = LocalViewModelStoreOwner.current
     lateinit var photoForSyncView: PhotoForSyncView
     lateinit var syncedPhotoView: SyncedPhotoView
+    lateinit var nearbyView: NearbyView
 
     owner?.let {
         photoForSyncView = viewModel(
@@ -46,6 +47,12 @@ fun MainScreen(
             it,
             "SyncedPhotoViewModel",
             SyncedPhotoViewFactory(LocalContext.current.applicationContext as Application)
+        )
+
+        nearbyView = viewModel(
+            it,
+            "NearbyViewModel",
+            NearbyViewFactory(LocalContext.current.applicationContext as Application)
         )
     }
 
@@ -66,6 +73,7 @@ fun MainScreen(
             navHostController = navHostController,
             photoForSyncView = photoForSyncView,
             syncedPhotoView =  syncedPhotoView,
+            nearbyView = nearbyView,
             userData = userData
         )
     }

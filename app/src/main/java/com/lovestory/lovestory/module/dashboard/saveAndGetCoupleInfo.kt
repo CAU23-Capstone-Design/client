@@ -28,3 +28,12 @@ fun getCoupleInfo(context: Context): UsersOfCoupleInfo? {
         gson.fromJson<UsersOfCoupleInfo>(getInfoFromShared, UsersOfCoupleInfo::class.java)
     }
 }
+
+fun deleteCoupleInfo(context: Context) {
+    val sharedPreferences = context.getSharedPreferences("SharedLoveStory", Context.MODE_PRIVATE)
+
+    with(sharedPreferences.edit()) {
+        remove("COUPLE_INFO")
+        apply()
+    }
+}
