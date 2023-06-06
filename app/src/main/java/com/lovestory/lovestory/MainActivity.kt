@@ -61,6 +61,7 @@ class MainActivity : ComponentActivity() {
             }
 
             LoveStoryTheme() {
+                Log.d("LoveStory 1.1", "MainActivity 2703534")
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = androidx.compose.material3.MaterialTheme.colorScheme.background
