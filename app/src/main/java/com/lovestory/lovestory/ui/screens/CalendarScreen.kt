@@ -81,13 +81,7 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
     var selection by remember { mutableStateOf(CalendarDay(date = LocalDate.now(), position = DayPosition.MonthDate))}
     var isPopupVisible by remember { mutableStateOf(false) }
     var dialogContent by remember { mutableStateOf(false) }
-
-    LaunchedEffect(null) {
-        if (isPopupVisibleSave) {
-            selection = selectionSave
-            isPopupVisible = true
-        }
-    }
+    var uniqueMonth by remember { mutableStateOf(mutableSetOf<YearMonth>(currentMonth)) }
 
     val onOpenDialogRequest : ()->Unit = {
         isPopupVisible = true
@@ -141,15 +135,24 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
 
     val systemUiController = rememberSystemUiController()
 
+    LaunchedEffect(null) {
+        if (isPopupVisibleSave) {
+            selection = selectionSave
+            isPopupVisible = true
+            uniqueMonth.clear()
+            uniqueMonth.add(visibleMonth.yearMonth)
+        }
+    }
+
     //해야 되는 게 코루틴 정리. 룸 db
     LaunchedEffect(null) {
         //getDayListByTargetMonth
+        Log.d("보이는 월","${visibleMonth.yearMonth}")
         val listOfDays = repository.getDayListByTargetMonth(monthToString(visibleMonth.yearMonth))
         listOfDays?.forEach {
             uniqueDate.add(it)
             meetDate.add(it)
         }
-        Log.d("유니크","$uniqueDate")
 
         //get Comment
         val getMemoryList: Response<List<GetMemory>> = getComment(token!!)
@@ -169,10 +172,13 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
             meetDate.add(intmonthToString(visibleMonth.yearMonth, it))
         }
         meetDateAfterLoad.addAll(meetDate)
+
+        //uniqueMonth.add(visibleMonth.yearMonth)
+        Log.d("유니크","$uniqueMonth")
     }
 
     LaunchedEffect(visibleMonth.yearMonth){
-        if(visibleMonth.yearMonth != currentMonth) {
+        if(!uniqueMonth.contains(visibleMonth.yearMonth)) {
             val meetDay = getDay(token!!, monthToString(visibleMonth.yearMonth))
             meetDay.body()?.forEach {
                 meetDateAfterLoad.add(intmonthToString(visibleMonth.yearMonth, it))
@@ -183,19 +189,7 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                 meetDateAfterLoad.add(it)
                 uniqueDate.add(it)
             }
-        }else{
-            if(selectionSave.date != LocalDate.now()){
-                val meetDay = getDay(token!!, monthToString(visibleMonth.yearMonth))
-                meetDay.body()?.forEach {
-                    meetDateAfterLoad.add(intmonthToString(visibleMonth.yearMonth, it))
-                }
-
-                val listOfDays = repository.getDayListByTargetMonth(monthToString(visibleMonth.yearMonth))
-                listOfDays?.forEach{
-                    meetDateAfterLoad.add(it)
-                    uniqueDate.add(it)
-                }
-            }
+            uniqueMonth.add(visibleMonth.yearMonth)
         }
     }
 
