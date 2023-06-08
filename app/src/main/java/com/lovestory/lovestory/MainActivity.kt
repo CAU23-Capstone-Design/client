@@ -3,7 +3,6 @@ package com.lovestory.lovestory
 import android.app.ActivityManager
 import android.content.Context
 import android.content.Intent
-import android.location.LocationManager
 import android.net.Uri
 import android.os.Bundle
 import android.os.PowerManager
@@ -14,16 +13,12 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.lovestory.lovestory.database.PhotoDatabase
-import com.lovestory.lovestory.database.entities.SyncedPhotoDao
-import com.lovestory.lovestory.database.repository.SyncedPhotoRepository
 import com.lovestory.lovestory.graphs.RootNavigationGraph
 import com.lovestory.lovestory.module.StartService
 import com.lovestory.lovestory.services.LocationService
@@ -61,16 +56,13 @@ class MainActivity : ComponentActivity() {
             }
 
             LoveStoryTheme() {
-                Log.d("LoveStory 1.1", "MainActivity 2703534")
+                Log.d("[MainActivity]", "Love Story Build ver [ad3a2f7]")
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = androidx.compose.material3.MaterialTheme.colorScheme.background
                 ) {
                     if(!resultIsRunningService){
-                        Log.d("Main", "서비스 실행중 예정")
                         StartService(LocalContext.current)
-                    }else{
-                        Log.d("Main", "이미 서비스 실행중")
                     }
                     DialogForPermission()
                     RootNavigationGraph()
@@ -87,26 +79,5 @@ class MainActivity : ComponentActivity() {
             }
         }
         return false
-    }
-}
-
-@Composable
-fun LoveStoryMainScreen() {
-//    val navController = rememberNavController()
-    Scaffold(
-        bottomBar = { }
-    ) {
-        Box(Modifier.padding(it)){
-
-        }
-    }
-}
-
-
-@Preview(showSystemUi = true)
-@Composable
-fun DefaultPreview() {
-    LoveStoryTheme {
-        RootNavigationGraph()
     }
 }

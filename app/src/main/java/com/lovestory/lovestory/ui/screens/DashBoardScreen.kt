@@ -1,14 +1,12 @@
 package com.lovestory.lovestory.ui.screens
 
 import android.app.Activity
-import android.os.Build.VERSION.SDK_INT
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -24,18 +22,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
-import coil.ImageLoader
-import coil.compose.rememberAsyncImagePainter
-import coil.compose.rememberImagePainter
-import coil.decode.GifDecoder
-import coil.decode.ImageDecoderDecoder
-import coil.request.ImageRequest
-import coil.size.Size
 import com.lovestory.lovestory.model.UsersOfCoupleInfo
 import com.lovestory.lovestory.module.dashboard.getCoupleInfo
 import com.lovestory.lovestory.module.dashboard.requestUsersOfCoupleInfo
-import com.lovestory.lovestory.module.shared.getDistanceInfo
 import com.lovestory.lovestory.resource.vitro
 import com.lovestory.lovestory.ui.components.*
 import com.lovestory.lovestory.view.NearbyView
@@ -45,7 +34,6 @@ import java.time.format.DateTimeFormatter
 
 @Composable
 fun DashBoardScreen(
-    navHostController: NavHostController,
     nearbyView: NearbyView
 ) {
 
@@ -65,19 +53,15 @@ fun DashBoardScreen(
 
     LaunchedEffect(null){
         val result = getCoupleInfo(context)
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+
         if(result == null){
-            Log.d("DashBoard Screen", "getCoupleInfo() is null")
             coupleInfo.value = requestUsersOfCoupleInfo(context)
-            Log.d("DashBoard Screen", "coupleInfo.value : ${coupleInfo.value}")
-            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
             val localDate = LocalDate.parse(coupleInfo.value!!.firstDate!!, formatter)
             countDay.value = currentDate.toEpochDay() - localDate.toEpochDay()
-            Log.d("DashBoard Screen", "${coupleInfo.value}")
         }else{
-            Log.d("DashBoard Screen", "getCoupleInfo() is not null")
             coupleInfo.value = result
-            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
-            val localDate = LocalDate.parse(coupleInfo!!.value!!.firstDate!!, formatter)
+            val localDate = LocalDate.parse(coupleInfo.value!!.firstDate!!, formatter)
             countDay.value = currentDate.toEpochDay() - localDate.toEpochDay()
         }
     }
@@ -127,7 +111,7 @@ fun HeaderOfDashBoard(){
             .padding(horizontal = 20.dp)
     ){
         Text(
-            text = "Lovestory",
+            text = "Love Story",
             fontSize = 24.sp,
             fontWeight = FontWeight.Normal,
             fontFamily = vitro,
@@ -152,7 +136,6 @@ fun ContentOfDashBoard(
     ) {
 
         Box() {
-            Log.d("DashBoard Screen", "isNearby : $isNearby")
             Column() {
                 AnimatedVisibility(visible = isNearby, enter = fadeIn(), exit = fadeOut())
                 {
@@ -241,30 +224,3 @@ fun ContentOfDashBoard(
         Spacer(modifier = Modifier.height(50.dp))
     }
 }
-
-//@Composable
-//fun GifImage(
-//    modifier: Modifier = Modifier,
-//) {
-//
-//    val context = LocalContext.current
-//    val tempFile = copyAssetToTempFile(context, "alone2.gif")
-//    val imageLoader = ImageLoader.Builder(context)
-//        .components {
-//            if (SDK_INT >= 28) {
-//                add(ImageDecoderDecoder.Factory())
-//            } else {
-//                add(GifDecoder.Factory())
-//            }
-//        }
-//        .build()
-//    Image(
-//        painter = rememberAsyncImagePainter(
-//            ImageRequest.Builder(context).data(data = tempFile).apply(block = {
-//                size(Size.ORIGINAL)
-//            }).build(), imageLoader = imageLoader
-//        ),
-//        contentDescription = null,
-//        modifier = modifier.fillMaxWidth(),
-//    )
-//}

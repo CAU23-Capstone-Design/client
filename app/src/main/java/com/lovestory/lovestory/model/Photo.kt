@@ -29,12 +29,6 @@ data class AreaInfo(
     val area3 : String,
 )
 
-
-data class PhotoTable(
-//    @SerializedName("PhotoTable")
-    val photoList: List<String>,
-)
-
 data class PhotoInfo(
     @SerializedName("_id")
     val id: String,

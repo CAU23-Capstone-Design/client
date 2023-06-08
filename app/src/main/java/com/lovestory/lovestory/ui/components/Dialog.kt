@@ -110,9 +110,7 @@ fun DialogForPermission(
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
 
     val isDialogOpen = remember{ mutableStateOf(true) }
-//    val isAskBackgroundPermissionDialog = remember { mutableStateOf(true) }
     val onDismissRequest : () -> Unit = {isDialogOpen.value = false}
-//    val onDismissRequestForAskBackgroundPermission : ()->Unit = {isAskBackgroundPermissionDialog.value = false}
 
     val permissionResult = getResultPermissionCheck(context)
     val permissionLauncher = getPermissionLauncher(context)

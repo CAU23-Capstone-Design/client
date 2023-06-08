@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.Resources
 import android.graphics.Bitmap
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -71,10 +70,8 @@ fun MapScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhot
     val items = remember{ mutableStateListOf<MyItem>() }
 
     lateinit var repository : SyncedPhotoRepository
-    var photoDate by remember { mutableStateOf(emptyList<String>()) }
     var photoPosition by remember { mutableStateOf(emptyList<LatLng>()) }
 
-    var bitmapList by remember { mutableStateOf(emptyList<Bitmap>()) }
 
     var isPopupVisible by remember { mutableStateOf(false) }
     var itemPopup by remember { mutableStateOf(emptyList<MyItem>()) }
@@ -123,7 +120,6 @@ fun MapScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhot
         }
 
         dataLoaded.value = true
-        Log.d("위치좌표", "$latLng")
     }
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -157,11 +153,6 @@ fun MapScreen(navHostController: NavHostController, syncedPhotoView : SyncedPhot
             val zoomLevelSave = rememberSaveable { mutableStateOf(100f) }
 
             var cameraPositionState = remember { CameraPositionState(position = CameraPosition.fromLatLngZoom(viewPosition, zoomLevel)) }
-//            if(zoomLevelSave.value != 100f){
-//                cameraPositionState = CameraPositionState(position = CameraPosition.fromLatLngZoom(viewPositionSave.value, zoomLevelSave.value))
-//                viewPositionSave.value = LatLng(0.0,0.0)
-//                zoomLevelSave.value = 100f
-//            }
 
                 LaunchedEffect(null){
                     coroutineScopeMap.launch{
@@ -454,15 +445,6 @@ class MarkerClusterRender<T : MyItem>(
         val myItem = clusterItem as MyItem
 
         if(myItem.itemType == "PHOTO") {
-//            val markerIcon = myItem.icon
-//            val desiredSize = 60.dp // Set the desired size for the icon
-//            val density = Resources.getSystem().displayMetrics.density
-//            val scaledBitmap = Bitmap.createScaledBitmap(
-//                markerIcon!!,
-//                (desiredSize.value * density).toInt(),
-//                (desiredSize.value * density).toInt(),
-//                false
-//            )
             marker.setIcon(markerIcon(context, myItem.icon!!))
         }else{
             marker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
@@ -472,19 +454,9 @@ class MarkerClusterRender<T : MyItem>(
 
     override fun onBeforeClusterItemRendered(item: T, markerOptions: MarkerOptions) {
         super.onBeforeClusterItemRendered(item, markerOptions)
-        Log.d("마커","${item}")
         val myItem = item as MyItem
 
         if(myItem.itemType == "PHOTO") {
-//            val markerIcon = myItem.icon
-//            val desiredSize = 60.dp // Set the desired size for the icon
-//            val density = Resources.getSystem().displayMetrics.density
-//            val scaledBitmap = Bitmap.createScaledBitmap(
-//                markerIcon!!,
-//                (desiredSize.value * density).toInt(),
-//                (desiredSize.value * density).toInt(),
-//                false
-//            )
             markerOptions.anchor(0.5f, 1f)
             markerOptions.icon(markerIcon(context, myItem.icon!!))
             markerOptions.title(myItem.itemTitle)
@@ -502,15 +474,6 @@ class MarkerClusterRender<T : MyItem>(
         val myItem = item as MyItem
 
         if(myItem.itemType == "PHOTO") {
-//            val markerIcon = myItem.icon
-//            val desiredSize = 60.dp // Set the desired size for the icon
-//            val density = Resources.getSystem().displayMetrics.density
-//            val scaledBitmap = Bitmap.createScaledBitmap(
-//                markerIcon!!,
-//                (desiredSize.value * density).toInt(),
-//                (desiredSize.value * density).toInt(),
-//                false
-//            )
             marker.setIcon(markerIcon(context, myItem.icon!!))
         }else{
             marker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))

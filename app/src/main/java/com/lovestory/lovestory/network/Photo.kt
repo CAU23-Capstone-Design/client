@@ -21,7 +21,7 @@ suspend fun uploadPhotoToServer(
 
     return try{
         val call = apiService.uploadImage(jwt, imagePart, local_id)
-        Log.e(TAG_UPLOAD_PHOTO_TO_SERVER, "${call.errorBody()}")
+//        Log.e(TAG_UPLOAD_PHOTO_TO_SERVER, "${call.errorBody()}")
         call
     }catch (e : HttpException){
         Log.e(TAG_UPLOAD_PHOTO_TO_SERVER, "$e")

@@ -436,7 +436,6 @@ fun SectionOfUploadButton(
                                 showUploadPhotoDialog.value = false
                                 Toast.makeText(context, "${numOfTotalUploadPhoto.value}개의 사진을 업로드 했습니다.", Toast.LENGTH_SHORT).show()
 
-                                Log.d("PhotoSyncScreen", "notSyncedPhotos.value) :  ${notSyncedPhotos.size}")
                                 numOfCurrentUploadedPhoto.value = 0
                                 if(notSyncedPhotos.size == 1){
                                     navHostController.popBackStack()
@@ -458,7 +457,6 @@ fun SectionOfUploadButton(
                                 showUploadPhotoDialog.value = false
                                 Toast.makeText(context, "${numOfTotalUploadPhoto.value}개의 사진을 업로드 했습니다.", Toast.LENGTH_SHORT).show()
 
-                                Log.d("PhotoSyncScreen", "notSyncedPhotos.value) :  ${additionalNotSync.size}")
                                 numOfCurrentUploadedPhoto.value = 0
                                 if(additionalNotSync.size == 1){
                                     navHostController.popBackStack()

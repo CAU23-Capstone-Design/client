@@ -149,7 +149,7 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
             uniqueDate.add(it)
             meetDate.add(it)
         }
-        Log.d("유니크","$uniqueDate")
+//        Log.d("유니크","$uniqueDate")
 
         //get Comment
         val getMemoryList: Response<List<GetMemory>> = getComment(token!!)
@@ -347,7 +347,7 @@ fun CalendarScreen(navHostController: NavHostController, syncedPhotoView : Synce
                         coupleMemoryList.filterNot { it.date == date }
                     val delete: Any =
                         deleteComment(token!!, dateToString(selection.date))
-                    Log.d("위치좌표","$latLng")
+//                    Log.d("위치좌표","$latLng")
                     if (!uniqueDate.contains(dateToString(date)) && latLng.isEmpty()) {
                         meetDateAfterLoad.remove(dateToString(date))
                     }

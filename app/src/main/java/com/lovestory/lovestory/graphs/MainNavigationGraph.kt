@@ -45,7 +45,6 @@ fun MainNavGraph(
         /*BottomBar*/
         composable(MainScreens.DashBoard.route){
             DashBoardScreen(
-                navHostController = navHostController,
                 nearbyView = nearbyView,
             )
         }

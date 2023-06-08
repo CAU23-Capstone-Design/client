@@ -3,16 +3,13 @@ package com.lovestory.lovestory.ui.components
 import android.graphics.Bitmap
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,8 +33,6 @@ import com.lovestory.lovestory.module.saveBitmapToDiskCache
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlin.properties.Delegates
-import kotlin.system.measureTimeMillis
 
 @Composable
 fun BigThumbnailFromServer(
@@ -106,7 +101,6 @@ fun BigThumbnail(
     curIndex : Int
 ) {
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
-//    val imageWidth = screenWidth - 5.dp
 
     Box(
         modifier = Modifier

@@ -17,6 +17,9 @@ import com.lovestory.lovestory.ui.screens.MainScreen
 
 const val tagName = "[NAVIGATION]ROOT"
 
+/**
+ * Root navigation graph
+ */
 @Composable
 fun RootNavigationGraph(){
     Log.d(tagName, "Root Navigation called")

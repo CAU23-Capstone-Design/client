@@ -22,6 +22,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
+/**
+ * Main Screen Navigation
+ *
+ * @param navHostController 네비게이션 컨트롤러
+ * @param userData 사용자 데이터
+ */
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun MainScreen(

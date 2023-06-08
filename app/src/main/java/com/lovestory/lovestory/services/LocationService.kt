@@ -11,8 +11,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.app.NotificationCompat
 import android.content.Context
 import android.os.*
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelStoreOwner
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.android.gms.location.*
 import com.lovestory.lovestory.MainActivity
@@ -23,20 +21,15 @@ import com.lovestory.lovestory.broadcasts.LocationToPhoto.ACTION_STOP_PHOTO_PICK
 import com.lovestory.lovestory.module.checkNearby
 import com.lovestory.lovestory.module.getToken
 import com.lovestory.lovestory.module.saveLocation
-import com.lovestory.lovestory.module.shared.saveDistanceInfo
-import com.lovestory.lovestory.view.NearbyView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.util.Objects
 
 class LocationService : Service() {
     private val locationLogName = "[SERVICE] LOCATION"
     val context = this
     private var isPhotoServiceRunning = false
     private var currentInterval: Long = 1 * 60 * 1000
-
-//    private lateinit var token : String
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var backgroundHandler: Handler
@@ -111,7 +104,6 @@ class LocationService : Service() {
                     CoroutineScope(Dispatchers.IO).launch {
                         val nearbyResponse = checkNearby(token)
                         if (nearbyResponse != null) {
-                            saveDistanceInfo(context, nearbyResponse.distance.toInt())
                             updateLocationRequestInterval( (nearbyResponse.distance.toLong()/500 +1L) * 60 * 1000)
                             if(nearbyResponse.isNearby){
                                 sendBroadcastToSecondService(ACTION_START_PHOTO_PICKER_SERVICE)

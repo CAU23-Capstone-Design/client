@@ -187,12 +187,6 @@ internal class ComposeUiClusterRenderer<T : ClusterItem>(
         }
     }
 
-    /**
-     * A [Cluster] is represented by one or more elements on screen. Even if a cluster contains
-     * multiple items, it still might only need a single element, depending on
-     * [shouldRenderAsCluster].
-     * @return a set of [ViewKey]s for each element.
-     */
     private fun Cluster<T>.computeViewKeys(): Set<ViewKey<T>> {
         return if (shouldRenderAsCluster(this)) {
             setOf(ViewKey.Cluster(this))
@@ -230,7 +224,6 @@ internal class ComposeUiClusterRenderer<T : ClusterItem>(
         return viewInfo
     }
 
-    /** Re-render the corresponding marker whenever [view] invalidates */
     private suspend fun collectInvalidationsAndRerender(
         key: ViewKey<T>,
         view: InvalidatingComposeView

@@ -212,6 +212,17 @@ fun GalleryScreen(navHostController: NavHostController, syncedPhotoView : Synced
     }
 }
 
+/**
+ * GalleryHeader
+ *
+ * @param context Application Context
+ * @param isPressedPhotoMode 사진 선택 모드인지 아닌지 확인 변수
+ * @param isDropMenuForGalleryScreen Gallery 화면에서 DropMenu를 제어 변수
+ * @param selectedButton Gallery 화면에서 선택된 버튼
+ * @param syncedPhotoView 동기화된 사진을 보여주는 뷰
+ * @param countSelectedPhotos 선택된 사진의 개수
+ * @param showDeleteSyncedPhotoDialog 동기화된 사진을 삭제할 것인지 확인하는 Dialog를 보여주는 변수
+ */
 @Composable
 fun GalleryHeader(
     context: Context,
@@ -295,6 +306,14 @@ fun FloatingSection(
     }
 }
 
+/**
+ * HeaderForGallery
+ *
+ * @param context 앱 컨텍스트
+ * @param isDropMenuForGalleryScreen 드롭메뉴가 열려있는지 여부
+ * @param isPressedPhotoMode 사진 선택 모드인지 여부
+ * @param selectedButton 현재 선택된 버튼
+ */
 @Composable
 fun HeaderForGallery(
     context: Context,
@@ -338,8 +357,6 @@ fun HeaderForGallery(
                         .padding(10.dp)
                 )
 
-//                Spacer(modifier = Modifier.width(20.dp))
-
                 Box() {
                     Icon(
                         painter = painterResource(id = R.drawable.baseline_more_vert_24),
@@ -376,6 +393,16 @@ fun HeaderForGallery(
     }
 }
 
+/**
+ * HeaderForDeletePhoto
+ * 사진 삭제 모드에서 보여지는 헤더
+ *
+ * @param context 앱 컨텍스트
+ * @param syncedPhotoView 동기화된 사진을 보여주는 뷰
+ * @param isPressedPhotoMode 사진 삭제 모드가 활성화 되었는지 확인하는 변수
+ * @param countSelectedPhotos 선택된 사진의 개수
+ * @param showDeleteSyncedPhotoDialog 동기화된 사진을 삭제할 때 보여지는 다이얼로그
+ */
 @Composable
 fun HeaderForDeletePhoto(
     context : Context,

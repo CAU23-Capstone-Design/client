@@ -266,11 +266,7 @@ fun PhotoDetailScreenFromServer(
                         saveBitmapToDiskCache(context, getResult, cacheKey)
                         bitmap.value = getResult
                     }
-                    else{
-                        Log.d("COMPONENT-detail photo", "Error in transfer bitmap")
-                    }
                 }
-                Log.d("[Composable]PhotoDetailScreen", "start Detail ${syncedPhotos[index].id}")
 
                 val photoInfo = repository.getSyncedPhotoById(syncedPhotos[index].id)
                 if (photoInfo != null) {
@@ -428,9 +424,6 @@ fun CalendarPhotoDetailScreenFromServer(
                         saveBitmapToDiskCache(context, getResult, cacheKey)
                         bitmap.value = getResult
                     }
-                    else{
-                        Log.d("COMPONENT-detail photo", "Error in transfer bitmap")
-                    }
                 }
 
                 val photoInfo = repository.getSyncedPhotoById(daySyncedPhoto[index].id)
@@ -585,9 +578,6 @@ fun ClickPhotoDetailScreenFromServer(
                 if(getResult != null){
                     saveBitmapToDiskCache(context, getResult, cacheKey)
                     bitmap.value = getResult
-                }
-                else{
-                    Log.d("COMPONENT-detail photo", "Error in transfer bitmap")
                 }
             }
         }
